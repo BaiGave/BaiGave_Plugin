@@ -1,0 +1,36 @@
+{
+    "variants": {
+	  "xpos=none,zpos=none": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_none", "uvlock": true, "y": 0 },	  
+	  "xpos=none,zpos=south": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_south_none", "uvlock": true, "y": 0 },	  
+	  "xpos=none,zpos=north": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_south_none", "uvlock": true, "y": 180 },	  
+	  "xpos=west,zpos=none": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_south_none", "uvlock": true, "y": 90 },	  
+	  "xpos=east,zpos=none": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_south_none", "uvlock": true, "y": 270 },
+	  "xpos=middle,zpos=middle": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_middle", "uvlock": true, "y": 0 },
+	  "xpos=middle,zpos=none": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_middle", "uvlock": true, "y": 0 },	  
+	  "xpos=none,zpos=middle": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_middle", "uvlock": true, "y": 0 },	  
+	  "xpos=middle,zpos=north": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_middle", "uvlock": true, "y": 0 },	
+	  "xpos=middle,zpos=south": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_middle", "uvlock": true, "y": 0 },	  
+	  "zpos=middle,xpos=west": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_middle", "uvlock": true, "y": 90 },	  
+	  "zpos=middle,xpos=east": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_middle", "uvlock": true, "y": 90 },	  
+	  "xpos=west,zpos=south": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_single_es", "uvlock": true, "y": 0 },		  
+	  "xpos=west,zpos=north": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_single_es", "uvlock": true, "y": 90 },	  
+	  "xpos=east,zpos=north": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_single_es", "uvlock": true, "y": 180 },	  
+	  "xpos=east,zpos=south": 
+      { "model": "yuushya:extra_building_material/table/table/jungle_single_es", "uvlock": true, "y": 270 }
+    }
+}

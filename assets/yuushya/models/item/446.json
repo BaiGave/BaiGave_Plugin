@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/cat",
+    "textures": {
+        "0": "entity/cat/siamese"
+    }
+}

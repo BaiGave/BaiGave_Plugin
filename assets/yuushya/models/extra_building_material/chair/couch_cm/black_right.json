@@ -1,0 +1,8 @@
+{
+    "parent": "yuushya:extra_building_material/chair/couch_cm/white_right",
+	"textures": {
+		"2": "yuushya:0extra_building_block/wool/gray_wool",
+		"3": "yuushya:0extra_building_block/wool/gray_couch",
+		"particle": "#3"
+	}
+}

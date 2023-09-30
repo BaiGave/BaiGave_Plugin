@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:extra_building_material/template_cube",
+	"textures": { 
+		"0": "yuushya:block/wall_brick6",
+		"particle": "yuushya:block/wall_brick6"
+	}
+}

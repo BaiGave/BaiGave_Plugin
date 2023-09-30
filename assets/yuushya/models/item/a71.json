@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/carpet_block/carpet_0_round",
+	"textures": { 
+		"1": "yuushya:0extra_building_material/preview/circle_table_gray"
+	}
+}

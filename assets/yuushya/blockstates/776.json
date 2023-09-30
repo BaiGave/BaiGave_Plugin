@@ -1,0 +1,124 @@
+{
+    "variants": {
+      "facing=north,half=bottom,shape=straight": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs", "uvlock":true, "y": 0, "x": 0 }
+      ],
+      "facing=south,half=bottom,shape=straight": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs", "uvlock":true, "y": 180, "x": 0 }
+      ],
+      "facing=west,half=bottom,shape=straight": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs", "uvlock":true, "y": 270, "x": 0 }
+      ],
+      "facing=east,half=bottom,shape=straight": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs", "uvlock":true, "y": 90, "x": 0 }
+      ],
+	  "facing=north,half=top,shape=straight": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs", "uvlock":true, "y": 180, "x": 180 }
+      ],
+      "facing=south,half=top,shape=straight": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs", "uvlock":true, "y": 0, "x": 180 }
+      ],
+      "facing=west,half=top,shape=straight": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs", "uvlock":true, "y": 90, "x": 180 }
+      ],
+      "facing=east,half=top,shape=straight": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs", "uvlock":true,"y": 270, "x": 180 }
+      ],
+	  "facing=north,half=bottom,shape=outer_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 0, "x": 0 }
+      ],
+      "facing=south,half=bottom,shape=outer_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 180, "x": 0 }
+      ],
+      "facing=west,half=bottom,shape=outer_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 270, "x": 0 }
+      ],
+      "facing=east,half=bottom,shape=outer_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 90, "x": 0 }
+      ],
+	  "facing=north,half=top,shape=outer_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 270, "x": 180 }
+      ],
+      "facing=south,half=top,shape=outer_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 90, "x": 180 }
+      ],
+      "facing=west,half=top,shape=outer_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 180, "x": 180 }
+      ],
+      "facing=east,half=top,shape=outer_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true,"y": 0, "x": 180 }
+      ],
+	  "facing=north,half=bottom,shape=outer_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 270, "x": 0 }
+      ],
+      "facing=south,half=bottom,shape=outer_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 90, "x": 0 }
+      ],
+      "facing=west,half=bottom,shape=outer_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 180, "x": 0 }
+      ],
+      "facing=east,half=bottom,shape=outer_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 0, "x": 0 }
+      ],
+	  "facing=north,half=top,shape=outer_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 180, "x": 180 }
+      ],
+      "facing=south,half=top,shape=outer_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 0, "x": 180 }
+      ],
+      "facing=west,half=top,shape=outer_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true, "y": 90, "x": 180 }
+      ],
+      "facing=east,half=top,shape=outer_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_outer", "uvlock":true,"y": 270, "x": 180 }
+      ],
+	  "facing=north,half=bottom,shape=inner_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 0, "x": 0 }
+      ],
+      "facing=south,half=bottom,shape=inner_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 180, "x": 0 }
+      ],
+      "facing=west,half=bottom,shape=inner_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 270, "x": 0 }
+      ],
+      "facing=east,half=bottom,shape=inner_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 90, "x": 0 }
+      ],
+	  "facing=north,half=top,shape=inner_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 270, "x": 180 }
+      ],
+      "facing=south,half=top,shape=inner_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 90, "x": 180 }
+      ],
+      "facing=west,half=top,shape=inner_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 180, "x": 180 }
+      ],
+      "facing=east,half=top,shape=inner_right": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true,"y": 0, "x": 180 }
+      ],
+	  "facing=north,half=bottom,shape=inner_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 270, "x": 0 }
+      ],
+      "facing=south,half=bottom,shape=inner_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 90, "x": 0 }
+      ],
+      "facing=west,half=bottom,shape=inner_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 180, "x": 0 }
+      ],
+      "facing=east,half=bottom,shape=inner_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 0, "x": 0 }
+      ],
+	  "facing=north,half=top,shape=inner_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 180, "x": 180 }
+      ],
+      "facing=south,half=top,shape=inner_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 0, "x": 180 }
+      ],
+      "facing=west,half=top,shape=inner_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true, "y": 90, "x": 180 }
+      ],
+      "facing=east,half=top,shape=inner_left": [
+      { "model": "yuushya:extra_building_material/stairs/birch_stairs_inner", "uvlock":true,"y": 270, "x": 180 }
+      ]	  
+    }
+}

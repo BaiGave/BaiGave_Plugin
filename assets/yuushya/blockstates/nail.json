@@ -1,0 +1,6 @@
+{
+    "variants": {
+        "map=false": { "model": "minecraft:block/item_frame" },
+        "map=true":  { "model": "minecraft:block/item_frame_map" }
+    }
+}

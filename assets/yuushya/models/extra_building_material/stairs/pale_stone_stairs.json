@@ -1,0 +1,8 @@
+{
+	"credit": "Yuushya",
+	"parent": "yuushya:extra_building_material/stairs/template_stairs",
+	"textures": {
+		"0": "yuushya:block/pale_stone",
+		"particle": "#0"
+	}
+}

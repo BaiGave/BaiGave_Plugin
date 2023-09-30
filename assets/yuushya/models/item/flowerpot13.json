@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/flower_pot/potted_orange_tulip",
+    "textures": {
+        "yuushya": "yuushya:0extra_building_block/concrete/green_concrete"
+    }
+}

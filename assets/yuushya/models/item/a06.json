@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:extra_building_material/template_cube",
+	"textures": { 
+		"0": "yuushya:block/pale_stone_",
+		"particle": "yuushya:block/pale_stone_"
+	}
+}

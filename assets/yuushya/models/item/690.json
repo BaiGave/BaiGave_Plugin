@@ -1,0 +1,8 @@
+{
+	"credit": "Yuushya",
+	"parent": "yuushya:extra_building_material/white_curtain",
+	"textures": {
+		"0": "yuushya:0extra_building_block/curtain_yellow",
+		"particle": "#0"
+	}
+}

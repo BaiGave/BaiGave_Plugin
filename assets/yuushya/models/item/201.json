@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/car1_part1",
+	"textures": {
+		"1": "yuushya:0extra_building_material/preview/yellow_car"
+	}
+}

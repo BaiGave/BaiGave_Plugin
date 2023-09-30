@@ -1,0 +1,6 @@
+{
+	"parent": "yuushya:extra_building_material/template_platform_middle",
+	"textures": {
+		"0": "yuushya:block/smooth_sandstone"
+	}
+}

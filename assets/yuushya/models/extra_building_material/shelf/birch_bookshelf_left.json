@@ -1,0 +1,9 @@
+{
+	"credit": "Yuushya",
+	"parent": "yuushya:extra_building_material/shelf/template_bookshelf_left",
+	"textures": {
+		"0": "yuushya:0extra_building_block/no_strip/birch",
+		"1": "yuushya:0extra_building_block/no_strip/birch_table",
+		"particle": "#0"
+	}
+}

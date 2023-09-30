@@ -1,0 +1,8 @@
+{
+	"credit": "Yuushya",
+	"parent": "yuushya:extra_building_material/template_cube",
+	"textures": {
+		"0": "yuushya:0extra_building_block/cut_sandstone_",
+		"particle": "#0"
+	}
+}

@@ -1,0 +1,69 @@
+{
+	"credit": "Yuushya",
+	"textures": {
+		"0": "yuushya:0extra_building_block/road2",
+		"particle": "yuushya:0extra_building_block/road2"
+	},
+	"elements": [
+		{
+			"from": [10, -0.995, 6],
+			"to": [16, 0.005, 10],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8.1, 14]},
+			"faces": {
+				"north": {"uv": [6, 1, 7, 2], "rotation": 90, "texture": "#0"},
+				"east": {"uv": [6, 1, 7, 2], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [6, 1, 7, 2], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [6, 1, 7, 2], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [6, 0, 10, 6], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [6, 0, 10, 6], "rotation": 90, "texture": "#0"}
+			}
+		},
+		{
+			"from": [6, -0.995, 0],
+			"to": [10, 0.005, 10],
+			"rotation": {"angle": 0, "axis": "y", "origin": [2, 8.1, 8]},
+			"faces": {
+				"north": {"uv": [6, 1, 7, 2], "rotation": 90, "texture": "#0"},
+				"east": {"uv": [6, 1, 7, 2], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [6, 1, 7, 2], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [6, 1, 7, 2], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [6, 0, 10, 10], "rotation": 180, "texture": "#0"},
+				"down": {"uv": [6, 0, 10, 10], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 225, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 3, 0],
+			"scale": [0.25, 0.25, 0.25]
+		},
+		"gui": {
+			"rotation": [30, 225, 0],
+			"translation": [-0.25, 3, 0],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"fixed": {
+			"rotation": [90, 0, 0],
+			"translation": [0, 0, 19.75],
+			"scale": [2, 2, 2]
+		}
+	}
+}

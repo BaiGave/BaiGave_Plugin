@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/template_thin_post_side",
+    "textures": {
+        "2": "yuushya:block/marble"
+    }
+}

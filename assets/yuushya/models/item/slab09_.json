@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/template_column_ceiling_slab",
+    "textures": {
+        "1": "yuushya:0extra_building_block/concrete/cyan_concrete_","0": "yuushya:0extra_building_block/concrete/cyan_concrete"
+    }
+}

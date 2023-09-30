@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/cross2x",
+    "textures": {
+        "cross": "yuushya:block/tall_grass"
+    }
+}

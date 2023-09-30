@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/board/template_wall1xad",
+	 "textures": {
+        "4": "yuushya:0extra_building_material/preview/board/1xwallad/0"
+    }
+}

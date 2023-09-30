@@ -1,0 +1,6 @@
+{
+  "parent": "yuushya:extra_building_material/bed42",
+  "textures": {
+    "3": "yuushya:0extra_building_block/bed_pattern/pattern_9"
+  }
+}

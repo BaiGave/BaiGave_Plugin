@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/door_tall",
+    "textures": {
+        "2": "yuushya:0extra_building_material/preview/tall_door/118"
+    }
+}

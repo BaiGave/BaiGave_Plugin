@@ -1,0 +1,8 @@
+{
+	"credit": "Yuushya",
+	"parent": "yuushya:extra_building_material/template_wool",
+	"textures": {
+		"side": "yuushya:0extra_building_block/no_strip/oak_table",
+		"top": "yuushya:0extra_building_block/no_strip/oak"
+	}
+}

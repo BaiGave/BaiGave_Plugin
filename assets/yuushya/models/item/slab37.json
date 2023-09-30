@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/template_bottom_slab",
+    "textures": {
+		"0": "yuushya:block/pale_stone"
+    }
+}

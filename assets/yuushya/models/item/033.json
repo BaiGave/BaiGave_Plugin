@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/template_concrete_side_slab_",
+    "textures": {
+        "0": "block/gray_concrete"
+    }
+}

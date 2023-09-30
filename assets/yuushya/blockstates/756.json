@@ -1,0 +1,184 @@
+{
+    "variants": {
+	  "face=ceiling,facing=east,powered=false,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 270 }
+      ],
+	  "face=ceiling,facing=east,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 270 }
+      ],
+	  "face=ceiling,facing=east,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 270 }
+      ],	  
+	  "face=ceiling,facing=east,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 270 }
+      ],	  
+	  "face=ceiling,facing=east,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 270 }
+      ],
+      "face=ceiling,facing=north,powered=false": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 180 }
+      ],
+	  "face=ceiling,facing=north,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 180 }
+      ],
+	  "face=ceiling,facing=north,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 180 }
+      ],	  
+	  "face=ceiling,facing=north,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 180 }
+      ],	  
+	  "face=ceiling,facing=north,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 180 }
+      ],
+      "face=ceiling,facing=south,powered=false": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none" }
+      ],
+	  "face=ceiling,facing=south,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 0 }
+      ],
+	  "face=ceiling,facing=south,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 0 }
+      ],	  
+	  "face=ceiling,facing=south,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 0 }
+      ],	  
+	  "face=ceiling,facing=south,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 0 }
+      ],
+      "face=ceiling,facing=west,powered=false": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 90 }
+      ],
+	  "face=ceiling,facing=west,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 90 }
+      ],
+	  "face=ceiling,facing=west,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 90 }
+      ],	  
+	  "face=ceiling,facing=west,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 90 }
+      ],	  
+	  "face=ceiling,facing=west,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 90 }
+	  ],
+	  "face=wall,facing=east,powered=false,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 270 }
+      ],
+	  "face=wall,facing=east,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 270 }
+      ],
+	  "face=wall,facing=east,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 270 }
+      ],	  
+	  "face=wall,facing=east,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 270 }
+      ],	  
+	  "face=wall,facing=east,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 270 }
+      ],
+      "face=wall,facing=north,powered=false": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 180 }
+      ],
+	  "face=wall,facing=north,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 180 }
+      ],
+	  "face=wall,facing=north,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 180 }
+      ],	  
+	  "face=wall,facing=north,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 180 }
+      ],	  
+	  "face=wall,facing=north,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 180 }
+      ],
+      "face=wall,facing=south,powered=false": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none" }
+      ],
+	  "face=wall,facing=south,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 0 }
+      ],
+	  "face=wall,facing=south,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 0 }
+      ],	  
+	  "face=wall,facing=south,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 0 }
+      ],	  
+	  "face=wall,facing=south,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 0 }
+      ],
+      "face=wall,facing=west,powered=false": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 90 }
+      ],
+	  "face=wall,facing=west,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 90 }
+      ],
+	  "face=wall,facing=west,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 90 }
+      ],	  
+	  "face=wall,facing=west,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 90 }
+      ],	  
+	  "face=wall,facing=west,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 90 }
+	  ],
+	  "face=floor,facing=east,powered=false,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 270 }
+      ],
+	  "face=floor,facing=east,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 270 }
+      ],
+	  "face=floor,facing=east,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 270 }
+      ],	  
+	  "face=floor,facing=east,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 270 }
+      ],	  
+	  "face=floor,facing=east,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 270 }
+      ],
+      "face=floor,facing=north,powered=false": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 180 }
+      ],
+	  "face=floor,facing=north,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 180 }
+      ],
+	  "face=floor,facing=north,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 180 }
+      ],	  
+	  "face=floor,facing=north,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 180 }
+      ],	  
+	  "face=floor,facing=north,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 180 }
+      ],
+      "face=floor,facing=south,powered=false": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none" }
+      ],
+	  "face=floor,facing=south,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 0 }
+      ],
+	  "face=floor,facing=south,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 0 }
+      ],	  
+	  "face=floor,facing=south,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 0 }
+      ],	  
+	  "face=floor,facing=south,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 0 }
+      ],
+      "face=floor,facing=west,powered=false": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 90 }
+      ],
+	  "face=floor,facing=west,powered=true,pos=none": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_none", "y": 90 }
+      ],
+	  "face=floor,facing=west,powered=true,pos=left": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_left", "y": 90 }
+      ],	  
+	  "face=floor,facing=west,powered=true,pos=right": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_right", "y": 90 }
+      ],	  
+	  "face=floor,facing=west,powered=true,pos=middle": [
+      { "model": "yuushya:extra_building_material/roof/roof_ridge/htile2_up_middle", "y": 90 }
+      ]
+    }
+}

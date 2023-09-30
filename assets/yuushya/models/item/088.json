@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/template_cube_90",
+    "textures": {
+        "0": "minecraft:block/stripped_warped_stem"
+    }
+}

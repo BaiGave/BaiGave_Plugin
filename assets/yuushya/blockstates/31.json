@@ -1,0 +1,76 @@
+{
+    "variants": {
+      "face=ceiling,facing=east,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink", "y": 270 }
+      ],
+      "face=ceiling,facing=east,powered=true": [       
+	  { "model":"yuushya:extra_building_material/grocery/shelf_soft_drink", "y": 270 }
+      ],
+      "face=ceiling,facing=north,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink",  "y": 180 }
+      ],
+      "face=ceiling,facing=north,powered=true": [       
+	  { "model":"yuushya:extra_building_material/grocery/shelf_soft_drink",  "y": 180 }
+      ],
+      "face=ceiling,facing=south,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink" }
+      ],
+      "face=ceiling,facing=south,powered=true": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink" }
+      ],
+      "face=ceiling,facing=west,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink" ,"y": 90}
+      ],
+      "face=ceiling,facing=west,powered=true": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink" ,"y": 90}
+      ],
+      "face=floor,facing=east,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink", "y": 270 }
+      ],
+      "face=floor,facing=east,powered=true": [       
+	  { "model":"yuushya:extra_building_material/grocery/shelf_soft_drink", "y": 270 }
+      ],
+      "face=floor,facing=north,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink", "y": 180 }
+      ],
+      "face=floor,facing=north,powered=true": [       
+	  { "model":"yuushya:extra_building_material/grocery/shelf_soft_drink", "y": 180 }
+      ],
+      "face=floor,facing=south,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink" }
+      ],
+      "face=floor,facing=south,powered=true": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink" }
+      ],
+      "face=floor,facing=west,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink", "y": 90 }
+      ],
+      "face=floor,facing=west,powered=true": [       
+	  { "model":"yuushya:extra_building_material/grocery/shelf_soft_drink", "y": 90 }
+      ],
+      "face=wall,facing=east,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink","y": 270}
+      ],
+      "face=wall,facing=east,powered=true": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink","y": 270}
+      ],
+      "face=wall,facing=north,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink",   "y": 180}
+      ],
+      "face=wall,facing=north,powered=true": [       
+	  { "model":"yuushya:extra_building_material/grocery/shelf_soft_drink",   "y": 180}
+      ],
+      "face=wall,facing=south,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink" }
+      ],
+      "face=wall,facing=south,powered=true": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink" }
+      ],
+      "face=wall,facing=west,powered=false": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink","y": 90 }
+      ],
+      "face=wall,facing=west,powered=true": [
+      { "model": "yuushya:extra_building_material/grocery/shelf_soft_drink","y": 90 }
+      ]
+    }
+}

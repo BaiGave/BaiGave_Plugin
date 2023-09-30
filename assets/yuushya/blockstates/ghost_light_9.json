@@ -1,0 +1,76 @@
+{
+    "variants": {
+      "face=ceiling,facing=east,powered=false": [
+      { "model": "yuushya:extra_building_material/blank"  }
+      ],
+      "face=ceiling,facing=east,powered=true": [
+      { "model": "yuushya:extra_building_material/blank"  }
+      ],
+      "face=ceiling,facing=north,powered=false": [
+      { "model": "yuushya:extra_building_material/blank"  }
+      ],
+      "face=ceiling,facing=north,powered=true": [
+      { "model": "yuushya:extra_building_material/blank"  }
+      ],
+      "face=ceiling,facing=south,powered=false": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=ceiling,facing=south,powered=true": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=ceiling,facing=west,powered=false": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=ceiling,facing=west,powered=true": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=floor,facing=east,powered=false": [
+      { "model": "yuushya:extra_building_material/blank"  }
+      ],
+      "face=floor,facing=east,powered=true": [
+      { "model": "yuushya:extra_building_material/blank"  }
+      ],
+      "face=floor,facing=north,powered=false": [
+      { "model": "yuushya:extra_building_material/blank"  }
+      ],
+      "face=floor,facing=north,powered=true": [
+      { "model": "yuushya:extra_building_material/blank"  }
+      ],
+      "face=floor,facing=south,powered=false": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=floor,facing=south,powered=true": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=floor,facing=west,powered=false": [
+      { "model": "yuushya:extra_building_material/blank"  }
+      ],
+      "face=floor,facing=west,powered=true": [
+      { "model": "yuushya:extra_building_material/blank"  }
+      ],
+      "face=wall,facing=east,powered=false": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=wall,facing=east,powered=true": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=wall,facing=north,powered=false": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=wall,facing=north,powered=true": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=wall,facing=south,powered=false": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=wall,facing=south,powered=true": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=wall,facing=west,powered=false": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ],
+      "face=wall,facing=west,powered=true": [
+      { "model": "yuushya:extra_building_material/blank" }
+      ]
+    }
+}

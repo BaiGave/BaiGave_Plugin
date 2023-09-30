@@ -1,0 +1,10 @@
+{
+    "variants": {
+      "face=floor": [
+      { "model": "yuushya:item/slab08", "y": 270 }
+      ],
+      "face=ceiling": [
+      { "model": "yuushya:item/slab08_", "y": 270 }
+      ]
+    }
+}

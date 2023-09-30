@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/template_post_side",
+    "textures": {
+        "2": "yuushya:0extra_building_block/concrete/light_blue_concrete"
+    }
+}

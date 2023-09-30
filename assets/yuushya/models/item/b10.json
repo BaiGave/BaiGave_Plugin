@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:extra_building_material/template_column",
+	"textures": { 
+		"side": "yuushya:0extra_building_block/blindwall/light_blue",
+		"top": "yuushya:0extra_building_block/concrete/light_blue_concrete_"
+	}
+}

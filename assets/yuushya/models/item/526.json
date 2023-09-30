@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/vending2",
+	"textures": {
+		"0": "yuushya:0extra_building_material/preview/vending2"
+	}
+}

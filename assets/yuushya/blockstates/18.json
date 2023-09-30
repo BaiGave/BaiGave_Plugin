@@ -1,0 +1,10 @@
+{
+    "variants": {
+      "": [
+      { "model": "yuushya:item/road_01" },
+      { "model": "yuushya:item/road_02" },
+      { "model": "yuushya:item/road_03" },
+      { "model": "yuushya:item/road_04" }
+      ]
+    }
+}

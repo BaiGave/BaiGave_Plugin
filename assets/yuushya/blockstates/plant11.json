@@ -1,0 +1,10 @@
+{
+    "variants": {
+      "": [
+      { "model": "yuushya:item/plant11_", "y": 0 },
+      { "model": "yuushya:item/plant11_", "y": 90 },
+      { "model": "yuushya:item/plant11_", "y": 180 },
+      { "model": "yuushya:item/plant11_", "y": 270 }
+	  ]
+    }
+}

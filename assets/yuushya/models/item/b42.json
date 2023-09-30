@@ -1,0 +1,9 @@
+{
+    "parent": "yuushya:extra_building_material/drawer/template_drawer",
+	"textures": { 
+		"0": "yuushya:0extra_building_block/no_strip/jungle_drawer",
+		"1": "yuushya:0extra_building_block/no_strip/jungle_table",
+		"2": "yuushya:0extra_building_block/no_strip/jungle",
+		"particle": "#1"
+	}
+}

@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/flower_pot/potted_oak_sapling",
+    "textures": {
+        "yuushya": "yuushya:0extra_building_block/concrete/brown_concrete"
+    }
+}

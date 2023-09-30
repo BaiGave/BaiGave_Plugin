@@ -1,0 +1,52 @@
+{
+    "variants": {
+      "facing=east,form=0": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_bl", "y": 270 }
+      ],
+      "facing=north,form=0": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_bl",  "y": 180 }
+      ],
+      "facing=south,form=0": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_bl" }
+      ],
+      "facing=west,form=0": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_bl" ,"y": 90}
+      ],
+      "facing=east,form=1": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_br", "y": 270 }
+      ],
+      "facing=north,form=1": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_br",  "y": 180 }
+      ],
+      "facing=south,form=1": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_br" }
+      ],
+      "facing=west,form=1": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_br" ,"y": 90}
+      ],
+      "facing=east,form=2": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_tr", "y": 270 }
+      ],
+      "facing=north,form=2": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_tr",  "y": 180 }
+      ],
+      "facing=south,form=2": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_tr" }
+      ],
+      "facing=west,form=2": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_tr" ,"y": 90}
+      ],
+      "facing=east,form=3": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_tl", "y": 270 }
+      ],
+      "facing=north,form=3": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_tl",  "y": 180 }
+      ],
+      "facing=south,form=3": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_tl" }
+      ],
+      "facing=west,form=3": [
+      { "model": "yuushya:extra_building_material/thin_pipe/connect_tl" ,"y": 90}
+      ]
+    }
+}

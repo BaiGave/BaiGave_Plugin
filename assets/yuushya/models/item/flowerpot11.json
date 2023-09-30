@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/flower_pot/potted_lily_of_the_valley",
+    "textures": {
+        "yuushya": "yuushya:0extra_building_block/concrete/blue_concrete"
+    }
+}

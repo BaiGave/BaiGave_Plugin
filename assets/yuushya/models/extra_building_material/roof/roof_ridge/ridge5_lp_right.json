@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:extra_building_material/roof/roof_ridge/ridge1_lp_right",
+    "textures": {
+		"0": "yuushya:0extra_building_material/preview/roof/tile5",
+		"particle": "yuushya:0extra_building_material/preview/roof/tile5"
+    }
+}

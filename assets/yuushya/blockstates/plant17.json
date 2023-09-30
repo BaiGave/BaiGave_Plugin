@@ -1,0 +1,8 @@
+{
+    "variants": {
+      "": [
+      { "model": "yuushya:item/plant17"},
+      { "model": "yuushya:item/plant17_"}
+	  ]
+    }
+}

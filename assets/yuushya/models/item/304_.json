@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/title/character_white_embedded",
+	"textures": {
+		"0": "yuushya:0extra_building_material/preview/character_black"
+	}
+}

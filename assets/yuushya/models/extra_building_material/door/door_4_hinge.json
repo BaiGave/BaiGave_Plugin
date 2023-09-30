@@ -1,0 +1,8 @@
+{
+	"credit": "Yuushya",
+	"parent": "yuushya:extra_building_material/door/door_0_hinge",
+	"textures": {
+		"0": "yuushya:0extra_building_material/preview/tall_door/4_h",
+		"particle": "#0"
+	}
+}

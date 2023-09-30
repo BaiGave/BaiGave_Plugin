@@ -1,0 +1,9 @@
+{
+	"credit": "Yuushya",
+	"parent": "yuushya:extra_building_material/shelf/template_shelf_none",
+	"textures": {
+		"0": "yuushya:0extra_building_block/no_strip/dark_oak",
+		"1": "yuushya:0extra_building_block/no_strip/dark_oak_table",
+		"particle": "#0"
+	}
+}

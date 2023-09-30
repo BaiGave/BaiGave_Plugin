@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/red_pillar",
+    "textures": {
+        "2": "block/cobblestone"
+    }
+}

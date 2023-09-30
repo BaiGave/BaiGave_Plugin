@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:extra_building_material/template_column",
+	"textures": { 
+		"side": "yuushya:block/wall_brick1",
+		"top": "yuushya:block/wall_brick9"
+	}
+}

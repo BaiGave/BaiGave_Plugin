@@ -1,0 +1,68 @@
+{
+	"credit": "Yuushya",
+	"textures": {
+		"0": "yuushya:0extra_building_block/concrete/black_concrete",
+		"1": "yuushya:0extra_building_material/preview/lamp_gs",
+		"particle": "yuushya:0extra_building_block/concrete/black_concrete"
+	},
+	"elements": [
+		{
+			"from": [4, 4, 0],
+			"to": [12, 12, 2],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [5, 6, 13, 14], "rotation": 180, "texture": "#0"},
+				"east": {"uv": [0, 0, 8, 2], "rotation": 270, "texture": "#0"},
+				"south": {"uv": [0, 0, 8, 8], "texture": "#0"},
+				"west": {"uv": [0, 0, 8, 2], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [8, 0, 16, 2], "rotation": 180, "texture": "#0"},
+				"down": {"uv": [8, 0, 16, 2], "texture": "#0"}
+			}
+		},
+		{
+			"from": [4, 4, 2],
+			"to": [12, 12, 5],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [0, 0, 8, 8], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [1, 9, 9, 12], "rotation": 270, "texture": "#1"},
+				"south": {"uv": [0, 0, 8, 8], "texture": "#1"},
+				"west": {"uv": [1, 9, 9, 12], "rotation": 90, "texture": "#1"},
+				"up": {"uv": [1, 9, 9, 12], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [1, 9, 9, 12], "texture": "#1"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 225, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 3, 0],
+			"scale": [0.25, 0.25, 0.25]
+		},
+		"gui": {
+			"rotation": [30, 45, 0],
+			"translation": [2, -1, 0],
+			"scale": [0.7, 0.7, 0.7]
+		},
+		"fixed": {
+			"scale": [0.5, 0.5, 0.5]
+		}
+	}
+}

@@ -1,0 +1,9 @@
+{
+    "parent": "yuushya:extra_building_material/drawer/template_drawer",
+	"textures": { 
+		"0": "yuushya:0extra_building_block/no_strip/birch_drawer_v",
+		"1": "yuushya:0extra_building_block/no_strip/birch_table",
+		"2": "yuushya:0extra_building_block/no_strip/birch",
+		"particle": "#1"
+	}
+}

@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/template_layer",
+    "textures": {
+        "0": "yuushya:block/wall_brick1"
+    }
+}

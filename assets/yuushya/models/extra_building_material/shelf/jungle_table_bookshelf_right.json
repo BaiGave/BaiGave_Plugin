@@ -1,0 +1,9 @@
+{
+	"credit": "Yuushya",
+	"parent": "yuushya:extra_building_material/shelf/template_table_bookshelf_right",
+	"textures": {
+		"0": "yuushya:0extra_building_block/no_strip/jungle",
+		"1": "yuushya:0extra_building_block/no_strip/jungle_table",
+		"particle": "#0"
+	}
+}
