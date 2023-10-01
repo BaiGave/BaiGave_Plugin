@@ -18,6 +18,7 @@ def CullBlocks(coord, d,vertices,faces,direction,texture_list,uv_list,uv_rotatio
         has_air = [adj_coord not in d or d[adj_coord].split('[')[0] in air_blocks for adj_coord in adjacent_coords]
         # 将 has_air 中的值按照 东西北南上下 的顺序排列
         has_air = [has_air[2], has_air[3], has_air[0], has_air[1], has_air[5], has_air[4]]
+        
         # 如果有空气方块，输出方块
         if any(has_air):
             return blockstates((coord[0],coord[1],coord[2]), block_id, has_air,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)

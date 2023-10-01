@@ -9,7 +9,7 @@ from .level import create_level
 from .tip import button_callback
 
 from .functions import get_all_data
-from .schem import schem
+from .schem import schem,schem_p
 from .generate import generate
 from .chunk  import chunk as create_chunk
 
@@ -153,7 +153,8 @@ class ImportSchem(bpy.types.Operator):
         # 获取当前时间
         start_time = time.time()
         schem(d,os.path.basename(self.filepath))
-
+        schem_p(d,os.path.basename(self.filepath))
+        bpy.context.space_data.overlay.show_stats = True
         # 获取当前时间
         end_time = time.time()
 
