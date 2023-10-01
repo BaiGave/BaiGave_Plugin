@@ -28,14 +28,14 @@ class MainPanel(bpy.types.Panel):
     bl_idname ="MainPanel"
     bl_space_type ='VIEW_3D'
     bl_region_type = 'UI'
-    bl_category ='BaiGave'
+    bl_category ='白给的工具'
     bl_options = {'HEADER_LAYOUT_EXPAND'}
     
     def draw(self,context):
         layout = self.layout
         row = layout.row()
         row.label(text = "白给的工具",icon='BOLD')
-#人物绑定面板        
+#人模绑定面板        
 class RigPanel(bpy.types.Panel):
     bl_label ="人模"
     bl_idname ="RigPanel"
@@ -51,7 +51,7 @@ class RigPanel(bpy.types.Panel):
         BaiGave = scene.BaiGave
         row = layout.row()    
         
-        row.label(text = "人模",icon='ERROR')
+        row.label(text = "白给的人模",icon='ERROR')
         row = layout.row()
         row.operator("spawn.model")
         row = layout.row()
@@ -110,14 +110,14 @@ class WorldPanel(bpy.types.Panel):
         
         row = layout.row()
         row.operator("baigave.import_schem", text="导入.schem文件")
-        row = layout.row()
-        row.operator("baigave.spawn_map", text="生成地图")
-        row = layout.row()
-        row.operator("baigave.select", text="选择区域")
-        row = layout.row()
-        row.operator("baigave.import_world", text="导入世界")
-        row = layout.row()
-        row.operator("baigave.create_save", text="创建存档")
+        # row = layout.row()
+        # row.operator("baigave.spawn_map", text="生成地图")
+        # row = layout.row()
+        # row.operator("baigave.select", text="选择区域")
+        # row = layout.row()
+        # row.operator("baigave.import_world", text="导入世界")
+        # row = layout.row()
+        # row.operator("baigave.create_save", text="创建存档")
 
 # 定义一个导入.schem文件的操作类
 class ImportSchem(bpy.types.Operator):
