@@ -1,5 +1,5 @@
 from .blockstates import blockstates
-from .air import air_blocks
+from .classification import air_blocks
 
 def section(section, level, y, vertices, faces, texture_list, uv_list, direction, uv_rotation_list, vertices_dict):
     # 遍历多维数组

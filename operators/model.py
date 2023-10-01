@@ -1,6 +1,7 @@
 import bpy
 import os
 import numpy as np
+from .classification import FoliageAndGrass
 
 def create_nodes(nodes, texture_paths, links):
     tex_nodes = []
@@ -24,7 +25,8 @@ def create_nodes(nodes, texture_paths, links):
 
     return tex_nodes, bsdf_nodes
 
-def create_node_material(texture_paths, mat_name, mix_shaders=False):
+def create_node_material(texture_paths, mat_name, mix_shaders,filename):
+    mat_name = mat_name.replace("block/", "")  # 去除"block/"部分
     mat = bpy.data.materials.get(mat_name)
     if mat is not None:
         return mat
@@ -72,10 +74,38 @@ def create_node_material(texture_paths, mat_name, mix_shaders=False):
 
         links.new(mix_node.outputs['Shader'], output_node.inputs['Surface'])
     else:
-        output_node = nodes.new('ShaderNodeOutputMaterial')
-        output_node.location = (600, 200)
+        if mat_name in FoliageAndGrass:
+            mix_node = nodes.new('ShaderNodeMix')
+            
+            mix_node.data_type='RGBA'
+            
+            mix_node.location = (-200, 500)
+            
+          # 创建纹理坐标节点
+            texture_coordinate_node = nodes.new('ShaderNodeTexCoord')
+            texture_coordinate_node.location = (-400, 200)
 
-        links.new(bsdf_nodes[0].outputs['BSDF'], output_node.inputs['Surface'])
+            # 创建材质纹理节点
+            colormap_texture_node = nodes.new('ShaderNodeTexImage')
+            colormap_texture_node.location = (-300, 200)
+            colormap_texture_node.image = bpy.data.images.get(filename + "_colormap")  
+            colormap_texture_node.interpolation = 'Closest'
+
+            output_node = nodes.new('ShaderNodeOutputMaterial')
+            output_node.location = (600, 200)
+            links.new(tex_nodes[0].outputs['Color'], mix_node.inputs[6])
+            links.new(colormap_texture_node.outputs['Color'], mix_node.inputs[7])
+            links.new(texture_coordinate_node.outputs[0], colormap_texture_node.inputs[0])
+            # 断开材质和BSDF之间的连接
+            links.remove(links[0])  
+            links.new(mix_node.outputs[2], bsdf_nodes[0].inputs[0])
+            links.new(bsdf_nodes[0].outputs['BSDF'], output_node.inputs['Surface'])
+
+        else:
+            output_node = nodes.new('ShaderNodeOutputMaterial')
+            output_node.location = (600, 200)
+
+            links.new(bsdf_nodes[0].outputs['BSDF'], output_node.inputs['Surface'])
 
     return mat
 
@@ -360,7 +390,7 @@ def add_mesh_to_collection(collection, mesh):
     # 返回新创建的对象
     return obj
 from .functions import get_file_path
-def get_or_create_material(texture, texture2, type):
+def get_or_create_material(texture, texture2, type,filename):
     mat_name = ""
     if type == 'cube':
         mat_name = f"{texture}"
@@ -369,9 +399,9 @@ def get_or_create_material(texture, texture2, type):
 
     if mat_name not in bpy.data.materials:
         if type == 'cube':
-            mat = create_node_material([get_file_path(texture, "t")], mat_name)
+            mat = create_node_material([get_file_path(texture, "t")], mat_name,False,filename)
         elif type == 'face':
-            mat = create_node_material([get_file_path(texture, "t"), get_file_path(texture2, "t")], mat_name, mix_shaders=True)
+            mat = create_node_material([get_file_path(texture, "t"), get_file_path(texture2, "t")], mat_name,True,filename)
     else:
         mat = bpy.data.materials[mat_name]
 

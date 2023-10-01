@@ -1,4 +1,4 @@
-from .air import air_blocks
+from .classification import air_blocks
 from .blockstates import blockstates
 
 def CullBlocks(coord, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict):

@@ -135,6 +135,7 @@ class ImportSchem(bpy.types.Operator):
         # 遍历字典的键值对
         d = {}
         nbt_data = amulet_nbt._load_nbt.load(self.filepath)
+        
         Palette = dict(nbt_data["Palette"])
         Palette = {int(v): k for k, v in Palette.items()}
         size = {
@@ -142,7 +143,23 @@ class ImportSchem(bpy.types.Operator):
             "y":int(nbt_data["Height"]),
             "z":int(nbt_data["Width"])
         }
-        
+
+        # 设置图片的大小和颜色
+        image_width = int(size["z"])
+        image_height = int(size["x"])
+        default_color = (0.47, 0.75, 0.35, 1.0)  # RGBA颜色，对应#79c05a
+
+        # 创建一个新的图片
+        filename = os.path.basename(self.filepath)
+        image = bpy.data.images.new(filename+"_colormap", width=image_width, height=image_height)
+
+        #设置默认颜色
+        for y in range(image_height):
+            for x in range(image_width):
+                pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
+                image.pixels[pixel_index : pixel_index + 4] = default_color
+
+
         for i in range(len(nbt_data["BlockData"])):
             x = floor((i % (size["z"] * size["x"])) % size["z"])
             y = floor(i / (size["z"] * size["x"]))
@@ -152,8 +169,8 @@ class ImportSchem(bpy.types.Operator):
 
         # 获取当前时间
         start_time = time.time()
-        schem(d,os.path.basename(self.filepath))
-        schem_p(d,os.path.basename(self.filepath))
+        schem(d,filename)
+        schem_p(d,filename)
         bpy.context.space_data.overlay.show_stats = True
         # 获取当前时间
         end_time = time.time()
@@ -306,7 +323,6 @@ class SelectArea(bpy.types.Operator):
             if coll is not None:
                 bpy.context.scene.collection.children.link(coll)
         return {'FINISHED'}
-
 
 
 class ImportWorld(bpy.types.Operator):

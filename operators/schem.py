@@ -3,7 +3,7 @@ import bmesh
 from .model import create_mesh,add_mesh_to_collection,get_or_create_material,set_uv
 from .cullblocks import CullBlocks
 
-from .air import air_blocks
+from .classification import air_blocks
 def schem_p(d,filename="",position=(0,0,0)):
     vertices = []
     faces = []
@@ -37,7 +37,7 @@ def schem_p(d,filename="",position=(0,0,0)):
         else:
             face = bm.faces.new([bm.verts[i] for i in f])
 
-        mat = get_or_create_material(texture_list[face_index], texture_list[face_index], 'cube')
+        mat = get_or_create_material(texture_list[face_index], texture_list[face_index], 'cube',filename)
         if mat.name not in obj.data.materials:
             obj.data.materials.append(mat)
 
@@ -94,7 +94,7 @@ def schem(d,filename="",position=(0,0,0)):
         else:
             face = bm.faces.new([bm.verts[i] for i in f])
 
-        mat = get_or_create_material(texture_list[face_index], texture_list[face_index], 'cube')
+        mat = get_or_create_material(texture_list[face_index], texture_list[face_index], 'cube',filename)
         if mat.name not in obj.data.materials:
             obj.data.materials.append(mat)
 
