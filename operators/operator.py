@@ -257,7 +257,7 @@ class GenerateWorld(bpy.types.Operator):
         with gzip.open(filepath, 'wb') as file:
             level_dat.write(file)
 
-
+        
         from amulet.api.chunk import Chunk
         from amulet.api.block import Block
 
