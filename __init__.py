@@ -1,17 +1,8 @@
 import bpy
-import subprocess
-import sys
 
-def install_dependencies():
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "amulet-core"])
-    except subprocess.CalledProcessError as e:
-        print("安装Amulet库失败:", e)
-
-# 执行自动安装函数
-install_dependencies()
 from .operators.operator import ImportSchem,Importjson,ImportWorld,SelectArea,GenerateWorld,MainPanel,RigPanel,BlockPanel,WorldPanel
 from .operators.map import Map
+from .operators.surface_optimization import MapOptimize
 from .operators.BaiGave_Rig import Settings,SPAWN_MODEL    
 
 
@@ -27,7 +18,7 @@ bl_info={
 
 
 
-classes=[Settings,SPAWN_MODEL,ImportSchem,Importjson,ImportWorld,Map,SelectArea,GenerateWorld,MainPanel,RigPanel,BlockPanel,WorldPanel]
+classes=[Settings,SPAWN_MODEL,ImportSchem,Importjson,ImportWorld,Map,MapOptimize,SelectArea,GenerateWorld,MainPanel,RigPanel,BlockPanel,WorldPanel]
 
 
 def register():

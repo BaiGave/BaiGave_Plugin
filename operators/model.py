@@ -1,7 +1,7 @@
 import bpy
 import os
 import numpy as np
-from .classification import FoliageAndGrass
+from .classification import NeedsToBeColored,Leaves
 
 def create_nodes(nodes, texture_paths, links):
     tex_nodes = []
@@ -74,10 +74,12 @@ def create_node_material(texture_paths, mat_name, mix_shaders,filename):
 
         links.new(mix_node.outputs['Shader'], output_node.inputs['Surface'])
     else:
-        if mat_name in FoliageAndGrass:
+        if mat_name in NeedsToBeColored:
             mix_node = nodes.new('ShaderNodeMix')
             
             mix_node.data_type='RGBA'
+            mix_node.blend_type='MULTIPLY'
+            mix_node.inputs[0].default_value = 1.0
             
             mix_node.location = (-200, 500)
             
@@ -100,6 +102,29 @@ def create_node_material(texture_paths, mat_name, mix_shaders,filename):
             links.remove(links[0])  
             links.new(mix_node.outputs[2], bsdf_nodes[0].inputs[0])
             links.new(bsdf_nodes[0].outputs['BSDF'], output_node.inputs['Surface'])
+            if mat_name in Leaves:
+                mix_node1 = nodes.new('ShaderNodeMixShader')
+                mix_node1.location = (600, 200)
+                mix_node2 = nodes.new('ShaderNodeMixShader')
+                mix_node2.location = (800, 200)
+                mix_node1.inputs["Fac"].default_value = 0.2
+                transparent_node = nodes.new(type='ShaderNodeBsdfTransparent')
+                transparent_node.location = (800, -200)
+                translucent_node = nodes.new(type="ShaderNodeBsdfTranslucent")
+                translucent_node.location = (600, -200)
+                links.remove(links[0])  
+
+                links.new(bsdf_nodes[0].outputs['BSDF'], mix_node1.inputs[1])
+                links.new(translucent_node.outputs[0], mix_node1.inputs[2])
+
+                links.new(mix_node.outputs[2], translucent_node.inputs[0])
+
+                links.new(tex_nodes[0].outputs['Alpha'], mix_node2.inputs[0])
+                links.new(mix_node1.outputs[0], mix_node2.inputs[2])
+                links.new(transparent_node.outputs[0], mix_node2.inputs[1])
+
+                links.new(mix_node2.outputs[0], output_node.inputs['Surface'])
+
 
         else:
             output_node = nodes.new('ShaderNodeOutputMaterial')

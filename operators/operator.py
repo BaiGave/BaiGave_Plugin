@@ -110,6 +110,14 @@ class WorldPanel(bpy.types.Panel):
         
         row = layout.row()
         row.operator("baigave.import_schem", text="导入.schem文件")
+
+        row = layout.row()
+        row.operator("baigave.map_optimize", text="执行优化")
+
+        # 添加布尔属性的选项
+        row = layout.row()
+        row.prop(scene, "is_weld", text="合并重叠顶点")
+        
         # row = layout.row()
         # row.operator("baigave.spawn_map", text="生成地图")
         # row = layout.row()
@@ -168,6 +176,7 @@ class ImportSchem(bpy.types.Operator):
             d[(x, z, y)] = str(Palette[int(nbt_data["BlockData"][i])])
 
         # 获取当前时间
+        bpy.context.space_data.shading.color_type = 'TEXTURE'
         start_time = time.time()
         schem(d,filename)
         schem_p(d,filename)

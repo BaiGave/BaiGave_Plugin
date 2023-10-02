@@ -240,4 +240,6 @@ class Settings(bpy.types.PropertyGroup):
     Layer3d : bpy.props.BoolProperty( name="3d", description="A simple bool property",
      default = False ,update = layer3d)
     JsonImportSpeed: bpy.props.FloatProperty(name="导入速度(秒每个）",description="Import speed",min=0.01, max=2.0,default=1.0)
+    bpy.types.Scene.is_weld = bpy.props.BoolProperty(name="合并重叠顶点", default=False)
+        
 
