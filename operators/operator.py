@@ -143,7 +143,6 @@ class ImportSchem(bpy.types.Operator):
         # 遍历字典的键值对
         d = {}
         nbt_data = amulet_nbt._load_nbt.load(self.filepath)
-        
         Palette = dict(nbt_data["Palette"])
         Palette = {int(v): k for k, v in Palette.items()}
         size = {
@@ -167,13 +166,17 @@ class ImportSchem(bpy.types.Operator):
                 pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
                 image.pixels[pixel_index : pixel_index + 4] = default_color
 
-
+        
         for i in range(len(nbt_data["BlockData"])):
             x = floor((i % (size["z"] * size["x"])) % size["z"])
             y = floor(i / (size["z"] * size["x"]))
             z = floor((i % (size["z"] * size["x"])) / size["z"])
-            
-            d[(x, z, y)] = str(Palette[int(nbt_data["BlockData"][i])])
+            try:
+                d[(x, z, y)] = str(Palette[int(nbt_data["BlockData"][i])])
+            except:
+                print(x)
+                print(z)
+                print(y)
 
         # 获取当前时间
         bpy.context.space_data.shading.color_type = 'TEXTURE'
@@ -195,63 +198,32 @@ class ImportSchem(bpy.types.Operator):
         context.window_manager.fileselect_add(self)
         
         return {'RUNNING_MODAL'}
-# 定义一个批量导入json文件的操作类
 class Importjson(bpy.types.Operator):
-    """点击导入json文件"""
+    """导入选定的json文件"""
     bl_idname = "baigave.import_json"
     bl_label = "导入json文件"
-    _timer = None
-    index = 0
-    def modal(self, context, event):
-        # 如果事件类型是计时器
-        if event.type == 'TIMER':
-            filepath = bpy.utils.script_path_user() + "\\addons\\BaiGave_Plugin\\assets\\minecraft\\models\\block\\"
-            #测试
-            #filepath = "C:\\Users\\user\\Desktop\\白给的人模\\BaiGave_Plugin\\assets\\minecraft\\models\\block\\"
-            
-            # 如果文件路径是一个目录
-            if os.path.isdir(filepath):
-                # 获取目录中的文件名
-                filename = os.listdir(filepath)[self.index]
-                # 如果文件名以.json结尾
-                if filename.endswith(".json"):
-                    #测试  
-                    #filename = "hopper.json"
-                    textures,elements,display = get_all_data(filepath, filename)
-                    position =[self.index,0,0]
 
-                    has_air= [True,True,True,True,True,True]
-                    block(textures,elements,display,position,filename,has_air)
-                    
-                    # self.cancel(context)
-                    # return {'FINISHED'}
-                    # 索引加一
-                    self.index += 1
-                    # 如果索引超过了目录中的文件数
-                    if self.index >= len(os.listdir(filepath)):
-                        # 取消定时器并返回
-                        self.cancel(context)
-                        return {'FINISHED'}
-        # 如果事件类型是ESC
-        elif event.type == 'ESC':
-            # 取消定时器并返回
-            self.cancel(context)
-            return {'CANCELLED'}
-        # 其他情况，继续传递事件
-        return {'PASS_THROUGH'}
-    # 定义操作的执行函数
+    filepath: bpy.props.StringProperty(subtype='FILE_PATH')
+
     def execute(self, context):
-        # 在窗口管理器中添加一个定时器
-        wm = context.window_manager
-        self._timer = wm.event_timer_add(bpy.data.scenes["Scene"].BaiGave.JsonImportSpeed, window=context.window)
-        # 在窗口管理器中添加这个操作符
-        wm.modal_handler_add(self)
+        # 检查文件路径是否有效
+        if os.path.isfile(self.filepath) and self.filepath.endswith(".json"):
+            # 获取文件名
+            filename = os.path.basename(self.filepath)
+            textures, elements, display = get_all_data(os.path.dirname(self.filepath)+"\\", filename)
+            position = [0, 0, 0]
+            has_air = [True, True, True, True, True, True]
+            block(textures, elements, display, position, filename, has_air)
+            return {'FINISHED'}
+        else:
+            self.report({'ERROR'}, "请选择有效的.json文件")
+            return {'CANCELLED'}
+
+    def invoke(self, context, event):
+        # 打开文件选择对话框
+        context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
-    
-    def cancel(self, context):
-        # 从窗口管理器中移除定时器
-        wm = context.window_manager
-        wm.event_timer_remove(self._timer)
+
 
 
 class GenerateWorld(bpy.types.Operator):

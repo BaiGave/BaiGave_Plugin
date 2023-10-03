@@ -141,7 +141,8 @@ def rot(origin, display, position, coords, rotation_matrix=None):
         coords = [tuple(np.dot(rotation_matrix, (point - origin)) + origin) for point in coords]
 
     if 'fixed' in display:
-        display_rotation = display['fixed']['rotation']
+        display_rotation = display.get('fixed', {}).get('rotation', [0,0,0])
+
         
         rotation_matrix_x = np.array([
             [1, 0, 0],
