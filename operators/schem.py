@@ -4,7 +4,16 @@ from .model import create_mesh,add_mesh_to_collection,get_or_create_material,set
 from .cullblocks import CullBlocks
 
 from .classification import air_blocks
-def schem_p(d,filename="",position=(0,0,0)):
+import threading
+import time
+
+def schem_p(d, filename="", position=(0, 0, 0)):
+    # 定义一个新的线程
+    t = threading.Thread(target=schem_p_thread, args=(d, filename, position))
+    # 启动线程
+    t.start()
+
+def schem_p_thread(d,filename="",position=(0,0,0)):
     vertices = []
     faces = []
     direction = []
@@ -80,6 +89,7 @@ def schem(d,filename="",position=(0,0,0)):
     obj = add_mesh_to_collection(collection, mesh)
     obj.location = position
 
+
     bm = bmesh.new()
     for v in vertices:
         bm.verts.new(v)
@@ -95,6 +105,8 @@ def schem(d,filename="",position=(0,0,0)):
             face = bm.faces.new([bm.verts[i] for i in f])
 
         mat = get_or_create_material(texture_list[face_index], texture_list[face_index], 'cube',filename)
+        mat.blend_method = 'CLIP'
+        mat.shadow_method = 'CLIP'
         if mat.name not in obj.data.materials:
             obj.data.materials.append(mat)
 
@@ -117,9 +129,3 @@ def schem(d,filename="",position=(0,0,0)):
 
     bm.to_mesh(mesh)
     bm.free()
-    
-
-
-
-    
-
