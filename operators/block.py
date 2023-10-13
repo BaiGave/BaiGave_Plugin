@@ -35,7 +35,7 @@ def block(textures,elements,display,position,filename,has_air):
         if texture_list[face_index] == "None":
             continue
 
-        mat = get_or_create_material(texture_list[face_index], texture_list[face_index], 'cube',filename)
+        mat = get_or_create_material(texture_list[face_index],filename)
         if mat.name not in obj.data.materials:
             obj.data.materials.append(mat)
 

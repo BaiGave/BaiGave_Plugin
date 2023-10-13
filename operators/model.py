@@ -1,136 +1,79 @@
 import bpy
-import os
 import numpy as np
 from .classification import NeedsToBeColored,Leaves
 
-def create_nodes(nodes, texture_paths, links):
-    tex_nodes = []
-    bsdf_nodes = []
-    for i, texture_path in enumerate(texture_paths):
-        image_name = os.path.basename(texture_path)
-        image = bpy.data.images.get(image_name)
-        if image is None:
-            image = bpy.data.images.load(texture_path)
-        tex_node = nodes.new('ShaderNodeTexImage')
-        tex_node.location = (-400 if i == 1 else 0, 200)
-        tex_node.image = image
-        tex_node.interpolation = 'Closest'
-        tex_nodes.append(tex_node)
-        bsdf_node = nodes.new('ShaderNodeBsdfPrincipled')
-        bsdf_node.location = (200, 200)
-        bsdf_nodes.append(bsdf_node)
 
-        links.new(tex_node.outputs['Color'], bsdf_node.inputs['Base Color'])
-        links.new(tex_node.outputs['Alpha'], bsdf_node.inputs['Alpha'])
-
-    return tex_nodes, bsdf_nodes
-
-def create_node_material(texture_paths, mat_name, mix_shaders,filename):
+def create_node_material(texture_paths, mat_name,filename):
     mat_name = mat_name.replace("block/", "")  # 去除"block/"部分
+     # 尝试找到名为mat_name的材质
     mat = bpy.data.materials.get(mat_name)
     if mat is not None:
-        return mat
-    mat = bpy.data.materials.new(mat_name)
-    mat.use_nodes = True
-    tree = mat.node_tree
-    nodes = tree.nodes
-    links = tree.links
-
-    # 清除默认的Diffuse BSDF节点和输出节点
-    nodes_to_delete = [node for node in nodes if node.type in ['BSDF_PRINCIPLED', 'OUTPUT_MATERIAL']]
-    for node in nodes_to_delete:
-        nodes.remove(node)
-
-    # 创建节点
-    tex_nodes, bsdf_nodes = create_nodes(nodes, texture_paths, links)
-
-    # 创建Mix Shader节点
-    if mix_shaders:
-        mix_node = nodes.new('ShaderNodeMixShader')
-        mix_node.location = (600, 200)
-
-        links.new(bsdf_nodes[0].outputs['BSDF'], mix_node.inputs[1])
-        links.new(bsdf_nodes[1].outputs['BSDF'], mix_node.inputs[2])
-
-        geometry = nodes.new(type='ShaderNodeNewGeometry')
-        
-        # 创建 UV 节点1
-        uv_node_1 = nodes.new('ShaderNodeUVMap')
-        uv_node_1.location = (-300, 0)
-        uv_node_1.uv_map = "UVMap"
-
-        # 创建 UV 节点2
-        uv_node_2 = nodes.new('ShaderNodeUVMap')
-        uv_node_2.location = (-300, 0)
-        uv_node_2.uv_map = "UVMap_1"
-
-        # 连接节点
-        links.new(geometry.outputs[6], mix_node.inputs['Fac'])
-        links.new(uv_node_1.outputs['UV'], tex_nodes[0].inputs['Vector'])
-        links.new(uv_node_2.outputs['UV'], tex_nodes[1].inputs['Vector'])
-
-        output_node = nodes.new('ShaderNodeOutputMaterial')
-        output_node.location = (1000, 200)
-
-        links.new(mix_node.outputs['Shader'], output_node.inputs['Surface'])
+        # 找到了材质，将其重命名
+        mat.name = mat_name
     else:
-        if mat_name in NeedsToBeColored:
-            mix_node = nodes.new('ShaderNodeMix')
-            
-            mix_node.data_type='RGBA'
-            mix_node.blend_type='MULTIPLY'
-            mix_node.inputs[0].default_value = 1.0
-            
-            mix_node.location = (-200, 500)
-            
-          # 创建纹理坐标节点
-            texture_coordinate_node = nodes.new('ShaderNodeTexCoord')
-            texture_coordinate_node.location = (-400, 200)
-
-            # 创建材质纹理节点
-            colormap_texture_node = nodes.new('ShaderNodeTexImage')
-            colormap_texture_node.location = (-300, 200)
-            colormap_texture_node.image = bpy.data.images.get(filename + "_colormap")  
-            colormap_texture_node.interpolation = 'Closest'
-
-            output_node = nodes.new('ShaderNodeOutputMaterial')
-            output_node.location = (600, 200)
-            links.new(tex_nodes[0].outputs['Color'], mix_node.inputs[6])
-            links.new(colormap_texture_node.outputs['Color'], mix_node.inputs[7])
-            links.new(texture_coordinate_node.outputs[0], colormap_texture_node.inputs[0])
-            # 断开材质和BSDF之间的连接
-            links.remove(links[0])  
-            links.new(mix_node.outputs[2], bsdf_nodes[0].inputs[0])
-            links.new(bsdf_nodes[0].outputs['BSDF'], output_node.inputs['Surface'])
-            if mat_name in Leaves:
-                mix_node1 = nodes.new('ShaderNodeMixShader')
-                mix_node1.location = (600, 200)
-                mix_node2 = nodes.new('ShaderNodeMixShader')
-                mix_node2.location = (800, 200)
-                mix_node1.inputs["Fac"].default_value = 0.2
-                transparent_node = nodes.new(type='ShaderNodeBsdfTransparent')
-                transparent_node.location = (800, -200)
-                translucent_node = nodes.new(type="ShaderNodeBsdfTranslucent")
-                translucent_node.location = (600, -200)
-                links.remove(links[0])  
-
-                links.new(bsdf_nodes[0].outputs['BSDF'], mix_node1.inputs[1])
-                links.new(translucent_node.outputs[0], mix_node1.inputs[2])
-
-                links.new(mix_node.outputs[2], translucent_node.inputs[0])
-
-                links.new(tex_nodes[0].outputs['Alpha'], mix_node2.inputs[0])
-                links.new(mix_node1.outputs[0], mix_node2.inputs[2])
-                links.new(transparent_node.outputs[0], mix_node2.inputs[1])
-
-                links.new(mix_node2.outputs[0], output_node.inputs['Surface'])
-
+        if mat_name in NeedsToBeColored and mat_name in Leaves:
+            shader_name = "树叶/草+灰度图着色器"
+            # 导入shader
+            shader = bpy.data.materials.get(shader_name)
+            if shader is None:
+                path = __file__.rsplit(
+                    "\\", 1)[0]+"\\Material.blend"
+                with bpy.data.libraries.load(path) as (data_from, data_to):
+                    if shader_name in data_from.materials:
+                        data_to.materials = [shader_name]
+                # 获取shader
+                shader = bpy.data.materials.get(shader_name)
+            # 复制 shader，并将其重命名为 mat_name
+            mat = shader.copy()
+            mat.name = mat_name
+            # 设置图像纹理节点的图片路径
+            for node in mat.node_tree.nodes:
+                if node.name =="色图":
+                    node.image = bpy.data.images.get(filename+"_colormap")
+                elif node.name == "默认图片":
+                    node.image = bpy.data.images.load(texture_paths[0])
+        elif mat_name in NeedsToBeColored:
+            shader_name = "灰度图着色器"
+            # 导入shader
+            shader = bpy.data.materials.get(shader_name)
+            if shader is None:
+                path = __file__.rsplit(
+                    "\\", 1)[0]+"\\Material.blend"
+                with bpy.data.libraries.load(path) as (data_from, data_to):
+                    if shader_name in data_from.materials:
+                        data_to.materials = [shader_name]
+                # 获取shader
+                shader = bpy.data.materials.get(shader_name)
+            # 复制 shader，并将其重命名为 mat_name
+            mat = shader.copy()
+            mat.name = mat_name
+            # 设置图像纹理节点的图片路径
+            for node in mat.node_tree.nodes:
+                if node.name =="色图":
+                    node.image = bpy.data.images.get(filename+"_colormap")
+                elif node.name == "默认图片":
+                    node.image = bpy.data.images.load(texture_paths[0])
+                
 
         else:
-            output_node = nodes.new('ShaderNodeOutputMaterial')
-            output_node.location = (600, 200)
-
-            links.new(bsdf_nodes[0].outputs['BSDF'], output_node.inputs['Surface'])
+            shader_name = "默认着色器"
+            # 导入shader
+            shader = bpy.data.materials.get(shader_name)
+            if shader is None:
+                path = __file__.rsplit(
+                    "\\", 1)[0]+"\\Material.blend"
+                with bpy.data.libraries.load(path) as (data_from, data_to):
+                    if shader_name in data_from.materials:
+                        data_to.materials = [shader_name]
+                # 获取shader
+                shader = bpy.data.materials.get(shader_name)
+            # 复制 shader，并将其重命名为 mat_name
+            mat = shader.copy()
+            mat.name = mat_name
+            # 设置图像纹理节点的图片路径
+            for node in mat.node_tree.nodes:
+                if node.name == "默认图片":
+                    node.image = bpy.data.images.load(texture_paths[0])
 
     return mat
 
@@ -416,18 +359,13 @@ def add_mesh_to_collection(collection, mesh):
     # 返回新创建的对象
     return obj
 from .functions import get_file_path
-def get_or_create_material(texture, texture2, type,filename):
+def get_or_create_material(texture,filename):
     mat_name = ""
-    if type == 'cube':
-        mat_name = f"{texture}"
-    elif type == 'face':
-        mat_name = f"{texture}_backface"
+    mat_name = f"{texture}"
 
     if mat_name not in bpy.data.materials:
-        if type == 'cube':
-            mat = create_node_material([get_file_path(texture, "t")], mat_name,False,filename)
-        elif type == 'face':
-            mat = create_node_material([get_file_path(texture, "t"), get_file_path(texture2, "t")], mat_name,True,filename)
+        mat = create_node_material([get_file_path(texture, "t")], mat_name,filename)
+
     else:
         mat = bpy.data.materials[mat_name]
 

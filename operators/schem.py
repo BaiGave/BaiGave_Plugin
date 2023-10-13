@@ -5,7 +5,6 @@ from .cullblocks import CullBlocks
 
 from .classification import air_blocks
 import threading
-import time
 
 def schem_p(d, filename="", position=(0, 0, 0)):
     # 定义一个新的线程
@@ -46,7 +45,7 @@ def schem_p_thread(d,filename="",position=(0,0,0)):
         else:
             face = bm.faces.new([bm.verts[i] for i in f])
 
-        mat = get_or_create_material(texture_list[face_index], texture_list[face_index], 'cube',filename)
+        mat = get_or_create_material(texture_list[face_index],filename)
         mat.blend_method = 'CLIP'
         mat.shadow_method = 'CLIP'
         if mat.name not in obj.data.materials:
@@ -106,7 +105,7 @@ def schem(d,filename="",position=(0,0,0)):
         else:
             face = bm.faces.new([bm.verts[i] for i in f])
 
-        mat = get_or_create_material(texture_list[face_index], texture_list[face_index], 'cube',filename)
+        mat = get_or_create_material(texture_list[face_index],filename)
         mat.blend_method = 'CLIP'
         mat.shadow_method = 'CLIP'
         if mat.name not in obj.data.materials:
