@@ -2,6 +2,7 @@ import json
 import bpy
 
 file_data_cache = {}
+global_filepath = bpy.utils.script_path_user()
 
 def get_all_data(filepath, filename):
     if (filepath, filename) in file_data_cache:
@@ -46,7 +47,7 @@ def get_all_data(filepath, filename):
 
 
 def get_file_path(modid, type):
-    filepath = bpy.utils.script_path_user() + "\\addons\\BaiGave_Plugin\\assets\\"
+    filepath = global_filepath + "\\addons\\BaiGave_Plugin\\assets\\"
     Pos = modid.find(":")
     mod = ""
     id = ""
