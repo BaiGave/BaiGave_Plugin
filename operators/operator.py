@@ -12,6 +12,7 @@ from .functions import get_all_data
 from .schem import schem,schem_p
 from .generate import generate
 from .chunk  import chunk as create_chunk
+from .sway_animation import add_sway_animation
 
 
 
@@ -110,6 +111,9 @@ class WorldPanel(bpy.types.Panel):
         
         row = layout.row()
         row.operator("baigave.import_schem", text="导入.schem文件")
+
+        row = layout.row()
+        row.operator("object.add_sway_animation", text="草摇摆")
 
         row = layout.row()
         row.operator("baigave.map_optimize", text="执行优化")

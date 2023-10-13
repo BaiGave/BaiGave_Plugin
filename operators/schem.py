@@ -12,6 +12,7 @@ def schem_p(d, filename="", position=(0, 0, 0)):
     # 启动线程
     t.start()
 
+
 def schem_p_thread(d,filename="",position=(0,0,0)):
     vertices = []
     faces = []
@@ -70,6 +71,8 @@ def schem_p_thread(d,filename="",position=(0,0,0)):
 
     bm.to_mesh(mesh)
     bm.free()
+    
+    
 
 def schem(d,filename="",position=(0,0,0)):
     vertices = []
