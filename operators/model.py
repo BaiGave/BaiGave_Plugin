@@ -32,7 +32,7 @@ def create_node_material(texture_paths, mat_name,filename):
                     node.image = bpy.data.images.get(filename+"_colormap")
                 elif node.name == "默认图片":
                     node.image = bpy.data.images.load(texture_paths[0])
-        elif mat_name in NeedsToBeColored:
+        elif mat_name in NeedsToBeColored and mat_name not in Leaves:
             shader_name = "灰度图着色器"
             # 导入shader
             shader = bpy.data.materials.get(shader_name)
@@ -53,7 +53,25 @@ def create_node_material(texture_paths, mat_name,filename):
                     node.image = bpy.data.images.get(filename+"_colormap")
                 elif node.name == "默认图片":
                     node.image = bpy.data.images.load(texture_paths[0])
-                
+        elif mat_name not in NeedsToBeColored and mat_name in Leaves:
+            shader_name = "树叶/草着色器"
+            # 导入shader
+            shader = bpy.data.materials.get(shader_name)
+            if shader is None:
+                path = __file__.rsplit(
+                    "\\", 1)[0]+"\\Material.blend"
+                with bpy.data.libraries.load(path) as (data_from, data_to):
+                    if shader_name in data_from.materials:
+                        data_to.materials = [shader_name]
+                # 获取shader
+                shader = bpy.data.materials.get(shader_name)
+            # 复制 shader，并将其重命名为 mat_name
+            mat = shader.copy()
+            mat.name = mat_name
+            # 设置图像纹理节点的图片路径
+            for node in mat.node_tree.nodes:
+                if node.name == "默认图片":
+                    node.image = bpy.data.images.load(texture_paths[0])
 
         else:
             shader_name = "默认着色器"
