@@ -4,12 +4,11 @@ class MapOptimize(bpy.types.Operator):
     """优化面"""
     bl_idname = "baigave.map_optimize"
     bl_label = "优化面"
-
     def execute(self, context):
         scene = context.scene
         is_weld = scene.is_weld 
         objs = context.selected_objects
-        nodetree_target = "世界空间映射uv"
+        nodetree_target = "UV"
         for obj in objs:
             obj.select_set(True)
             context.view_layer.objects.active = obj
@@ -21,7 +20,7 @@ class MapOptimize(bpy.types.Operator):
 
             #是否合并重叠的顶点
             if is_weld:
-                bpy.ops.mesh.remove_doubles(threshold=0.005)
+                bpy.ops.mesh.remove_doubles(threshold=0.001)
             #精简面
             bpy.ops.mesh.dissolve_limited(
                 angle_limit=0.0872665, use_dissolve_boundaries=False, delimit={'MATERIAL'})
@@ -37,7 +36,7 @@ class MapOptimize(bpy.types.Operator):
                 mg.node_group = bpy.data.node_groups[nodetree_target]
             except:
                 path = __file__.rsplit(
-                    "\\", 1)[0]+"\\map_node.blend"
+                    "\\", 1)[0]+"\\GeometryNodes.blend"
                 with bpy.data.libraries.load(path) as (data_from, data_to):
                     strs = nodetree_target
                     if strs in (nodetree_target):

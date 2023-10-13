@@ -89,7 +89,7 @@ class BlockPanel(bpy.types.Panel):
         row.label(text = "方块",icon='SNAP_VOLUME')
         
         row = layout.row()
-        layout.prop(BaiGave,"JsonImportSpeed")
+        #layout.prop(BaiGave,"JsonImportSpeed")
         row.operator("baigave.import_json", text="导入.json文件")
 #世界面板     
 class WorldPanel(bpy.types.Panel):
