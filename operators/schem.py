@@ -4,7 +4,7 @@ from .model import create_mesh,add_mesh_to_collection,get_or_create_material,set
 from .cullblocks import CullBlocks
 from .blockstates import blockstates
 
-from .classification import air_blocks
+from .classification import flowers
 import threading
 
 def schem_p(d, filename="", position=(0, 0, 0)):
@@ -25,7 +25,7 @@ def schem_p_thread(d,filename="",position=(0,0,0)):
 
     for key, value in d.items():
         result = remove_brackets(value)
-        if result in air_blocks and result !=  "minecraft:air":
+        if result in flowers:
             has_air = [True, True,True, True, True,True]
             vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, value,has_air,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
             
@@ -102,7 +102,7 @@ def schem(d,filename="",position=(0,0,0)):
 
     for key, value in d.items():
         result = remove_brackets(value)
-        if result not in air_blocks:
+        if result not in flowers:
             vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
             
     collection = bpy.context.collection
