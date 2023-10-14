@@ -107,7 +107,7 @@ def schem_l(d,filename="",position=(0,0,0)):
             vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, value,has_air,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
             
     collection = bpy.context.collection
-    mesh_name = filename+"_plants"
+    mesh_name = filename+"_leaves"
     mesh = create_mesh(mesh_name)
     obj = add_mesh_to_collection(collection, mesh)
     obj.location = position
