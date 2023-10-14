@@ -9,7 +9,7 @@ from .level import create_level
 from .tip import button_callback
 
 from .functions import get_all_data
-from .schem import schem,schem_p,schem_l
+from .schem import schem,schem_p,schem_leaves,schem_liquid
 from .generate import generate
 from .chunk  import chunk as create_chunk
 
@@ -151,7 +151,7 @@ class ImportSchem(bpy.types.Operator):
             "y":int(nbt_data["Height"]),
             "z":int(nbt_data["Width"])
         }
-
+        print(nbt_data)
         # 设置图片的大小和颜色
         image_width = int(size["z"])
         image_height = int(size["x"])
@@ -184,7 +184,8 @@ class ImportSchem(bpy.types.Operator):
         start_time = time.time()
 
         schem(d,filename)
-        schem_l(d,filename)
+        schem_leaves(d,filename)
+        schem_liquid(d,filename)
         schem_p(d,filename)
         bpy.context.space_data.overlay.show_stats = True
         # 获取当前时间
