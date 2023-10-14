@@ -145,7 +145,6 @@ class ImportSchem(bpy.types.Operator):
         d = {}
         nbt_data = amulet_nbt._load_nbt.load(self.filepath)
         Palette = dict(nbt_data["Palette"])
-        print(Palette)
         Palette = {int(v): k for k, v in Palette.items()}
         size = {
             "x":int(nbt_data["Length"]),
@@ -183,8 +182,9 @@ class ImportSchem(bpy.types.Operator):
         # 获取当前时间
         bpy.context.space_data.shading.color_type = 'TEXTURE'
         start_time = time.time()
-        schem(d,filename)
         schem_p(d,filename)
+        schem(d,filename)
+        
         bpy.context.space_data.overlay.show_stats = True
         # 获取当前时间
         end_time = time.time()

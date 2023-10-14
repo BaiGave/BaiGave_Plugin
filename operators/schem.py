@@ -24,8 +24,8 @@ def schem_p_thread(d,filename="",position=(0,0,0)):
     vertices_dict ={}
 
     for key, value in d.items():
-        if value in air_blocks and value !=  "minecraft:air":
-            print(value)
+        result = remove_brackets(value)
+        if result in air_blocks and result !=  "minecraft:air":
             has_air = [True, True,True, True, True,True]
             vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, value,has_air,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
             
@@ -74,8 +74,22 @@ def schem_p_thread(d,filename="",position=(0,0,0)):
 
     bm.to_mesh(mesh)
     bm.free()
-    
-    
+
+#用于删除[]的部分 
+def remove_brackets(input_string):
+    output_string = ""
+    inside_brackets = False
+
+    for char in input_string:
+        if char == '[':
+            inside_brackets = True
+        elif char == ']' and inside_brackets:
+            inside_brackets = False
+        elif not inside_brackets:
+            output_string += char
+
+    return output_string
+
 
 def schem(d,filename="",position=(0,0,0)):
     vertices = []
@@ -87,7 +101,8 @@ def schem(d,filename="",position=(0,0,0)):
     vertices_dict ={}
 
     for key, value in d.items():
-        if value not in air_blocks:
+        result = remove_brackets(value)
+        if result not in air_blocks:
             vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
             
     collection = bpy.context.collection
