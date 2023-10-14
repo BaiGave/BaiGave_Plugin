@@ -9,7 +9,7 @@ from .level import create_level
 from .tip import button_callback
 
 from .functions import get_all_data
-from .schem import schem,schem_p
+from .schem import schem,schem_p,schem_l
 from .generate import generate
 from .chunk  import chunk as create_chunk
 
@@ -182,7 +182,9 @@ class ImportSchem(bpy.types.Operator):
         # 获取当前时间
         bpy.context.space_data.shading.color_type = 'TEXTURE'
         start_time = time.time()
+
         schem(d,filename)
+        schem_l(d,filename)
         schem_p(d,filename)
         bpy.context.space_data.overlay.show_stats = True
         # 获取当前时间
