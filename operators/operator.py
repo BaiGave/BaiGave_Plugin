@@ -182,9 +182,8 @@ class ImportSchem(bpy.types.Operator):
         # 获取当前时间
         bpy.context.space_data.shading.color_type = 'TEXTURE'
         start_time = time.time()
-        schem_p(d,filename)
         schem(d,filename)
-        
+        schem_p(d,filename)
         bpy.context.space_data.overlay.show_stats = True
         # 获取当前时间
         end_time = time.time()
