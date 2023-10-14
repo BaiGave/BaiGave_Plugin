@@ -12,9 +12,6 @@ from .functions import get_all_data
 from .schem import schem,schem_p
 from .generate import generate
 from .chunk  import chunk as create_chunk
-from .sway_animation import add_sway_animation
-
-
 
 import gzip
 import amulet

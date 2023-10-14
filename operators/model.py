@@ -1,6 +1,6 @@
 import bpy
 import numpy as np
-from .classification import NeedsToBeColored,Leaves
+from .shader_type import Type1,Type2,Type3
 
 
 def create_node_material(texture_paths, mat_name,filename):
@@ -11,7 +11,7 @@ def create_node_material(texture_paths, mat_name,filename):
         # 找到了材质，将其重命名
         mat.name = mat_name
     else:
-        if mat_name in NeedsToBeColored and mat_name in Leaves:
+        if mat_name in Type1:
             shader_name = "树叶/草+灰度图着色器"
             # 导入shader
             shader = bpy.data.materials.get(shader_name)
@@ -32,7 +32,7 @@ def create_node_material(texture_paths, mat_name,filename):
                     node.image = bpy.data.images.get(filename+"_colormap")
                 elif node.name == "默认图片":
                     node.image = bpy.data.images.load(texture_paths[0])
-        elif mat_name in NeedsToBeColored and mat_name not in Leaves:
+        elif mat_name in Type2:
             shader_name = "灰度图着色器"
             # 导入shader
             shader = bpy.data.materials.get(shader_name)
@@ -53,7 +53,7 @@ def create_node_material(texture_paths, mat_name,filename):
                     node.image = bpy.data.images.get(filename+"_colormap")
                 elif node.name == "默认图片":
                     node.image = bpy.data.images.load(texture_paths[0])
-        elif mat_name not in NeedsToBeColored and mat_name in Leaves:
+        elif mat_name not in Type3:
             shader_name = "树叶/草着色器"
             # 导入shader
             shader = bpy.data.materials.get(shader_name)
