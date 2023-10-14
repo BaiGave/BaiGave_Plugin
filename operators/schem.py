@@ -102,7 +102,7 @@ def schem(d,filename="",position=(0,0,0)):
 
     for key, value in d.items():
         result = remove_brackets(value)
-        if result not in flowers:
+        if result not in flowers and result != "minecraft:air":
             vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
             
     collection = bpy.context.collection
