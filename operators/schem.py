@@ -2,6 +2,7 @@ import bpy
 import bmesh
 from .model import create_mesh,add_mesh_to_collection,get_or_create_material,set_uv
 from .cullblocks import CullBlocks
+from .blockstates import blockstates
 
 from .classification import air_blocks
 import threading
@@ -24,7 +25,8 @@ def schem_p_thread(d,filename="",position=(0,0,0)):
 
     for key, value in d.items():
         if value in air_blocks:
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
+            has_air = [True, True,True, True, True,True]
+            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, value,has_air,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
             
     collection = bpy.context.collection
     mesh_name = filename+"_plants"
