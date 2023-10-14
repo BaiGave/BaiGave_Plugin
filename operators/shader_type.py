@@ -6,6 +6,6 @@ Type1 =["minecraft:grass","minecraft:spruce_leaves","minecraft:acacia_leaves","m
 Type2 =["grass_block_top","grass_block_side_overlay","byg:overgrown_stone_top","byg:overgrown_stone_side_overlay"]
 
 #树叶/草着色器
-Type3 =["byg:yellow_birch_leaves","byg:orange_birch_leaves","byg:fir_leaves"]
+Type3 =["minecraft:azalea_leaves","minecraft:flowering_azalea_leaves","byg:yellow_birch_leaves","byg:orange_birch_leaves","byg:fir_leaves"]
 
 

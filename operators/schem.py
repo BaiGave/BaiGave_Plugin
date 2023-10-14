@@ -24,7 +24,8 @@ def schem_p_thread(d,filename="",position=(0,0,0)):
     vertices_dict ={}
 
     for key, value in d.items():
-        if value in air_blocks:
+        if value in air_blocks and value !=  "minecraft:air":
+            print(value)
             has_air = [True, True,True, True, True,True]
             vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, value,has_air,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
             
