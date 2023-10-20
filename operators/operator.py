@@ -2,10 +2,6 @@ import bpy
 import os
 import time
 import random
-import pickle
-import threading
-import subprocess
-import sys
 
 from math import floor
 from .block import block
@@ -13,7 +9,7 @@ from .level import create_level
 from .tip import button_callback
 
 from .functions import get_all_data
-from .schem import schem,schem_p,schem_leaves,schem_liquid,schem_dirtgrass,schem_snow,schem_deepstone,schem_sandgravel
+from .schem import schem,schem_p,schem_leaves,schem_liquid
 from .generate import generate
 from .chunk  import chunk as create_chunk
 
@@ -145,14 +141,6 @@ class ImportSchem(bpy.types.Operator):
 
     # 定义操作的执行函数
     def execute(self, context):
-        #清空缓存文件夹
-        start_time = time.time()
-        folder_path = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache"
-        file_names = os.listdir(folder_path)
-        for file_name in file_names:
-            file_path = os.path.join(folder_path, file_name)
-            os.remove(file_path)
-            
         # 遍历字典的键值对
         d = {}
         nbt_data = amulet_nbt._load_nbt.load(self.filepath)
@@ -163,12 +151,10 @@ class ImportSchem(bpy.types.Operator):
             "y":int(nbt_data["Height"]),
             "z":int(nbt_data["Width"])
         }
-        #print(nbt_data)
         # 设置图片的大小和颜色
         image_width = int(size["z"])
         image_height = int(size["x"])
         default_color = (0.47, 0.75, 0.35, 1.0)  # RGBA颜色，对应#79c05a
-
         # 创建一个新的图片
         filename = os.path.basename(self.filepath)
         image = bpy.data.images.new(filename+"_colormap", width=image_width, height=image_height)
@@ -179,305 +165,40 @@ class ImportSchem(bpy.types.Operator):
                 pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
                 image.pixels[pixel_index : pixel_index + 4] = default_color
 
-        lennbt = len(nbt_data["BlockData"])
-        sizezx = size["z"] * size["x"]
-        sizez = size["z"]
-        for i in range(lennbt):
-            x = floor((i % sizezx) % sizez)
-            y = floor(i / sizezx)
-            z = floor((i % sizezx) / sizez)
+        
+        for i in range(len(nbt_data["BlockData"])):
+            x = floor((i % (size["z"] * size["x"])) % size["z"])
+            y = floor(i / (size["z"] * size["x"]))
+            z = floor((i % (size["z"] * size["x"])) / size["z"])
             try:
                 d[(x, z, y)] = str(Palette[int(nbt_data["BlockData"][i])])
             except:
-                print(x)
-                print(z)
-                print(y)
-        end_time = time.time()
-        print("预处理时间：", end_time - start_time, "秒")
+                pass
 
-        VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-        with open(VarCachePath, 'wb') as file:
-            pickle.dump((d,self.filepath),file)
-        with open(VarCachePath, 'rb') as file:
-            d,schempath = pickle.load(file)
-        
-        #bpy.context.space_data.shading.color_type = 'TEXTURE'
-        #bpy.context.space_data.overlay.show_stats = True
 
-        #多进程导入模型
-        def import_schems():
-            blender_path = bpy.app.binary_path
-            ImportPath = bpy.utils.script_path_user()
-            MPplantsPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_plants.py"
-            MPleavesPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_leaves.py"
-            MPliquidPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_liquid.py"
-            MPothersPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_others.py"
-            MPdirtgrassPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_dirtgrass.py"
-            MPdeepstonePath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_deepstone.py"
-            MPsandgravelPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_sandgravel.py"
-            MPsnowPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_snow.py"
-
-            #多进程实现方法：后台启动headless blender(-b)，只运行python代码(-P)，不显示界面
-            subprocess.Popen([blender_path, "-b", "-P", MPplantsPath])
-            subprocess.Popen([blender_path, "-b", "-P", MPleavesPath])
-            subprocess.Popen([blender_path, "-b", "-P", MPliquidPath])
-            subprocess.Popen([blender_path, "-b", "-P", MPothersPath])
-            subprocess.Popen([blender_path, "-b", "-P", MPdirtgrassPath])
-            subprocess.Popen([blender_path, "-b", "-P", MPdeepstonePath])
-            subprocess.Popen([blender_path, "-b", "-P", MPsandgravelPath])
-            subprocess.Popen([blender_path, "-b", "-P", MPsnowPath])
-
-            b1=b2=b3=b4=b5=b6=b7=b8=0
-            p1 = ImportPath + "/addons/BaiGave_Plugin/schemcache/plants.blend"
-            p2 = ImportPath + "/addons/BaiGave_Plugin/schemcache/leaves.blend"
-            p3 = ImportPath + "/addons/BaiGave_Plugin/schemcache/liquid.blend"
-            p4 = ImportPath + "/addons/BaiGave_Plugin/schemcache/others.blend"
-            p5 = ImportPath + "/addons/BaiGave_Plugin/schemcache/dirtgrass.blend"
-            p6 = ImportPath + "/addons/BaiGave_Plugin/schemcache/deepstone.blend"
-            p7 = ImportPath + "/addons/BaiGave_Plugin/schemcache/sandgravel.blend"
-            p8 = ImportPath + "/addons/BaiGave_Plugin/schemcache/snow.blend"
-
-            #等待每个进程生成的缓存文件，然后追加到当前场景
-            while True:
-                if os.path.exists(p1) and b1==0:
-                    b1=1
-                    with bpy.data.libraries.load(p1) as (data_from, data_to):
-                        data_to.objects = [name for name in data_from.objects if name == "plants"]
-                    for obj in data_to.objects:
-                        bpy.context.scene.collection.objects.link(obj)
-                    end_time = time.time()
-                    print("代码块执行时间：", end_time - start_time, "秒")
-                elif os.path.exists(p2) and b2==0:
-                    b2=1
-                    with bpy.data.libraries.load(p2) as (data_from, data_to):
-                        data_to.objects = [name for name in data_from.objects if name == "leaves"]
-                    for obj in data_to.objects:
-                        bpy.context.scene.collection.objects.link(obj)
-                    end_time = time.time()
-                    print("代码块执行时间：", end_time - start_time, "秒")
-                elif os.path.exists(p3) and b3==0:
-                    b3=1
-                    with bpy.data.libraries.load(p3) as (data_from, data_to):
-                        data_to.objects = [name for name in data_from.objects if name == "liquid"]
-                    for obj in data_to.objects:
-                        bpy.context.scene.collection.objects.link(obj)
-                    end_time = time.time()
-                    print("代码块执行时间：", end_time - start_time, "秒")
-                elif os.path.exists(p4) and b4==0:
-                    b4=1
-                    with bpy.data.libraries.load(p4) as (data_from, data_to):
-                        data_to.objects = [name for name in data_from.objects if name == "others"]
-                    for obj in data_to.objects:
-                        bpy.context.scene.collection.objects.link(obj)
-                    end_time = time.time()
-                    print("代码块执行时间：", end_time - start_time, "秒")
-                elif os.path.exists(p5) and b5==0:
-                    b5=1
-                    with bpy.data.libraries.load(p5) as (data_from, data_to):
-                        data_to.objects = [name for name in data_from.objects if name == "dirtgrass"]
-                    for obj in data_to.objects:
-                        bpy.context.scene.collection.objects.link(obj)
-                    end_time = time.time()
-                    print("代码块执行时间：", end_time - start_time, "秒")
-                elif os.path.exists(p6) and b6==0:
-                    b6=1
-                    with bpy.data.libraries.load(p6) as (data_from, data_to):
-                        data_to.objects = [name for name in data_from.objects if name == "deepstone"]
-                    for obj in data_to.objects:
-                        bpy.context.scene.collection.objects.link(obj)
-                    end_time = time.time()
-                    print("代码块执行时间：", end_time - start_time, "秒")
-                elif os.path.exists(p7) and b7==0:
-                    b7=1
-                    with bpy.data.libraries.load(p7) as (data_from, data_to):
-                        data_to.objects = [name for name in data_from.objects if name == "sandgravel"]
-                    for obj in data_to.objects:
-                        bpy.context.scene.collection.objects.link(obj)
-                    end_time = time.time()
-                    print("代码块执行时间：", end_time - start_time, "秒")
-                elif os.path.exists(p8) and b8==0:
-                    b8=1
-                    with bpy.data.libraries.load(p8) as (data_from, data_to):
-                        data_to.objects = [name for name in data_from.objects if name == "snow"]
-                    for obj in data_to.objects:
-                        bpy.context.scene.collection.objects.link(obj)
-                    end_time = time.time()
-                    print("代码块执行时间：", end_time - start_time, "秒")
-                elif b1==1 and b2==1 and b3==1 and b4==1 and b5==1 and b6==1 and b7==1 and b8==1:
-                    # 添加材质
-                    materials = bpy.data.materials
-                    for material in materials:
-                        try:
-                            node_tree = material.node_tree
-                            nodes = node_tree.nodes
-                            for node in nodes:
-                                if node.type == 'TEX_IMAGE':
-                                    if node.name == '色图':
-                                        node.image = bpy.data.images.get(filename+"_colormap")
-                        except:
-                            pass
-                    break
-                else:
-                    time.sleep(0.1)
-
+        # 获取当前时间
+        bpy.context.space_data.shading.color_type = 'TEXTURE'
         start_time = time.time()
-        #多线程防止blender卡死
-        threading.Thread(target=import_schems).start()
+
+        schem(d,filename)
+        schem_leaves(d,filename)
+        schem_liquid(d,filename)
+        schem_p(d,filename)
+        bpy.context.space_data.overlay.show_stats = True
+        # 获取当前时间
+        end_time = time.time()
+
+        # 计算代码块执行时间
+        execution_time = end_time - start_time
+
+        # 打印执行时间
+        print("代码块执行时间：", execution_time, "秒")
         return {'FINISHED'}
     
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
+        
         return {'RUNNING_MODAL'}
-
-
-#每个进程调用一类功能，导入特定方块
-class ImportSchemPlants(bpy.types.Operator):
-    bl_idname = "baigave.import_schem_plants"
-    bl_label = "导入.schem文件"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
-
-    def execute(self, context):
-        VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-        with open(VarCachePath, 'rb') as file:
-            d,schempath = pickle.load(file)
-        schem_p(d,"plants")
-        ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/plants.blend"
-        bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
-        return {'FINISHED'}
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-
-class ImportSchemLeaves(bpy.types.Operator):
-    bl_idname = "baigave.import_schem_leaves"
-    bl_label = "导入.schem文件"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
-
-    def execute(self, context):
-        VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-        with open(VarCachePath, 'rb') as file:
-            d,schempath = pickle.load(file)
-        schem_leaves(d,"leaves")
-        ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/leaves.blend"
-        bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
-        return {'FINISHED'}
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-
-class ImportSchemLiquid(bpy.types.Operator):
-    bl_idname = "baigave.import_schem_liquid"
-    bl_label = "导入.schem文件"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
-
-    def execute(self, context):
-        VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-        with open(VarCachePath, 'rb') as file:
-            d,schempath = pickle.load(file)
-        schem_liquid(d,"liquid")
-        ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/liquid.blend"
-        bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
-        return {'FINISHED'}
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-    
-class ImportSchemOthers(bpy.types.Operator):
-    bl_idname = "baigave.import_schem_others"
-    bl_label = "导入.schem文件"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
-
-    def execute(self, context):
-        VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-        with open(VarCachePath, 'rb') as file:
-            d,schempath = pickle.load(file)
-        schem(d,"others")
-        ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/others.blend"
-        bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
-        return {'FINISHED'}
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-    
-class ImportSchemDirtGrass(bpy.types.Operator):
-    bl_idname = "baigave.import_schem_dirtgrass"
-    bl_label = "导入.schem文件"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
-
-    def execute(self, context):
-        VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-        with open(VarCachePath, 'rb') as file:
-            d,schempath = pickle.load(file)
-        schem_dirtgrass(d,"dirtgrass")
-        ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/dirtgrass.blend"
-        bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
-        return {'FINISHED'}
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-    
-class ImportSchemDeepStone(bpy.types.Operator):
-    bl_idname = "baigave.import_schem_deepstone"
-    bl_label = "导入.schem文件"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
-
-    def execute(self, context):
-        VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-        with open(VarCachePath, 'rb') as file:
-            d,schempath = pickle.load(file)
-        schem_deepstone(d,"deepstone")
-        ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/deepstone.blend"
-        bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
-        return {'FINISHED'}
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-
-class ImportSchemSandGravel(bpy.types.Operator):
-    bl_idname = "baigave.import_schem_sandgravel"
-    bl_label = "导入.schem文件"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
-
-    def execute(self, context):
-        VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-        with open(VarCachePath, 'rb') as file:
-            d,schempath = pickle.load(file)
-        schem_sandgravel(d,"sandgravel")
-        ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/sandgravel.blend"
-        bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
-        return {'FINISHED'}
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-    
-class ImportSchemSnow(bpy.types.Operator):
-    bl_idname = "baigave.import_schem_snow"
-    bl_label = "导入.schem文件"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
-
-    def execute(self, context):
-        VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-        with open(VarCachePath, 'rb') as file:
-            d,schempath = pickle.load(file)
-        schem_snow(d,"snow")
-        ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/snow.blend"
-        bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
-        return {'FINISHED'}
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-
-
-
-
 class Importjson(bpy.types.Operator):
     """导入选定的json文件"""
     bl_idname = "baigave.import_json"

@@ -1,5 +1,6 @@
 import bpy
 import numpy as np
+import math
 from .shader_type import Type1,Type2,Type3
 
 

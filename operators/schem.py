@@ -4,7 +4,7 @@ from .model import create_mesh,add_mesh_to_collection,get_or_create_material,set
 from .cullblocks import CullBlocks
 from .blockstates import blockstates
 
-from .classification import flowers,leaves,liquid,exclude
+from .classification import flowers,leaves,liquid
 import threading
 
 #用于删除[]的部分 
@@ -24,6 +24,13 @@ def remove_brackets(input_string):
 
 
 def schem_p(d, filename="", position=(0, 0, 0)):
+    # 定义一个新的线程
+    t = threading.Thread(target=schem_p_thread, args=(d, filename, position))
+    # 启动线程
+    t.start()
+
+
+def schem_p_thread(d,filename="",position=(0,0,0)):
     vertices = []
     faces = []
     direction = []
@@ -39,7 +46,7 @@ def schem_p(d, filename="", position=(0, 0, 0)):
             vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, value,has_air,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
             
     collection = bpy.context.collection
-    mesh_name = filename
+    mesh_name = filename+"_plants"
     mesh = create_mesh(mesh_name)
     obj = add_mesh_to_collection(collection, mesh)
     obj.location = position
@@ -100,7 +107,7 @@ def schem_leaves(d,filename="",position=(0,0,0)):
             vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, value,has_air,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
             
     collection = bpy.context.collection
-    mesh_name = filename
+    mesh_name = filename+"_leaves"
     mesh = create_mesh(mesh_name)
     obj = add_mesh_to_collection(collection, mesh)
     obj.location = position
@@ -204,7 +211,7 @@ def schem_liquid(d, filename="", position=(0, 0, 0)):
                 ]
             )
     collection = bpy.context.collection
-    mesh_name = filename
+    mesh_name = filename + "_liquid"
     mesh = create_mesh(mesh_name)
     obj = add_mesh_to_collection(collection, mesh)
     obj.location = position
@@ -231,8 +238,6 @@ def schem_liquid(d, filename="", position=(0, 0, 0)):
 
 
 
-
-
 def schem(d,filename="",position=(0,0,0)):
     vertices = []
     faces = []
@@ -244,7 +249,7 @@ def schem(d,filename="",position=(0,0,0)):
 
     for key, value in d.items():
         result = remove_brackets(value)
-        if result not in exclude:
+        if result not in flowers and result != "minecraft:air" and result not in leaves:
             vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
             
     collection = bpy.context.collection
@@ -267,7 +272,6 @@ def schem(d,filename="",position=(0,0,0)):
             face = existing_face
         else:
             face = bm.faces.new([bm.verts[i] for i in f])
-
         mat = get_or_create_material(texture_list[face_index],filename)
         mat.blend_method = 'CLIP'
         mat.shadow_method = 'CLIP'
@@ -290,248 +294,6 @@ def schem(d,filename="",position=(0,0,0)):
                 loop[uv_layer].uv = set_uv(uv_coords, i, rotation)
 
     bm.faces.ensure_lookup_table()
-    bm.to_mesh(mesh)
-    bm.free()
 
-
-def schem_dirtgrass(d,filename="",position=(0,0,0)):
-    vertices = []
-    faces = []
-    direction = []
-    texture_list = []
-    uv_list = []
-    uv_rotation_list = []
-    vertices_dict ={}
-
-    for key, value in d.items():
-        result = remove_brackets(value)
-        if result == "minecraft:dirt" or result == "minecraft:grass_block":
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
-            
-    collection = bpy.context.collection
-    mesh_name = filename
-    mesh = create_mesh(mesh_name)
-    obj = add_mesh_to_collection(collection, mesh)
-    obj.location = position
-
-
-    bm = bmesh.new()
-    for v in vertices:
-        bm.verts.new(v)
-    bm.verts.ensure_lookup_table()
-
-    uv_layer = bm.loops.layers.uv.new()  # 添加UV图层
-    
-    for face_index, f in enumerate(faces):
-        existing_face = bm.faces.get([bm.verts[i] for i in f])
-        if existing_face is not None:
-            face = existing_face
-        else:
-            face = bm.faces.new([bm.verts[i] for i in f])
-
-        mat = get_or_create_material(texture_list[face_index],filename)
-        mat.blend_method = 'BLEND'
-        mat.show_transparent_back = False
-        mat.shadow_method = 'CLIP'
-        if mat.name not in obj.data.materials:
-            obj.data.materials.append(mat)
-
-        face.material_index = obj.data.materials.find(mat.name)
-
-        if uv_list[face_index] == "Auto":
-            for loop in face.loops:
-                vertex = loop.vert
-                uv = (vertex.co.y, vertex.co.z) if direction[face_index] in ['west', 'east'] \
-                    else (vertex.co.x, vertex.co.z) if direction[face_index] in ['north', 'south'] \
-                    else (vertex.co.x, vertex.co.y)
-                loop[uv_layer].uv = uv
-        else:
-            rotation = uv_rotation_list[face_index]
-            uv_coords = uv_list[face_index]
-            for i, loop in enumerate(face.loops):
-                loop[uv_layer].uv = set_uv(uv_coords, i, rotation)
-
-    bm.faces.ensure_lookup_table()
-    bm.to_mesh(mesh)
-    bm.free()
-
-
-def schem_deepstone(d,filename="",position=(0,0,0)):
-    vertices = []
-    faces = []
-    direction = []
-    texture_list = []
-    uv_list = []
-    uv_rotation_list = []
-    vertices_dict ={}
-
-    for key, value in d.items():
-        result = remove_brackets(value)
-        if result == "minecraft:stone" or result == "minecraft:deepslate":
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
-            
-    collection = bpy.context.collection
-    mesh_name = filename
-    mesh = create_mesh(mesh_name)
-    obj = add_mesh_to_collection(collection, mesh)
-    obj.location = position
-
-
-    bm = bmesh.new()
-    for v in vertices:
-        bm.verts.new(v)
-    bm.verts.ensure_lookup_table()
-
-    uv_layer = bm.loops.layers.uv.new()  # 添加UV图层
-    
-    for face_index, f in enumerate(faces):
-        existing_face = bm.faces.get([bm.verts[i] for i in f])
-        if existing_face is not None:
-            face = existing_face
-        else:
-            face = bm.faces.new([bm.verts[i] for i in f])
-
-        mat = get_or_create_material(texture_list[face_index],filename)
-        mat.blend_method = 'CLIP'
-        mat.shadow_method = 'CLIP'
-        if mat.name not in obj.data.materials:
-            obj.data.materials.append(mat)
-
-        face.material_index = obj.data.materials.find(mat.name)
-
-        if uv_list[face_index] == "Auto":
-            for loop in face.loops:
-                vertex = loop.vert
-                uv = (vertex.co.y, vertex.co.z) if direction[face_index] in ['west', 'east'] \
-                    else (vertex.co.x, vertex.co.z) if direction[face_index] in ['north', 'south'] \
-                    else (vertex.co.x, vertex.co.y)
-                loop[uv_layer].uv = uv
-        else:
-            rotation = uv_rotation_list[face_index]
-            uv_coords = uv_list[face_index]
-            for i, loop in enumerate(face.loops):
-                loop[uv_layer].uv = set_uv(uv_coords, i, rotation)
-
-    bm.faces.ensure_lookup_table()
-    bm.to_mesh(mesh)
-    bm.free()
-
-def schem_sandgravel(d,filename="",position=(0,0,0)):
-    vertices = []
-    faces = []
-    direction = []
-    texture_list = []
-    uv_list = []
-    uv_rotation_list = []
-    vertices_dict ={}
-
-    for key, value in d.items():
-        result = remove_brackets(value)
-        if result == "minecraft:sand" or result == "minecraft:gravel":
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
-            
-    collection = bpy.context.collection
-    mesh_name = filename
-    mesh = create_mesh(mesh_name)
-    obj = add_mesh_to_collection(collection, mesh)
-    obj.location = position
-
-
-    bm = bmesh.new()
-    for v in vertices:
-        bm.verts.new(v)
-    bm.verts.ensure_lookup_table()
-
-    uv_layer = bm.loops.layers.uv.new()  # 添加UV图层
-    
-    for face_index, f in enumerate(faces):
-        existing_face = bm.faces.get([bm.verts[i] for i in f])
-        if existing_face is not None:
-            face = existing_face
-        else:
-            face = bm.faces.new([bm.verts[i] for i in f])
-
-        mat = get_or_create_material(texture_list[face_index],filename)
-        mat.blend_method = 'CLIP'
-        mat.shadow_method = 'CLIP'
-        if mat.name not in obj.data.materials:
-            obj.data.materials.append(mat)
-
-        face.material_index = obj.data.materials.find(mat.name)
-
-        if uv_list[face_index] == "Auto":
-            for loop in face.loops:
-                vertex = loop.vert
-                uv = (vertex.co.y, vertex.co.z) if direction[face_index] in ['west', 'east'] \
-                    else (vertex.co.x, vertex.co.z) if direction[face_index] in ['north', 'south'] \
-                    else (vertex.co.x, vertex.co.y)
-                loop[uv_layer].uv = uv
-        else:
-            rotation = uv_rotation_list[face_index]
-            uv_coords = uv_list[face_index]
-            for i, loop in enumerate(face.loops):
-                loop[uv_layer].uv = set_uv(uv_coords, i, rotation)
-
-    bm.faces.ensure_lookup_table()
-    bm.to_mesh(mesh)
-    bm.free()
-
-def schem_snow(d,filename="",position=(0,0,0)):
-    vertices = []
-    faces = []
-    direction = []
-    texture_list = []
-    uv_list = []
-    uv_rotation_list = []
-    vertices_dict ={}
-
-    for key, value in d.items():
-        result = remove_brackets(value)
-        if result == "minecraft:snow" or result == "minecraft:snow_block" or result == "minecraft:powder_snow":
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
-            
-    collection = bpy.context.collection
-    mesh_name = filename
-    mesh = create_mesh(mesh_name)
-    obj = add_mesh_to_collection(collection, mesh)
-    obj.location = position
-
-
-    bm = bmesh.new()
-    for v in vertices:
-        bm.verts.new(v)
-    bm.verts.ensure_lookup_table()
-
-    uv_layer = bm.loops.layers.uv.new()  # 添加UV图层
-    
-    for face_index, f in enumerate(faces):
-        existing_face = bm.faces.get([bm.verts[i] for i in f])
-        if existing_face is not None:
-            face = existing_face
-        else:
-            face = bm.faces.new([bm.verts[i] for i in f])
-
-        mat = get_or_create_material(texture_list[face_index],filename)
-        mat.blend_method = 'CLIP'
-        mat.shadow_method = 'CLIP'
-        if mat.name not in obj.data.materials:
-            obj.data.materials.append(mat)
-
-        face.material_index = obj.data.materials.find(mat.name)
-
-        if uv_list[face_index] == "Auto":
-            for loop in face.loops:
-                vertex = loop.vert
-                uv = (vertex.co.y, vertex.co.z) if direction[face_index] in ['west', 'east'] \
-                    else (vertex.co.x, vertex.co.z) if direction[face_index] in ['north', 'south'] \
-                    else (vertex.co.x, vertex.co.y)
-                loop[uv_layer].uv = uv
-        else:
-            rotation = uv_rotation_list[face_index]
-            uv_coords = uv_list[face_index]
-            for i, loop in enumerate(face.loops):
-                loop[uv_layer].uv = set_uv(uv_coords, i, rotation)
-
-    bm.faces.ensure_lookup_table()
     bm.to_mesh(mesh)
     bm.free()
