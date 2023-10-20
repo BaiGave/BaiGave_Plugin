@@ -1,6 +1,6 @@
 import bpy
 
-from .operators.operator import ImportSchem,Importjson,ImportWorld,SelectArea,GenerateWorld,MainPanel,RigPanel,BlockPanel,WorldPanel
+from .operators.operator import ImportSchem,ImportSchemPlants,ImportSchemLeaves,ImportSchemLiquid,ImportSchemDeepStone,ImportSchemDirtGrass,ImportSchemOthers,ImportSchemSandGravel,ImportSchemSnow,Importjson,ImportWorld,SelectArea,GenerateWorld,MainPanel,RigPanel,BlockPanel,WorldPanel
 from .operators.map import Map
 from .operators.surface_optimization import MapOptimize
 from .operators.sway_animation import SwayAnimationOperator
@@ -19,7 +19,7 @@ bl_info={
 
 
 
-classes=[Settings,SPAWN_MODEL,ImportSchem,Importjson,ImportWorld,Map,MapOptimize,SwayAnimationOperator,SelectArea,GenerateWorld,MainPanel,RigPanel,BlockPanel,WorldPanel]
+classes=[Settings,SPAWN_MODEL,ImportSchem,ImportSchemPlants,ImportSchemLeaves,ImportSchemLiquid,ImportSchemSnow,ImportSchemDeepStone,ImportSchemDirtGrass,ImportSchemOthers,ImportSchemSandGravel,Importjson,ImportWorld,Map,MapOptimize,SwayAnimationOperator,SelectArea,GenerateWorld,MainPanel,RigPanel,BlockPanel,WorldPanel]
 
 
 def register():
