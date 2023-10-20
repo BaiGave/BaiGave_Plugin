@@ -151,7 +151,6 @@ class ImportSchem(bpy.types.Operator):
             "y":int(nbt_data["Height"]),
             "z":int(nbt_data["Width"])
         }
-        print(nbt_data)
         # 设置图片的大小和颜色
         image_width = int(size["z"])
         image_height = int(size["x"])

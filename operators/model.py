@@ -10,6 +10,15 @@ def create_node_material(texture_paths, mat_name,filename):
     if mat is not None:
         # 找到了材质，将其重命名
         mat.name = mat_name
+    elif mat_name == "missing":
+        #透明材质
+        mat = bpy.data.materials.new(mat_name)
+        mat.use_nodes = True
+        for node in mat.node_tree.nodes:
+            mat.node_tree.nodes.remove(node)
+        shader_node = mat.node_tree.nodes.new('ShaderNodeBsdfTransparent')
+        output_node = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
+        mat.node_tree.links.new(shader_node.outputs['BSDF'], output_node.inputs['Surface'])
     else:
         if mat_name in Type1:
             shader_name = "树叶/草+灰度图着色器"
@@ -96,7 +105,7 @@ def create_node_material(texture_paths, mat_name,filename):
     return mat
 
 
-def rot(origin, display, position, coords, rotation_matrix=None):
+def rot(origin, display, position, coords,rotation, rotation_matrix=None):
     scale_factor = 1/16
     if rotation_matrix is not None:
         coords = [tuple(np.dot(rotation_matrix, (point - origin)) + origin) for point in coords]
@@ -107,19 +116,19 @@ def rot(origin, display, position, coords, rotation_matrix=None):
         
         rotation_matrix_x = np.array([
             [1, 0, 0],
-            [0, np.cos(np.radians(display_rotation[0])), -np.sin(np.radians(display_rotation[0]))],
-            [0, np.sin(np.radians(display_rotation[0])), np.cos(np.radians(display_rotation[0]))]
+            [0, np.cos(np.radians(display_rotation[0]+rotation[0])), -np.sin(np.radians(display_rotation[0]+rotation[0]))],
+            [0, np.sin(np.radians(display_rotation[0]+rotation[0])), np.cos(np.radians(display_rotation[0]+rotation[0]))]
         ])
-        
+
         rotation_matrix_y = np.array([
-            [np.cos(np.radians(display_rotation[1])), 0, np.sin(np.radians(display_rotation[1]))],
+            [np.cos(np.radians(display_rotation[1]+rotation[1])), 0, np.sin(np.radians(display_rotation[1]+rotation[1]))],
             [0, 1, 0],
-            [-np.sin(np.radians(display_rotation[1])), 0, np.cos(np.radians(display_rotation[1]))]
+            [-np.sin(np.radians(display_rotation[1]+rotation[1])), 0, np.cos(np.radians(display_rotation[1]+rotation[1]))]
         ])
-        
+
         rotation_matrix_z = np.array([
-            [np.cos(np.radians(display_rotation[2])), -np.sin(np.radians(display_rotation[2])), 0],
-            [np.sin(np.radians(display_rotation[2])), np.cos(np.radians(display_rotation[2])), 0],
+            [np.cos(np.radians(display_rotation[2]+rotation[2])), -np.sin(np.radians(display_rotation[2]+rotation[2])), 0],
+            [np.sin(np.radians(display_rotation[2]+rotation[2])), np.cos(np.radians(display_rotation[2]+rotation[2])), 0],
             [0, 0, 1]
         ])
         
@@ -135,7 +144,41 @@ def rot(origin, display, position, coords, rotation_matrix=None):
         ])
         
         coords = [tuple(np.dot(rotation_matrix_x, point)) for point in coords]
+    elif rotation != [0, 0, 0] or rotation is not None:
+        # 计算旋转矩阵
+        center = np.array([8, 8, 8])  # 旋转中心
+        rotation_matrix_x = np.array([
+            [1, 0, 0],
+            [0, np.cos(np.radians(rotation[0])), -np.sin(np.radians(rotation[0]))],
+            [0, np.sin(np.radians(rotation[0])), np.cos(np.radians(rotation[0]))]
+        ])
+
+        rotation_matrix_y = np.array([
+            [np.cos(np.radians(rotation[1])), 0, np.sin(np.radians(rotation[1]))],
+            [0, 1, 0],
+            [-np.sin(np.radians(rotation[1])), 0, np.cos(np.radians(rotation[1]))]
+        ])
+
+        rotation_matrix_z = np.array([
+            [np.cos(np.radians(rotation[2])), -np.sin(np.radians(rotation[2])), 0],
+            [np.sin(np.radians(rotation[2])), np.cos(np.radians(rotation[2])), 0],
+            [0, 0, 1]
+        ])
+
+        # 组合三个旋转矩阵
+        rotation_matrix = np.dot(np.dot(rotation_matrix_x, rotation_matrix_y), rotation_matrix_z)
+
+        if rotation_matrix is not None:
+            # 对方块的每个顶点坐标减去旋转中心，应用旋转矩阵，再加上旋转中心
+            coords = [tuple(np.dot(rotation_matrix, point - center) + center) for point in coords]
+
+        rotation_matrix_x = np.array([
+            [1, 0, 0],
+            [0, 0, -1],
+            [0, 1, 0]
+        ])
     else:
+        
         rotation_matrix_x = np.array([
             [1, 0, 0],
             [0, 0, -1],
@@ -151,7 +194,7 @@ def rot(origin, display, position, coords, rotation_matrix=None):
     
     return coords
 
-def fac(origin, display, position, element, vertices, faces, vertices_dict, directions, has_air, rotation_matrix=None):
+def fac(origin, display, position, element, vertices, faces, vertices_dict, directions, has_air,rotation, rotation_matrix=None):
     from_coord = np.array(element['from'])
     to_coord = np.array(element['to'])
     coords = None
@@ -177,7 +220,7 @@ def fac(origin, display, position, element, vertices, faces, vertices_dict, dire
                     (to_coord[0], to_coord[1], to_coord[2]),
                     (from_coord[0], to_coord[1], from_coord[2])
                 ])
-            coords = rot(origin, display, position, coords, rotation_matrix)
+            coords = rot(origin, display, position, coords, rotation,rotation_matrix)
             for coord in coords:
                 if coord not in vertices_dict:
                     vertices_dict[coord] = len(vertices_dict)
@@ -258,7 +301,7 @@ def fac(origin, display, position, element, vertices, faces, vertices_dict, dire
     for face_direction, face_visible in face_visibility.items():
         if face_visible and face_direction in element['faces']:
             coords = coord_patterns[face_direction]
-            coords = rot(origin, display, position, coords, rotation_matrix)
+            coords = rot(origin, display, position, coords,rotation, rotation_matrix)
             for coord in coords:
                 if coord not in vertices_dict:
                     vertices_dict[coord] = len(vertices_dict)
@@ -271,7 +314,7 @@ def fac(origin, display, position, element, vertices, faces, vertices_dict, dire
             ])
             directions.append(face_direction)
 
-def extract_vertices(element, display, has_air, vertices, faces, vertices_dict, position):
+def extract_vertices(element, display, has_air, vertices, faces, vertices_dict, position,rotation):
     directions = []
     rotation_matrix = None
     origin = None
@@ -305,13 +348,13 @@ def extract_vertices(element, display, has_air, vertices, faces, vertices_dict, 
         else:
             raise ValueError('Invalid axis value')
 
-        fac(origin, display, position, element, vertices, faces, vertices_dict, directions, has_air, rotation_matrix)
+        fac(origin, display, position, element, vertices, faces, vertices_dict, directions, has_air,rotation, rotation_matrix)
     else:
-        fac((0, 0, 0), display, position, element, vertices, faces, vertices_dict, directions, has_air)
+        fac((0, 0, 0), display, position, element, vertices, faces, vertices_dict, directions, has_air,rotation)
 
     return directions
         
-def extract_vertices_from_elements(textures, elements, display, has_air, position=None, vertices=[], faces=[], direction=[], texture_list=[], uv_list=[], uv_rotation_list=[], vertices_dict={}):
+def extract_vertices_from_elements(textures, elements, display, has_air, position=None,Rotation=None, vertices=[], faces=[], direction=[], texture_list=[], uv_list=[], uv_rotation_list=[], vertices_dict={}):
     v_from = set()
     v_to = set()
     directions = []
@@ -327,7 +370,7 @@ def extract_vertices_from_elements(textures, elements, display, has_air, positio
                 element['to'][2] += 0.01
             v_from.add(tuple(element['from']))
             v_to.add(tuple(element['to']))
-            directions = extract_vertices(element, display, has_air, vertices, faces, vertices_dict, position)
+            directions = extract_vertices(element, display, has_air, vertices, faces, vertices_dict, position,Rotation)
             for d in directions:
                 direction.append(d)
                 if d in element['faces']:
