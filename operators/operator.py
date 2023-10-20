@@ -151,10 +151,12 @@ class ImportSchem(bpy.types.Operator):
             "y":int(nbt_data["Height"]),
             "z":int(nbt_data["Width"])
         }
+        print(nbt_data)
         # 设置图片的大小和颜色
         image_width = int(size["z"])
         image_height = int(size["x"])
         default_color = (0.47, 0.75, 0.35, 1.0)  # RGBA颜色，对应#79c05a
+
         # 创建一个新的图片
         filename = os.path.basename(self.filepath)
         image = bpy.data.images.new(filename+"_colormap", width=image_width, height=image_height)
@@ -173,8 +175,9 @@ class ImportSchem(bpy.types.Operator):
             try:
                 d[(x, z, y)] = str(Palette[int(nbt_data["BlockData"][i])])
             except:
-                pass
-
+                print(x)
+                print(z)
+                print(y)
 
         # 获取当前时间
         bpy.context.space_data.shading.color_type = 'TEXTURE'
