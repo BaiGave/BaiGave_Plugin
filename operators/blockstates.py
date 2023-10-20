@@ -40,7 +40,7 @@ def blockstates(pos, id, has_air, vertices, faces, direction, texture_list, uv_l
                         else:
                             filepath = value["model"]
                         if "z" in value:
-                            rotation[2] = -value["z"]
+                            rotation[2] = value["z"]
                         if "y" in value:
                             rotation[1] = value["y"]
                         if "x" in value:
@@ -79,17 +79,12 @@ def blockstates(pos, id, has_air, vertices, faces, direction, texture_list, uv_l
         dirname, filename = os.path.split(filepath)
         dirname = dirname + '\\'
         textures, elements, display = get_all_data(dirname, filename)
-        
-        # 此处有bug,方块的旋转不对,旋转后的面剔除不对
-        if "fixed" not in display:
-            display["fixed"] = {}
-            display["fixed"]["rotation"] = [rotation[0], rotation[1], rotation[2]]
-        else:
-            display['fixed']["rotation"] = [display['fixed']["rotation"][0] + rotation[0], display['fixed']["rotation"][1] + rotation[1], display['fixed']["rotation"][2] + rotation[2]]
+
     except:
         filepath = ""
         textures = {}
         elements = []
         display = {}
         pass
-    return extract_vertices_from_elements(textures, elements, display, has_air, pos, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
+
+    return extract_vertices_from_elements(textures, elements, display, has_air, pos, rotation, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
