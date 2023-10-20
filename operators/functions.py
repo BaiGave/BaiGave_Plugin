@@ -42,6 +42,7 @@ def get_all_data(filepath, filename):
             textures, elements = process_data(data)
 
         file_data_cache[(filepath, filename)] = (textures, elements, display)
+
     return textures, elements, display
 
 

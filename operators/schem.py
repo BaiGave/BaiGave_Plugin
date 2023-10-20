@@ -238,6 +238,8 @@ def schem_liquid(d, filename="", position=(0, 0, 0)):
 
 
 
+
+
 def schem(d,filename="",position=(0,0,0)):
     vertices = []
     faces = []
@@ -272,6 +274,7 @@ def schem(d,filename="",position=(0,0,0)):
             face = existing_face
         else:
             face = bm.faces.new([bm.verts[i] for i in f])
+
         mat = get_or_create_material(texture_list[face_index],filename)
         mat.blend_method = 'CLIP'
         mat.shadow_method = 'CLIP'
