@@ -330,7 +330,8 @@ def schem_dirtgrass(d,filename="",position=(0,0,0)):
             face = bm.faces.new([bm.verts[i] for i in f])
 
         mat = get_or_create_material(texture_list[face_index],filename)
-        mat.blend_method = 'CLIP'
+        mat.blend_method = 'BLEND'
+        mat.show_transparent_back = False
         mat.shadow_method = 'CLIP'
         if mat.name not in obj.data.materials:
             obj.data.materials.append(mat)
