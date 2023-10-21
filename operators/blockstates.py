@@ -7,7 +7,6 @@ def blockstates(pos, id, has_air, vertices, faces, direction, texture_list, uv_l
     block_name = id.split('[')[0]
     filepath = get_file_path(block_name, 's')
     rotation = [0, 0, 0]
-    
     # 获取方块属性的起始位置和结束位置
     start_index = id.find('[')
     end_index = id.find(']')
@@ -79,11 +78,8 @@ def blockstates(pos, id, has_air, vertices, faces, direction, texture_list, uv_l
         dirname, filename = os.path.split(filepath)
         dirname = dirname + '\\'
         textures, elements, display = get_all_data(dirname, filename)
-        
+
     except:
-        filepath = ""
-        textures = {}
-        elements = []
-        display = {}
         pass
+
     return extract_vertices_from_elements(textures, elements, display, has_air, pos, rotation, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
