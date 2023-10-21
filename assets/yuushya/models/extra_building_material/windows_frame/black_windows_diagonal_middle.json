@@ -1,0 +1,9 @@
+{
+	"credit": "Yuushya",
+    "parent": "yuushya:extra_building_material/windows_frame/white_windows_diagonal_middle",
+	"textures": {
+		"0": "yuushya:block/frame_nctm/frame_black_outer",
+		"1": "yuushya:block/frame_nctm/frame_black_inner",
+		"particle": "yuushya:block/frame_nctm/frame_black_outer"
+	}
+}

@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:block/template_column",
+    "textures": {
+        "sides": "yuushya:block_/japanese_wall",
+        "top": "yuushya:block_/raw_wood/raw_acacia_wood_top"
+    }
+}

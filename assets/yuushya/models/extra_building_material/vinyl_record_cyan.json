@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/vinyl_record",
+	"textures": {
+		"1": "yuushya:0extra_building_block/wool/cyan_wool"
+	}
+}

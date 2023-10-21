@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:extra_building_material/roof/corner/htile1_up_corner_inner",
+    "textures": {
+		"0": "yuushya:0extra_building_material/preview/roof/tile5",
+		"particle": "yuushya:0extra_building_material/preview/roof/tile5"
+    }
+}

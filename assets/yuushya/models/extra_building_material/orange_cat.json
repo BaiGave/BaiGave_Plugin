@@ -2,7 +2,7 @@
 	"credit": "Yuushya", "ambientocclusion": false,
 	"texture_size": [64, 32],
 	"textures": {
-		"0": "entity/cat/red",
+		"0": "yuushya:0extra_building_material/cat/red",
 		"1": "yuushya:0extra_building_material/zzz",
 		"particle": "yuushya:0extra_building_material/zzz"
 	},

@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/hanger_clothes",
+	"textures": {
+		"0": "yuushya:0extra_building_material/preview/clothes/0"
+	  }
+}

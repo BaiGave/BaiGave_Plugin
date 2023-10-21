@@ -1,0 +1,33 @@
+{
+    "name": "方块建模 - 特殊功能",
+    "icon": "yuushya:pos_trans_item",
+    "category": "yuushya:mod_functions",
+	"read_by_default": true,
+    "sortnum": 5,
+    "pages": [
+        {
+			"type": "spotlight",
+			"item": "yuushya:micro_pos_trans_item",
+			"title": "对【方块实体】进行微调",
+			"link_recipe": false,
+            "text": "使用【方块实体层微调工具】可对【方块实体】进行微调操作，在极小的尺度上调整其位置。$(br2)"
+        }, 
+        {
+            "type": "text",
+            "text": "将【方块实体层微调工具】置于主手时，对着【方块实体】进行左右键操作可让其在特定轴上略微移动；【方块实体层位移工具】置于副手时，对着空气右键可切换其XYZ轴和复原模式。复原模式可将【方块实体】的偏移量还原为最初状态。"
+        },   
+		
+		{
+			"type": "spotlight",
+			"item": "yuushya:get_lit_item",
+			"title": "对【方块实体】进行点亮",
+			"link_recipe": false,
+            "text": "变为【方块实体】后的方块会失去其原有的亮度。使用【方块实体点亮工具】，右键任意【方块实体】可对其切换是否发光。"
+        },		
+        {
+            "type": "text",
+            "title": "取下一【方块实体】至物品栏中",
+            "text": "$(br)在创造模式中对着一【方块实体】执行Ctrl+鼠标中键即可取下一【方块实体】，其中的NBT数据包含其所有内容。"
+        }
+    ]
+}

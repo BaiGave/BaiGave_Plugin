@@ -1,0 +1,39 @@
+{
+    "sources": [
+        {
+            "type": "directory",
+            "source": "block",
+            "prefix": "block/"
+        },
+        {
+            "type": "directory",
+            "source": "block_",
+            "prefix": "block_/"
+        },
+        {
+            "type": "directory",
+            "source": "0extra_building_block",
+            "prefix": "0extra_building_block/"
+        },
+        {
+            "type": "directory",
+            "source": "0extra_building_material",
+            "prefix": "0extra_building_material/"
+        },		
+        {
+            "type": "directory",
+            "source": "item",
+            "prefix": "item/"
+        },
+        {
+            "type": "directory",
+            "source": "entity",
+            "prefix": "entity/"
+        },        
+		{
+            "type": "directory",
+            "source": "misc",
+            "prefix": "misc/"
+        }
+    ]
+}

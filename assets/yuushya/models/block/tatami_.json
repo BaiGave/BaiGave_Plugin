@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:block/template_column",
+    "textures": {
+        "sides": "yuushya:block_/tatami",
+        "top": "yuushya:block_/tatami_"
+    }
+}

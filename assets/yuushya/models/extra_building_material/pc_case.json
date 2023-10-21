@@ -1,4 +1,5 @@
 {
+	"credit": "Coco",
 	"ambientocclusion": false,
 	"texture_size": [32, 32],
 	"textures": {
@@ -7,8 +8,8 @@
 	},
 	"elements": [
 		{
-			"from": [2, 0, 3],
-			"to": [10, 14, 13],
+			"from": [4, 0, 3],
+			"to": [12, 14, 13],
 			"rotation": {"angle": 0, "axis": "y", "origin": [24, 8, 10]},
 			"faces": {
 				"north": {"uv": [11, 7.5, 15, 14.5], "texture": "#2"},
@@ -46,19 +47,17 @@
 		},
 		"gui": {
 			"rotation": [30, 45, 0],
-			"translation": [1.25, 1, 0],
-			"scale": [0.7, 0.7, 0.7]
+			"scale": [0.625, 0.625, 0.625]
 		},
 		"fixed": {
-			"rotation": [-90, 5, 0],
-			"translation": [-10, 0, -16],
-			"scale": [2, 2, 2]
+			"scale": [0.5, 0.5, 0.5]
 		}
 	},
 	"groups": [
 		{
 			"name": "monitor",
 			"origin": [8, 8, 8],
+			"color": 0,
 			"children": [0]
 		}
 	]

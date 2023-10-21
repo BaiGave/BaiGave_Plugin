@@ -1,8 +1,0 @@
-{
-	"credit": "Yuushya",
-	"parent": "yuushya:extra_building_material/template_cube",
-	"textures": {
-		"0": "yuushya:block/road/01",
-		"particle": "#0"
-	}
-}

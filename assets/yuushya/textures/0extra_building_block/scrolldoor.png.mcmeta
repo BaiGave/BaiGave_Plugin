@@ -1,0 +1,9 @@
+{
+    "ctm":{
+        "ctm_version": 1,
+        "type":"CTM",
+        "textures":[
+            "yuushya:0extra_building_block/scrolldoor_ctm"
+        ]
+    }
+}

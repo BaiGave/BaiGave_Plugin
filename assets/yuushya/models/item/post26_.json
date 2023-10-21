@@ -1,6 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/template_post_side",
-    "textures": {
-        "2": "yuushya:block/pale_stone__"
-    }
-}

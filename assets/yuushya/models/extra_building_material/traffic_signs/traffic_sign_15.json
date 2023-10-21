@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:extra_building_material/template_ts",
+    "textures": {
+        "2": "yuushya:0extra_building_material/preview/traffic/traffic2",
+		"particle": "#2"
+    }
+}

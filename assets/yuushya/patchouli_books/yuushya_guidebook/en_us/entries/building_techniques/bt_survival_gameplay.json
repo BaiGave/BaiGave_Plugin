@@ -1,0 +1,61 @@
+{
+    "name": "生存模式获取工具",
+    "icon": "yuushya:the_encyclopedia",
+    "category": "yuushya:building_techniques",
+	"read_by_default": true,
+    "sortnum": 2,
+    "pages": [
+        {
+            "type": "text",
+            "text": "此篇介绍了所有建材的生存获取途径。$(br2)足迹遍布天涯海角的你，已领略了方块世界的真谛，获得了世界的认可。"
+        },
+		{
+            "type": "crafting",
+            "recipe": "yuushya:the_encyclopedia",
+			"recipe2": "yuushya:shimmering_pearl",
+            "title": ""
+        },		
+		{
+            "type": "crafting",
+            "recipe": "yuushya:everlasting_wood",
+            "recipe2": "yuushya:sprouting_dirt",
+            "title": ""
+        },		
+		{
+            "type": "crafting",
+            "recipe": "yuushya:floating_bloom",
+            "recipe2": "yuushya:sparking_flame",
+            "title": ""
+        },		
+		{
+            "type": "crafting",
+            "recipe": "yuushya:pos_trans_item",
+            "recipe2": "yuushya:micro_pos_trans_item",
+			"title": ""
+        },		
+		{
+            "type": "crafting",
+            "recipe": "yuushya:rot_trans_item",
+            "recipe2": "yuushya:scale_trans_item",
+			"title": ""
+        },		
+		{
+            "type": "crafting",
+            "recipe": "yuushya:slot_trans_item",
+            "recipe2": "yuushya:get_showblock_item",
+			"title": ""
+        },		
+		{
+            "type": "crafting",
+            "recipe": "yuushya:get_blockstate_item",
+            "recipe2": "yuushya:move_transformdata_item",
+			"title": ""
+        },		
+		{
+            "type": "crafting",
+            "recipe": "yuushya:get_lit_item",
+            "recipe2": "yuushya:form_trans_item",
+			"title": ""
+        }
+    ]
+}

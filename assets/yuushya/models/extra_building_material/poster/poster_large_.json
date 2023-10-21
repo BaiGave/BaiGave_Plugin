@@ -1,14 +1,15 @@
 {
 	"credit": "Yuushya",
+	"ambientocclusion": false,
 	"texture_size": [32, 32],
 	"textures": {
-		"0": "yuushya:0extra_building_material/preview/poster/poster_large",
-		"particle": "yuushya:0extra_building_material/preview/poster/poster_large"
+		"0": "yuushya:0extra_building_material/preview/poster/poster_large_",
+		"particle": "yuushya:0extra_building_material/preview/poster/poster_large_"
 	},
 	"elements": [
 		{
-			"from": [-8, 0, 0.2],
-			"to": [24, 32, 0.2],
+			"from": [-4, 0, 0.2],
+			"to": [28, 32, 0.2],
 			"faces": {
 				"north": {"uv": [16, 0, 0, 16], "texture": "#0"},
 				"east": {"uv": [0, 0, 0, 16], "texture": "#0"},
@@ -44,7 +45,7 @@
 			"scale": [0.25, 0.25, 0.25]
 		},
 		"gui": {
-			"translation": [4, -4, 0],
+			"translation": [0, -4, 0],
 			"scale": [0.5, 0.5, 0.5]
 		},
 		"fixed": {

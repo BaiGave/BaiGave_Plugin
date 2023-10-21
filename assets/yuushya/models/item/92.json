@@ -1,7 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/template_slab",
-    "textures": {
-        "1": "yuushya:0extra_building_block/concrete/magenta_concrete_",
-        "0": "block/magenta_concrete"
-    }
-}

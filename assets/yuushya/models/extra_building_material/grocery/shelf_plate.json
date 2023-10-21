@@ -1,5 +1,5 @@
 {
-	"credit": "Yuushya",
+	"credit": "Made with Blockbench",
 	"ambientocclusion": false,
 	"textures": {
 		"1": "yuushya:0extra_building_block/transition/light_gray_concrete_",
@@ -300,7 +300,12 @@
 			"scale": [0.5, 0.5, 0.5]
 		}
 	},
-	"groups": [0, 1, 2, 3, 4,
+	"groups": [
+		0,
+		1,
+		2,
+		3,
+		4,
 		{
 			"name": "plate",
 			"origin": [8, 8, 8],

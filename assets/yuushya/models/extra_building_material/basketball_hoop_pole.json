@@ -1,0 +1,63 @@
+{
+	"credit": "Yuushya",
+	"ambientocclusion": false,
+	"textures": {
+		"5": "yuushya:0extra_building_block/concrete/black_concrete",
+		"6": "yuushya:0extra_building_block/concrete/black_concrete_",
+		"particle": "yuushya:0extra_building_block/concrete/red_concrete"
+	},
+	"elements": [
+		{
+			"from": [5, 0, 4],
+			"to": [11, 16, 10],
+			"faces": {
+				"north": {"uv": [5, 0, 11, 16], "texture": "#5"},
+				"east": {"uv": [6, 0, 12, 16], "texture": "#5"},
+				"south": {"uv": [5, 0, 11, 16], "texture": "#5"},
+				"west": {"uv": [4, 0, 10, 16], "texture": "#5"},
+				"up": {"uv": [5, 4, 11, 10], "texture": "#6"},
+				"down": {"uv": [5, 6, 11, 12], "texture": "#6"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 225, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 3, 0],
+			"scale": [0.25, 0.25, 0.25]
+		},
+		"gui": {
+			"rotation": [30, 45, 0],
+			"scale": [0.625, 0.625, 0.625]
+		},
+		"fixed": {
+			"scale": [0.5, 0.5, 0.5]
+		}
+	},
+	"groups": [
+		{
+			"name": "group",
+			"origin": [6, 7, 9],
+			"color": 0,
+			"children": []
+		},
+		0
+	]
+}

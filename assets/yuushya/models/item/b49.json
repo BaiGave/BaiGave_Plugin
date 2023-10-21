@@ -1,9 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/drawer/template_drawer",
-	"textures": { 
-		"0": "yuushya:0extra_building_block/no_strip/dark_oak_drawer_v",
-		"1": "yuushya:0extra_building_block/no_strip/dark_oak_table",
-		"2": "yuushya:0extra_building_block/no_strip/dark_oak",
-		"particle": "#1"
-	}
-}

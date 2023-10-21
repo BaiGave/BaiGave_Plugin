@@ -1,10 +1,11 @@
 {
+	"credit": "Yuushya",
 	"textures": {
 		"2": "yuushya:block/yellow_stained_glass_top",
 		"3": "yuushya:0extra_building_block/wastepaper_basket",
 		"4": "yuushya:0extra_building_block/rope_material",
+		"particle": "yuushya:0extra_building_block/rope_material",
 		"1_0": "yuushya:0extra_building_block/d_rope",
-		"particle": "yuushya:0extra_building_material/preview/bottle",
 		"2_0": "yuushya:0extra_building_material/preview/bottle"
 	},
 	"elements": [
@@ -407,12 +408,34 @@
 		{
 			"name": "group",
 			"origin": [15, 11, 8],
+			"color": 0,
 			"shade": false,
 			"children": [0, 1, 2, 3]
-		}, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+		},
+		4,
+		5,
+		6,
+		7,
+		8,
+		9,
+		10,
+		11,
+		12,
+		13,
+		14,
+		15,
+		16,
+		17,
+		18,
+		19,
 		{
 			"name": "wine",
 			"origin": [8, 8, 8],
+			"color": 0,
 			"children": [20, 21, 22]
-		}, 23, 24, 25]
+		},
+		23,
+		24,
+		25
+	]
 }

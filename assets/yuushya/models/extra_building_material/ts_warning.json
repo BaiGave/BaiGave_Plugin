@@ -1,0 +1,262 @@
+{
+	"credit": "Coco",
+	"textures": {
+		"1": "yuushya:0extra_building_material/preview/traffic/traffic_09",
+		"2": "yuushya:0extra_building_material/preview/traffic/traffic6",
+		"particle": "yuushya:0extra_building_material/preview/traffic/traffic_09"
+	},
+	"elements": [
+		{
+			"from": [6, 6, -5],
+			"to": [10, 10, -4],
+			"rotation": {"angle": 0, "axis": "y", "origin": [15, 17, 7]},
+			"faces": {
+				"north": {"uv": [0, 0, 1, 1], "texture": "#2"},
+				"east": {"uv": [0, 0, 1, 1], "texture": "#2"},
+				"south": {"uv": [0, 0, 1, 1], "texture": "#2"},
+				"west": {"uv": [0, 0, 1, 1], "texture": "#2"},
+				"up": {"uv": [0, 0, 1, 1], "texture": "#2"},
+				"down": {"uv": [0, 0, 1, 1], "texture": "#2"}
+			}
+		},
+		{
+			"name": "traffic_09_0",
+			"from": [7, 0, -4],
+			"to": [9, 16, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [8, 0, 9, 16], "texture": "#1"},
+				"south": {"uv": [7, 0, 9, 16], "texture": "#1"},
+				"west": {"uv": [7, 0, 8, 16], "texture": "#1"},
+				"up": {"uv": [9, 0, 7, 1], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [7, 15, 9, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_1",
+			"from": [6, 0, -4],
+			"to": [7, 15, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [6, 1, 7, 16], "texture": "#1"},
+				"south": {"uv": [6, 1, 7, 16], "texture": "#1"},
+				"west": {"uv": [6, 1, 7, 16], "texture": "#1"},
+				"up": {"uv": [7, 1, 6, 2], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [6, 15, 7, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_2",
+			"from": [9, 0, -4],
+			"to": [10, 15, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [9, 1, 10, 16], "texture": "#1"},
+				"south": {"uv": [9, 1, 10, 16], "texture": "#1"},
+				"west": {"uv": [9, 1, 10, 16], "texture": "#1"},
+				"up": {"uv": [10, 1, 9, 2], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [9, 15, 10, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_3",
+			"from": [5, 0, -4],
+			"to": [6, 13, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [5, 3, 6, 16], "texture": "#1"},
+				"south": {"uv": [5, 3, 6, 16], "texture": "#1"},
+				"west": {"uv": [5, 3, 6, 16], "texture": "#1"},
+				"up": {"uv": [6, 3, 5, 4], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [5, 15, 6, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_4",
+			"from": [10, 0, -4],
+			"to": [11, 13, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [10, 3, 11, 16], "texture": "#1"},
+				"south": {"uv": [10, 3, 11, 16], "texture": "#1"},
+				"west": {"uv": [10, 3, 11, 16], "texture": "#1"},
+				"up": {"uv": [11, 3, 10, 4], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [10, 15, 11, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_5",
+			"from": [4, 0, -4],
+			"to": [5, 11, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [4, 5, 5, 16], "texture": "#1"},
+				"south": {"uv": [4, 5, 5, 16], "texture": "#1"},
+				"west": {"uv": [4, 5, 5, 16], "texture": "#1"},
+				"up": {"uv": [5, 5, 4, 6], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [4, 15, 5, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_6",
+			"from": [11, 0, -4],
+			"to": [12, 11, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [11, 5, 12, 16], "texture": "#1"},
+				"south": {"uv": [11, 5, 12, 16], "texture": "#1"},
+				"west": {"uv": [11, 5, 12, 16], "texture": "#1"},
+				"up": {"uv": [12, 5, 11, 6], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [11, 15, 12, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_7",
+			"from": [3, 0, -4],
+			"to": [4, 9, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [3, 7, 4, 16], "texture": "#1"},
+				"south": {"uv": [3, 7, 4, 16], "texture": "#1"},
+				"west": {"uv": [3, 7, 4, 16], "texture": "#1"},
+				"up": {"uv": [4, 7, 3, 8], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [3, 15, 4, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_8",
+			"from": [12, 0, -4],
+			"to": [13, 9, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [12, 7, 13, 16], "texture": "#1"},
+				"south": {"uv": [12, 7, 13, 16], "texture": "#1"},
+				"west": {"uv": [12, 7, 13, 16], "texture": "#1"},
+				"up": {"uv": [13, 7, 12, 8], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [12, 15, 13, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_9",
+			"from": [2, 0, -4],
+			"to": [3, 7, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [2, 9, 3, 16], "texture": "#1"},
+				"south": {"uv": [2, 9, 3, 16], "texture": "#1"},
+				"west": {"uv": [2, 9, 3, 16], "texture": "#1"},
+				"up": {"uv": [3, 9, 2, 10], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [2, 15, 3, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_10",
+			"from": [13, 0, -4],
+			"to": [14, 7, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [13, 9, 14, 16], "texture": "#1"},
+				"south": {"uv": [13, 9, 14, 16], "texture": "#1"},
+				"west": {"uv": [13, 9, 14, 16], "texture": "#1"},
+				"up": {"uv": [14, 9, 13, 10], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [13, 15, 14, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_11",
+			"from": [1, 0, -4],
+			"to": [2, 5, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [1, 11, 2, 16], "texture": "#1"},
+				"south": {"uv": [1, 11, 2, 16], "texture": "#1"},
+				"west": {"uv": [1, 11, 2, 16], "texture": "#1"},
+				"up": {"uv": [2, 11, 1, 12], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [1, 15, 2, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_12",
+			"from": [14, 0, -4],
+			"to": [15, 5, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [14, 11, 15, 16], "texture": "#1"},
+				"south": {"uv": [14, 11, 15, 16], "texture": "#1"},
+				"west": {"uv": [14, 11, 15, 16], "texture": "#1"},
+				"up": {"uv": [15, 11, 14, 12], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [14, 15, 15, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_13",
+			"from": [0, 0, -4],
+			"to": [1, 4, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [0, 12, 1, 16], "texture": "#1"},
+				"south": {"uv": [0, 12, 1, 16], "texture": "#1"},
+				"west": {"uv": [0, 12, 1, 16], "texture": "#1"},
+				"up": {"uv": [1, 12, 0, 13], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [0, 15, 1, 16], "texture": "#1"}
+			}
+		},
+		{
+			"name": "traffic_09_14",
+			"from": [15, 0, -4],
+			"to": [16, 4, -3],
+			"faces": {
+				"north": {"uv": [14, 16, 15, 15], "rotation": 180, "texture": "#1"},
+				"east": {"uv": [15, 12, 16, 16], "texture": "#1"},
+				"south": {"uv": [15, 12, 16, 16], "texture": "#1"},
+				"west": {"uv": [15, 12, 16, 16], "texture": "#1"},
+				"up": {"uv": [16, 12, 15, 13], "rotation": 180, "texture": "#1"},
+				"down": {"uv": [15, 15, 16, 16], "texture": "#1"}
+			}
+		}
+	],
+	"gui_light": "front",
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 225, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 3, 0],
+			"scale": [0.25, 0.25, 0.25]
+		},
+		"gui": {
+			"rotation": [30, 45, 0],
+			"translation": [5.5, -2.5, 0],
+			"scale": [0.7, 0.7, 0.7]
+		},
+		"fixed": {
+			"rotation": [0, -180, 0],
+			"translation": [0, 0, -14],
+			"scale": [2, 2, 2]
+		}
+	},
+	"groups": [
+		0,
+		{
+			"name": "traffic_09",
+			"origin": [8, 8, 8],
+			"color": 0,
+			"children": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+		}
+	]
+}

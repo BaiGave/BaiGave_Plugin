@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:block/template_column",
+    "textures": {
+        "sides": "yuushya:0extra_building_block/scrolldoor_2",
+        "top": "yuushya:0extra_building_block/scrolldoor_2_"
+    }
+}

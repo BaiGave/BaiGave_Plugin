@@ -3,7 +3,7 @@
 	"ambientocclusion": false,
 	"textures": {
 		"0": "yuushya:0extra_building_material/preview/fan_frame",
-		"1": "yuushya:0extra_building_material/preview/fan3_",
+		"1": "yuushya:0extra_building_material/preview/fan3",
 		"4": "yuushya:0extra_building_block/pipe",
 		"6": "yuushya:0extra_building_material/preview/iron",
 		"7": "yuushya:0extra_building_material/preview/iron_bars_alt",
@@ -563,8 +563,8 @@
 			"scale": [0.25, 0.25, 0.25]
 		},
 		"gui": {
-			"rotation": [30, -45, 0],
-			"translation": [1.25, -3, 0],
+			"rotation": [30, 45, 0],
+			"translation": [1.25, -1, 0],
 			"scale": [0.6, 0.6, 0.6]
 		},
 		"head": {
@@ -577,7 +577,13 @@
 			"scale": [2, 2, 2]
 		}
 	},
-	"groups": [0, 1, 2, 3, 4, 5,
+	"groups": [
+		0,
+		1,
+		2,
+		3,
+		4,
+		5,
 		{
 			"name": "leaf",
 			"origin": [8.1, 13, 8],

@@ -1,0 +1,7 @@
+{
+  "parent": "yuushya:item/template_wrench_alt",
+  "textures": {
+    "nbt": "yuushya:item/wrench/switch_layer",
+    "head": "yuushya:item/wrench/switch_layer_icon"
+  }
+}

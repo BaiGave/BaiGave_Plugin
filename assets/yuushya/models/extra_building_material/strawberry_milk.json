@@ -1,0 +1,78 @@
+{
+	"credit": "Yuushya",
+	"textures": {
+		"0": "yuushya:0extra_building_material/preview/milktea_top",
+		"1": "yuushya:0extra_building_material/preview/milktea_bottom",
+		"2": "yuushya:0extra_building_material/preview/strawberry_milk_side",
+		"particle": "yuushya:0extra_building_material/preview/milktea_top"
+	},
+	"elements": [
+		{
+			"from": [6, 0, 5],
+			"to": [11, 8, 10],
+			"faces": {
+				"north": {"uv": [0, 0, 5, 8], "texture": "#2"},
+				"east": {"uv": [5, 0, 10, 8], "texture": "#2"},
+				"south": {"uv": [0, 8, 5, 16], "texture": "#2"},
+				"west": {"uv": [5, 8, 10, 16], "texture": "#2"},
+				"up": {"uv": [15, 5, 10, 0], "texture": "#2"},
+				"down": {"uv": [15, 5, 10, 10], "texture": "#2"}
+			}
+		},
+		{
+			"from": [5, 8, 4],
+			"to": [12, 9, 11],
+			"faces": {
+				"north": {"uv": [7, 0, 14, 1], "texture": "#1"},
+				"east": {"uv": [7, 1, 14, 2], "texture": "#1"},
+				"south": {"uv": [7, 2, 14, 3], "texture": "#1"},
+				"west": {"uv": [7, 3, 14, 4], "texture": "#1"},
+				"up": {"uv": [7, 7, 0, 0], "texture": "#1"},
+				"down": {"uv": [7, 7, 0, 14], "texture": "#1"}
+			}
+		},
+		{
+			"from": [8, 9, 6],
+			"to": [9, 13, 7],
+			"faces": {
+				"north": {"uv": [0, 0, 1, 4], "texture": "#0"},
+				"east": {"uv": [1, 0, 2, 4], "texture": "#0"},
+				"south": {"uv": [2, 0, 3, 4], "texture": "#0"},
+				"west": {"uv": [3, 0, 4, 4], "texture": "#0"},
+				"up": {"uv": [1, 5, 0, 4], "texture": "#0"},
+				"down": {"uv": [5, 0, 4, 1], "texture": "#0"}
+			}
+		}
+	],
+	"gui_light": "front",
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 225, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 3, 0],
+			"scale": [0.25, 0.25, 0.25]
+		},
+		"gui": {
+			"translation": [-0.5, 0, 0]
+		},
+		"fixed": {
+			"scale": [0.5, 0.5, 0.5]
+		}
+	}
+}

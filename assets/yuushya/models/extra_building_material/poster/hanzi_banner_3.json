@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:extra_building_material/poster/hanzi_banner_0",
+	"textures": { 
+		"0": "yuushya:0extra_building_material/preview/board/hanzi/3",
+		"particle": "#0"
+	}
+}

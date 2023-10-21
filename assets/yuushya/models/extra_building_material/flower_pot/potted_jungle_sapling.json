@@ -1,8 +1,8 @@
 {
-	"credit": "Yuushya",
+	"credit": "Coco",
 	"ambientocclusion": false,
 	"textures": {
-		"1": "yuushya:block/tall_sapl",
+		"1": "yuushya:block/tall_sapl_",
 		"2": "yuushya:0extra_building_block/stone_material",
 		"3": "yuushya:0extra_building_block/dirt_alt",
 		"4": "yuushya:block/tall_sapl_",
@@ -276,5 +276,17 @@
 					"children": [0, 1, 2, 3, 4, 5]
 				}
 			]
-		}, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+		},
+		6,
+		7,
+		8,
+		9,
+		10,
+		11,
+		12,
+		13,
+		14,
+		15,
+		16
+	]
 }

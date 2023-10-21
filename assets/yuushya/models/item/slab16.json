@@ -1,6 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/template_bottom_slab",
-    "textures": {
-		"0": "yuushya:0extra_building_block/stripped_oak_planks"
-    }
-}

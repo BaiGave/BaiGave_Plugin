@@ -1,7 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/template_wool",
-	"textures": { 
-		"side": "yuushya:block/road",
-		"top": "yuushya:0extra_building_block/crosswalking"
-	}
-}

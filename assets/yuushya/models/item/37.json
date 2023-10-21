@@ -1,7 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/template_wool",
-	"textures": {
-		"side": "yuushya:block/l_concrete",
-		"top": "yuushya:block/l_concrete_top"
-	}
-}

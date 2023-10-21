@@ -1,5 +1,5 @@
 {
-	"credit": "Yuushya",
+	"credit": "Coco",
 	"textures": {
 		"1": "yuushya:0extra_building_material/preview/note1/1",
 		"particle": "yuushya:0extra_building_material/preview/note1/1"
@@ -80,6 +80,7 @@
 		{
 			"name": "1",
 			"origin": [8, 8, 8],
+			"color": 0,
 			"children": [0, 1, 2, 3, 4]
 		}
 	]

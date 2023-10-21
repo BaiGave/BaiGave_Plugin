@@ -1,9 +1,10 @@
 {
+	"credit": "Yuushya",
 	"textures": {
 		"3": "yuushya:0extra_building_block/wastepaper_basket",
 		"4": "yuushya:0extra_building_block/rope_material",
-		"1_0": "yuushya:0extra_building_block/d_rope",
-		"particle": "yuushya:0extra_building_material/preview/bottle"
+		"particle": "yuushya:0extra_building_block/rope_material",
+		"1_0": "yuushya:0extra_building_block/d_rope"
 	},
 	"elements": [
 		{

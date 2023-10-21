@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:block/template_column",
+    "textures": {
+        "sides": "yuushya:block_/concrete/light_gray_worn_concrete",
+        "top": "yuushya:block_/concrete/light_gray_concrete_top"
+    }
+}

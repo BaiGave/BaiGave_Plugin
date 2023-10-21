@@ -7,7 +7,7 @@
 		"7": "yuushya:0extra_building_material/preview/iron_bars_alt",
 		"particle": "yuushya:0extra_building_material/preview/iron",
 		"2_0": "yuushya:0extra_building_material/preview/fan_frame",
-		"2_1": "yuushya:0extra_building_material/preview/fan3_"
+		"2_1": "yuushya:0extra_building_material/preview/fan3"
 	},
 	"elements": [
 		{
@@ -607,5 +607,12 @@
 			"origin": [8.1, 13, 8],
 			"color": 0,
 			"children": [29, 30, 31, 32]
-		}, 33, 34, 35, 36, 37, 38]
+		},
+		33,
+		34,
+		35,
+		36,
+		37,
+		38
+	]
 }

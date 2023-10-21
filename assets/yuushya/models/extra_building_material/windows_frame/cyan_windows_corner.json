@@ -1,0 +1,9 @@
+{
+    "parent": "yuushya:extra_building_material/windows_frame/white_windows_corner",
+    "textures": {
+        "0": "yuushya:block/frame_cyan_outer",
+		"1": "yuushya:block/frame_cyan_inner",
+		"2": "yuushya:block/frame_nctm/frame_cyan_inner",
+		"particle": "#1"
+    }
+}

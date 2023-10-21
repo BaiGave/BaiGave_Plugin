@@ -1,5 +1,5 @@
 {
-	"credit": "Yuushya",
+	"credit": "Made with Blockbench",
 	"ambientocclusion": false,
 	"textures": {
 		"2": "yuushya:0extra_building_block/concrete/white_concrete_nonverti",
@@ -196,7 +196,11 @@
 			"scale": [0.5, 0.5, 0.5]
 		}
 	},
-	"groups": [0, 1, 2, 3,
+	"groups": [
+		0,
+		1,
+		2,
+		3,
 		{
 			"name": "choping_board",
 			"origin": [8, 8, 8],

@@ -1,7 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/template_column",
-	"textures": { 
-		"side": "yuushya:0extra_building_block/concrete/cream_concrete",
-		"top": "yuushya:0extra_building_block/concrete/cream_concrete_"
-	}
-}

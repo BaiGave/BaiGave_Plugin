@@ -1,10 +1,10 @@
 {
-	"credit": "Yuushya",
+	"credit": "Made with Blockbench",
 	"ambientocclusion": false,
 	"textures": {
 		"0": "yuushya:0extra_building_material/preview/glass",
-		"particle": "yuushya:0extra_building_block/concrete/white_concrete",
-		"1_2": "yuushya:0extra_building_block/concrete/white_concrete_nonverti"
+		"1_2": "yuushya:0extra_building_block/concrete/white_concrete_nonverti",
+		"particle": "yuushya:0extra_building_block/concrete/white_concrete"
 	},
 	"elements": [
 		{

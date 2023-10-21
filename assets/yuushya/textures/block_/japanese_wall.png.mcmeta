@@ -1,0 +1,9 @@
+{
+    "ctm":{
+        "ctm_version": 1,
+        "type":"pillar",
+        "textures":[
+            "yuushya:block_/japanese_wall_ctm"
+        ]
+    }
+}

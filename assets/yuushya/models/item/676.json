@@ -1,7 +1,0 @@
-{
-	"credit": "Yuushya",
-	"parent": "yuushya:extra_building_material/painting/template_painting",
-	"textures": {
-		"0": "yuushya:0extra_building_material/preview/paintings/creebet"
-	}
-}

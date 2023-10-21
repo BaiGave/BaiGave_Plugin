@@ -1,7 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/butterfly_0",
-	"textures": {
-		"main": "yuushya:block/azure/butterfly4_s_p",
-		"particle": "yuushya:0extra_building_material/preview/character_black_blur"
-	}
-}

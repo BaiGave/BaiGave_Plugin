@@ -1,7 +1,5 @@
 {
-    "variants": {
-      "": [
-      { "model": "yuushya:extra_building_material/blank" }
-      ]
-    }
+  "variants": {
+    "": { "model": "yuushya:extra_building_material/blank" }
+  }
 }

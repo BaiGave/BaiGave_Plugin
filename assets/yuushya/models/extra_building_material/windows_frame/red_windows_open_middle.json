@@ -1,0 +1,8 @@
+{
+    "parent": "yuushya:extra_building_material/windows_frame/white_windows_open_middle",
+    "textures": {
+        "0": "yuushya:block/frame_nctm/frame_red_outer",
+		"1": "yuushya:block/frame_nctm/frame_red_inner",
+		"particle": "#1"
+    }
+}

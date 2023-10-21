@@ -1,0 +1,136 @@
+{
+	"textures": {
+		"all": "yuushya:block_/template",
+		"particle": "#all"
+	},
+	"elements": [
+		{
+			"from": [2, 0, 2],
+			"to": [7, 1, 12],
+			"faces": {
+				"north": {"uv": [0, 0, 5, 1], "texture": "#all"},
+				"east": {"uv": [0, 0, 10, 1], "texture": "#all"},
+				"south": {"uv": [0, 0, 5, 1], "texture": "#all"},
+				"west": {"uv": [0, 0, 10, 1], "texture": "#all"},
+				"up": {"uv": [0, 0, 5, 10], "texture": "#all"},
+				"down": {"uv": [0, 0, 5, 10], "texture": "#all"}
+			}
+		},
+		{
+			"from": [9, 0, 2],
+			"to": [14, 1, 12],
+			"faces": {
+				"north": {"uv": [0, 0, 5, 1], "texture": "#all"},
+				"east": {"uv": [0, 0, 10, 1], "texture": "#all"},
+				"south": {"uv": [0, 0, 5, 1], "texture": "#all"},
+				"west": {"uv": [0, 0, 10, 1], "texture": "#all"},
+				"up": {"uv": [1, 0, 6, 10], "texture": "#all"},
+				"down": {"uv": [0, 0, 5, 10], "texture": "#all"}
+			}
+		},
+		{
+			"from": [2, 2, 4],
+			"to": [7, 2.5, 6],
+			"faces": {
+				"north": {"uv": [0, 0, 5, 0.5], "texture": "#all"},
+				"east": {"uv": [0, 0, 2, 0.5], "texture": "#all"},
+				"south": {"uv": [0, 0, 5, 0.5], "texture": "#all"},
+				"west": {"uv": [0, 0, 2, 0.5], "texture": "#all"},
+				"up": {"uv": [0, 0, 5, 2], "texture": "#all"},
+				"down": {"uv": [0, 0, 5, 2], "texture": "#all"}
+			}
+		},
+		{
+			"from": [9, 2, 4],
+			"to": [14, 2.5, 6],
+			"faces": {
+				"north": {"uv": [0, 0, 5, 0.5], "texture": "#all"},
+				"east": {"uv": [0, 0, 2, 0.5], "texture": "#all"},
+				"south": {"uv": [0, 0, 5, 0.5], "texture": "#all"},
+				"west": {"uv": [0, 0, 2, 0.5], "texture": "#all"},
+				"up": {"uv": [1, 0, 6, 2], "texture": "#all"},
+				"down": {"uv": [0, 0, 5, 2], "texture": "#all"}
+			}
+		},
+		{
+			"from": [2, 1, 4],
+			"to": [2.5, 2, 6],
+			"faces": {
+				"north": {"uv": [0, 0, 0.5, 1], "texture": "#all"},
+				"east": {"uv": [0, 0, 2, 1], "texture": "#all"},
+				"south": {"uv": [0, 0, 0.5, 1], "texture": "#all"},
+				"west": {"uv": [0, 0, 2, 1], "texture": "#all"},
+				"up": {"uv": [0, 0, 0.5, 2], "texture": "#all"},
+				"down": {"uv": [0, 0, 0.5, 2], "texture": "#all"}
+			}
+		},
+		{
+			"from": [9, 1, 4],
+			"to": [9.5, 2, 6],
+			"faces": {
+				"north": {"uv": [0, 0, 0.5, 1], "texture": "#all"},
+				"east": {"uv": [0, 0, 2, 1], "texture": "#all"},
+				"south": {"uv": [0, 0, 0.5, 1], "texture": "#all"},
+				"west": {"uv": [0, 0, 2, 1], "texture": "#all"},
+				"up": {"uv": [0, 0, 0.5, 2], "texture": "#all"},
+				"down": {"uv": [0, 0, 0.5, 2], "texture": "#all"}
+			}
+		},
+		{
+			"from": [6.5, 1, 4],
+			"to": [7, 2, 6],
+			"faces": {
+				"north": {"uv": [0, 0, 0.5, 1], "texture": "#all"},
+				"east": {"uv": [0, 0, 2, 1], "texture": "#all"},
+				"south": {"uv": [0, 0, 0.5, 1], "texture": "#all"},
+				"west": {"uv": [0, 0, 2, 1], "texture": "#all"},
+				"up": {"uv": [0, 0, 0.5, 2], "texture": "#all"},
+				"down": {"uv": [0, 0, 0.5, 2], "texture": "#all"}
+			}
+		},
+		{
+			"from": [13.5, 1, 4],
+			"to": [14, 2, 6],
+			"faces": {
+				"north": {"uv": [0, 0, 0.5, 1], "texture": "#all"},
+				"east": {"uv": [0, 0, 2, 1], "texture": "#all"},
+				"south": {"uv": [0, 0, 0.5, 1], "texture": "#all"},
+				"west": {"uv": [0, 0, 2, 1], "texture": "#all"},
+				"up": {"uv": [0, 0, 0.5, 2], "texture": "#all"},
+				"down": {"uv": [0, 0, 0.5, 2], "texture": "#all"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 225, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 3, 0],
+			"scale": [0.25, 0.25, 0.25]
+		},
+		"gui": {
+			"rotation": [30, 45, 0],
+			"translation": [0.5, 2, 0],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"fixed": {
+			"scale": [0.5, 0.5, 0.5]
+		}
+	}
+}

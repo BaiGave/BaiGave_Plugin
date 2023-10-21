@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/truck_head_red",
+	"textures": {
+		"1": "yuushya:0extra_building_material/preview/white_truck"
+	}
+}

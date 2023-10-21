@@ -1,0 +1,10 @@
+{
+    "parent": "yuushya:extra_building_material/windows_frame/white_windows_deviated_1",
+    "textures": {
+		"0": "yuushya:block/frame_oak_outer",
+		"1": "yuushya:block/frame_oak_inner",
+		"2": "yuushya:block/frame_oak_inner_",
+		"3": "yuushya:block/frame_oak_outer_",
+		"particle": "#1"
+    }
+}

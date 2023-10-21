@@ -1,7 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/template_cube",
-	"textures": { 
-		"0": "yuushya:block/seperate_lime",
-		"particle": "yuushya:block/seperate_lime"
-	}
-}

@@ -1,15 +1,12 @@
 {
-  "parent": "minecramc:item/generated",
+  "parent": "yuushya:item/template_wrench",
   "textures": {
-    "layer0": "yuushya:item/mc_xp"
+    "nbt": "yuushya:item/fine_tune_x"
   },
       "overrides": [
-        { "predicate": { "direction": 0 }, "model": "yuushya:item/mc_xp" },
-        { "predicate": { "direction": 0.1 }, "model": "yuushya:item/mc_xm" },
-        { "predicate": { "direction": 0.2 }, "model": "yuushya:item/mc_yp" },
-        { "predicate": { "direction": 0.3 }, "model": "yuushya:item/mc_ym" },
-        { "predicate": { "direction": 0.4 }, "model": "yuushya:item/mc_zp" },
-        { "predicate": { "direction": 0.5 }, "model": "yuushya:item/mc_zm" },
-        { "predicate": { "direction": 0.6 }, "model": "yuushya:item/mc_rs" }
+        { "predicate": { "direction": 0 }, "model": "yuushya:item/fine_tune_x" },
+		{ "predicate": { "direction": 0.1 }, "model": "yuushya:item/fine_tune_y" },
+        { "predicate": { "direction": 0.2 }, "model": "yuushya:item/fine_tune_z" },
+        { "predicate": { "direction": 0.3 }, "model": "yuushya:item/fine_tune_reset" }
 	]
 }

@@ -1,0 +1,30 @@
+{
+    "name": "方块建模 - 基本操作",
+    "icon": "yuushya:pos_trans_item",
+    "category": "yuushya:mod_functions",
+	"read_by_default": true,
+    "sortnum": 3,
+    "pages": [
+        {
+			"type": "spotlight",
+			"item": "yuushya:pos_trans_item",
+			"title": "进行移动操作",
+			"link_recipe": false,
+            "text": "将【方块实体层位移工具】置于主手时，对着【方块实体】进行左右键操作可让其在特定轴上偏移；【方块实体层位移工具】置于副手时，对着空气右键可切换其XYZ轴模式。"
+        },        
+		{
+			"type": "spotlight",
+			"item": "yuushya:rot_trans_item",
+			"title": "进行旋转操作",
+			"link_recipe": false,
+            "text": "将【方块实体层旋转工具】置于主手时，对着【方块实体】进行左右键操作可让其在特定轴上旋转；【方块实体层旋转工具】置于副手时，对着空气右键可切换其XYZ轴模式。$(br2)一般来说，对于放置在地面上的建材，通常使用Y轴模式"
+        },		
+		{
+			"type": "spotlight",
+			"item": "yuushya:scale_trans_item",
+			"title": "进行缩放操作",
+			"link_recipe": false,
+            "text": "将【方块实体层缩放工具】置于主手时，对着【方块实体】进行左键操作执行缩小，进行右键操作执行放大。"
+        }
+    ]
+}

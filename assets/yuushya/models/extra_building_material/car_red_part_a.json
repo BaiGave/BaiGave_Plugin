@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:extra_building_material/template_car_part_a",
+	"textures": {
+		"1": "yuushya:0extra_building_material/preview/red_car"
+	}
+}

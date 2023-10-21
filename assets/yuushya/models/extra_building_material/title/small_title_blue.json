@@ -1,0 +1,7 @@
+{
+    "parent": "yuushya:extra_building_material/title/character_small_single",
+	"textures": {
+		"0": "yuushya:0extra_building_material/preview/character_small_blue",
+		"particle": "#0"
+	}
+}

@@ -1,0 +1,25 @@
+{
+    "name": "PBR效果与光影推荐",
+    "icon": "yuushya:oriental_lantern",
+    "category": "yuushya:building_techniques",
+	"read_by_default": true,
+    "sortnum": 2,
+    "pages": [
+        {
+            "type": "text",
+            "text": "目前Minecraft主流的光影Mod有Optifine和Iris Shaders。但我们推荐使用Optifine，因为其集成了方块小镇Mod所需要的CTM效果，而目前Iris Shaders模组无法做到。"
+        },
+		{
+            "type": "text",
+            "text": "方块小镇Mod内部分方块具有PBR效果，例如能反光的积水路面，具有反射效果的钢材，窗户等。于此，我们推荐安装一个支持此效果的光影，如BSL光影。而BSL光影的PBR效果需手动打开，以BSL_V8.0为例，您需在视频设置-光影-光影设置-Material中将Advanced Materials选项打开。"
+        },		
+		{
+            "type": "text",
+            "text": "推荐光影列表：$(br2)BSL$(br)Complementary Shaders$(br)Chocapic13’s Shaders$(br)Kappa$(br2)我们推荐使用非SEUS系的光影包，因为大部分SEUS系光影对半透明方块的支持不是非常友好"
+        },		
+		{
+            "type": "text",
+            "text": "。"
+        }
+    ]
+}

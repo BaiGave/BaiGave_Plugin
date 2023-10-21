@@ -220,7 +220,7 @@ class ImportSchem(bpy.types.Operator):
             subprocess.Popen([blender_path, "-b", "-P", MPplantsPath])
             subprocess.Popen([blender_path, "-b", "-P", MPleavesPath])
             subprocess.Popen([blender_path, "-b", "-P", MPliquidPath])
-            subprocess.Popen([blender_path, "-b" ,"-P", MPothersPath])
+            subprocess.Popen([blender_path, "-P", MPothersPath])
             subprocess.Popen([blender_path, "-b", "-P", MPdirtgrassPath])
             subprocess.Popen([blender_path, "-b", "-P", MPdeepstonePath])
             subprocess.Popen([blender_path, "-b", "-P", MPsandgravelPath])

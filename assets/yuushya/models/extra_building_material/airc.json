@@ -1,7 +1,7 @@
 {
+	"credit": "Coco",
 	"ambientocclusion": false,
 	"textures": {
-		"0": "yuushya:0extra_building_material/preview/bottle",
 		"2": "yuushya:0extra_building_material/preview/airc1_",
 		"6": "yuushya:0extra_building_material/preview/rice_cooker_",
 		"9": "yuushya:0extra_building_material/preview/iron_",
@@ -58,45 +58,6 @@
 				"west": {"uv": [8.5, 3, 11, 6.5], "texture": "#6"},
 				"up": {"uv": [0, 0, 0.5, 2.5], "texture": "#6"},
 				"down": {"uv": [0, 0, 0.5, 2.5], "texture": "#6"}
-			}
-		},
-		{
-			"from": [22.9, 17, 5],
-			"to": [26.9, 19, 7],
-			"rotation": {"angle": -22.5, "axis": "y", "origin": [21, 18, 6]},
-			"faces": {
-				"north": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#0"},
-				"east": {"uv": [0, 0, 2, 2], "rotation": 90, "texture": "#0"},
-				"south": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#0"},
-				"west": {"uv": [0, 0, 2, 2], "rotation": 90, "texture": "#0"},
-				"up": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#0"},
-				"down": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#0"}
-			}
-		},
-		{
-			"from": [21.9, 16.5, 4.5],
-			"to": [22.9, 19.5, 7.5],
-			"rotation": {"angle": -22.5, "axis": "y", "origin": [21, 18, 6]},
-			"faces": {
-				"north": {"uv": [0, 5, 1, 6], "rotation": 270, "texture": "#0"},
-				"east": {"uv": [0, 5, 1, 6], "rotation": 90, "texture": "#0"},
-				"south": {"uv": [0, 5, 1, 6], "rotation": 90, "texture": "#0"},
-				"west": {"uv": [0, 5, 1, 6], "rotation": 90, "texture": "#0"},
-				"up": {"uv": [0, 5, 1, 6], "rotation": 90, "texture": "#0"},
-				"down": {"uv": [0, 5, 1, 6], "rotation": 90, "texture": "#0"}
-			}
-		},
-		{
-			"from": [13.9, 16, 4],
-			"to": [21.9, 20, 8],
-			"rotation": {"angle": -22.5, "axis": "y", "origin": [21, 18, 6]},
-			"faces": {
-				"north": {"uv": [0, 6, 4, 14], "rotation": 270, "texture": "#0"},
-				"east": {"uv": [0, 5, 1, 6], "rotation": 90, "texture": "#0"},
-				"south": {"uv": [0, 6, 4, 14], "rotation": 90, "texture": "#0"},
-				"west": {"uv": [2, 13, 3, 14], "rotation": 90, "texture": "#0"},
-				"up": {"uv": [0, 6, 4, 14], "rotation": 90, "texture": "#0"},
-				"down": {"uv": [0, 6, 4, 14], "rotation": 90, "texture": "#0"}
 			}
 		},
 		{
@@ -187,10 +148,20 @@
 			"scale": [2, 2, 2]
 		}
 	},
-	"groups": [0, 1, 2, 3,
+	"groups": [
+		0,
+		1,
+		2,
+		3,
 		{
 			"name": "wine",
 			"origin": [8, 8, 8],
-			"children": [4, 5, 6]
-		}, 7, 8, 9, 10]
+			"color": 0,
+			"children": []
+		},
+		4,
+		5,
+		6,
+		7
+	]
 }

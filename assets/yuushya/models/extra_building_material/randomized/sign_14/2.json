@@ -1,0 +1,6 @@
+{
+  "parent": "yuushya:extra_building_material/sign/sign_14",
+  "textures": {
+    "0": "yuushya:0extra_building_material/preview/randomized_poster/2"
+  }
+}

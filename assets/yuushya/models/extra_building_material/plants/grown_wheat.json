@@ -1,0 +1,6 @@
+{
+    "parent": "yuushya:block/crop1",
+    "textures": {
+        "crop1": "yuushya:block/grown_wheat"
+    }
+}

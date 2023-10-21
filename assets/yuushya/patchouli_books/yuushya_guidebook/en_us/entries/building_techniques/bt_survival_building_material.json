@@ -1,0 +1,36 @@
+{
+    "name": "生存模式获取建材",
+    "icon": "yuushya:the_encyclopedia",
+    "category": "yuushya:building_techniques",
+	"read_by_default": true,
+    "sortnum": 2,
+    "pages": [
+        {
+            "type": "text",
+            "text": "此篇介绍了所有建材的生存获取途径。$(br2)您可以在游戏内通过简单的合成获取建材的【蓝图】。把蓝图放入切石机中即可挑选需要的建材。$(br2)不同的蓝图分别可以获取对应创造模式物品栏的建材。【蓝图】的合成表(无序合成)展示如下。"
+        },
+		{
+            "type": "crafting",
+            "recipe": "yuushya:block_blueprint",
+			"recipe2": "yuushya:deco_blueprint",
+            "title": ""
+        },		
+		{
+            "type": "crafting",
+            "recipe": "yuushya:dailylife_stuff_blueprint",
+            "recipe2": "yuushya:sign_blueprint",
+            "title": ""
+        },		
+		{
+            "type": "crafting",
+            "recipe": "yuushya:furniture_blueprint",
+            "recipe2": "yuushya:facility_blueprint",
+            "title": ""
+        },		
+		{
+            "type": "crafting",
+            "recipe": "yuushya:extra_shapes_blueprint",
+            "title": ""
+        }
+    ]
+}

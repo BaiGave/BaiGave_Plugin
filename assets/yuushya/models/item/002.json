@@ -1,6 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/template_side_slab",
-    "textures": {
-        "0": "block/spruce_planks"
-    }
-}

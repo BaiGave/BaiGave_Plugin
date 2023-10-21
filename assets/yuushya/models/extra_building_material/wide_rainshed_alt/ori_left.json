@@ -1,9 +1,10 @@
 {
+	"credit": "Coco",
 	"ambientocclusion": false,
 	"textures": {
 		"0": "yuushya:0extra_building_material/preview/rainshed/110",
 		"particle": "yuushya:0extra_building_material/preview/rainshed/110",
-		"rope": "yuushya:0extra_building_block/rope_material"
+		"rope": "yuushya:0extra_building_block/dark_metal"
 	},
 	"elements": [
 		{

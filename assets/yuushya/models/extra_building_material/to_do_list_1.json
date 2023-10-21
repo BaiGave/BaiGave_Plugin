@@ -1,0 +1,23 @@
+{
+	"credit": "Coco",
+	"textures": {
+		"1": "yuushya:0extra_building_material/preview/note1/1",
+		"particle": "yuushya:0extra_building_material/preview/note1/1"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0.22],
+			"to": [16, 16, 0.22],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#1"},
+				"east": {"uv": [0, 0, 0, 16], "texture": "#1"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#1"},
+				"west": {"uv": [0, 0, 0, 16], "texture": "#1"},
+				"up": {"uv": [0, 0, 16, 0], "texture": "#1"},
+				"down": {"uv": [0, 0, 16, 0], "texture": "#1"}
+			}
+		}
+	],
+	"gui_light": "front",
+	"display": {}
+}

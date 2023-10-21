@@ -10,7 +10,6 @@ def blockstates(pos, id, has_air, vertices, faces, direction, texture_list, uv_l
     # 获取方块属性的起始位置和结束位置
     start_index = id.find('[')
     end_index = id.find(']')
-    
     # 如果找不到方块属性，则使用空字典
     properties_dict = {}
     if start_index != -1 and end_index != -1:
@@ -20,6 +19,8 @@ def blockstates(pos, id, has_air, vertices, faces, direction, texture_list, uv_l
         for prop in properties_str.split(','):
             key, value = prop.split('=')
             properties_dict[key.strip().replace('"', '')] = value.strip().replace('"', '')
+    # print(filepath)
+    # print(block_name+":")
     try:
         with open(filepath, "r") as f:
             data = json.load(f)
@@ -73,13 +74,13 @@ def blockstates(pos, id, has_air, vertices, faces, direction, texture_list, uv_l
             if filepath == "":
                 print("No matching model found")
                 return [], [], [], [], [], []
-        
         filepath = get_file_path(filepath, 'm')
         dirname, filename = os.path.split(filepath)
         dirname = dirname + '\\'
         textures, elements, display = get_all_data(dirname, filename)
-
     except:
-        pass
-
+        textures = {}
+        elements = []
+        display = {}
+        pass         
     return extract_vertices_from_elements(textures, elements, display, has_air, pos, rotation, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
