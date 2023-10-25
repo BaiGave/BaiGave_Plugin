@@ -17,7 +17,7 @@ def block(textures,elements,display,position,filename,has_air):
     uv_rotation_list = []
     vertices_dict ={}
 
-    vertices,faces,direction,texture_list,uv_list,uv_rotation_list = extract_vertices_from_elements(textures, elements, display, has_air, None, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
+    vertices,faces,direction,texture_list,uv_list,uv_rotation_list = extract_vertices_from_elements(textures, elements, display, has_air, None,[0,0,0], vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
     
     bm = bmesh.new()
     for v in vertices:

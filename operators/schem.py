@@ -187,10 +187,10 @@ def schem_liquid(d, filename="", position=(0, 0, 0)):
         adjacent_coords = [(key[0] + offset[0], key[1] + offset[1], key[2] + offset[2]) for offset in offsets]
         # 使用 any 函数判断是否有流体方块
         #最少面
-        #has_air = [adj_coord not in d or d[adj_coord].split('[')[0] =="minecraft:air" for adj_coord in adjacent_coords]
+        has_air = [adj_coord not in d or d[adj_coord].split('[')[0] =="minecraft:air" for adj_coord in adjacent_coords]
 
         #体积水
-        has_air = [adj_coord not in d or d[adj_coord].split('[')[0] not in liquid for adj_coord in adjacent_coords]
+        #has_air = [adj_coord not in d or d[adj_coord].split('[')[0] not in liquid for adj_coord in adjacent_coords]
 
         # 将 has_air 中的值按照 东西北南上下 的顺序排列
         has_air = [has_air[2], has_air[3], has_air[0], has_air[1], has_air[5], has_air[4]]

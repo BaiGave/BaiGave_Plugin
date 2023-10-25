@@ -1,7 +1,7 @@
 import bpy
 import numpy as np
 from .shader_type import Type1,Type2,Type3
-
+from .functions import get_frametime
 
 def create_node_material(texture_paths, mat_name,filename):
     mat_name = mat_name.replace("block/", "")  # 去除"block/"部分
@@ -63,49 +63,105 @@ def create_node_material(texture_paths, mat_name,filename):
                 elif node.name == "默认图片":
                     node.image = bpy.data.images.load(texture_paths[0])
         elif mat_name not in Type3:
-            shader_name = "树叶/草着色器"
-            # 导入shader
-            shader = bpy.data.materials.get(shader_name)
-            if shader is None:
-                path = __file__.rsplit(
-                    "\\", 1)[0]+"\\Material.blend"
-                with bpy.data.libraries.load(path) as (data_from, data_to):
-                    if shader_name in data_from.materials:
-                        data_to.materials = [shader_name]
-                # 获取shader
+            image=bpy.data.images.load(texture_paths[0])
+            # 获取图像的边长大小
+            width = image.size[0]  # 宽度
+            height = image.size[1]  # 高度
+            if width/height != 1:
+                shader_name = "动态材质+树叶/草着色器"
+                # 导入shader
                 shader = bpy.data.materials.get(shader_name)
-            # 复制 shader，并将其重命名为 mat_name
-            mat = shader.copy()
-            mat.name = mat_name
-            # 设置图像纹理节点的图片路径
-            for node in mat.node_tree.nodes:
-                if node.name == "默认图片":
-                    node.image = bpy.data.images.load(texture_paths[0])
-
+                if shader is None:
+                    path = __file__.rsplit(
+                        "\\", 1)[0]+"\\Material.blend"
+                    with bpy.data.libraries.load(path) as (data_from, data_to):
+                        if shader_name in data_from.materials:
+                            data_to.materials = [shader_name]
+                    # 获取shader
+                    shader = bpy.data.materials.get(shader_name)
+                # 复制 shader，并将其重命名为 mat_name
+                mat = shader.copy()
+                mat.name = mat_name
+                
+                # 设置图像纹理节点的图片路径
+                for node in mat.node_tree.nodes:
+                    if node.name == "默认图片":
+                        node.image = image
+                    elif node.name =="行":
+                        node.outputs[0].default_value = height/width
+                    elif node.name =="值":
+                        node.outputs[0].default_value = get_frametime(texture_paths[0]+".mcmeta")
+            else:   
+                shader_name = "树叶/草着色器"
+                # 导入shader
+                shader = bpy.data.materials.get(shader_name)
+                if shader is None:
+                    path = __file__.rsplit(
+                        "\\", 1)[0]+"\\Material.blend"
+                    with bpy.data.libraries.load(path) as (data_from, data_to):
+                        if shader_name in data_from.materials:
+                            data_to.materials = [shader_name]
+                    # 获取shader
+                    shader = bpy.data.materials.get(shader_name)
+                # 复制 shader，并将其重命名为 mat_name
+                mat = shader.copy()
+                mat.name = mat_name
+                # 设置图像纹理节点的图片路径
+                for node in mat.node_tree.nodes:
+                    if node.name == "默认图片":
+                        node.image = image
         else:
-            shader_name = "默认着色器"
-            # 导入shader
-            shader = bpy.data.materials.get(shader_name)
-            if shader is None:
-                path = __file__.rsplit(
-                    "\\", 1)[0]+"\\Material.blend"
-                with bpy.data.libraries.load(path) as (data_from, data_to):
-                    if shader_name in data_from.materials:
-                        data_to.materials = [shader_name]
-                # 获取shader
+            image=bpy.data.images.load(texture_paths[0])
+            # 获取图像的边长大小
+            width = image.size[0]  # 宽度
+            height = image.size[1]  # 高度
+            if width/height != 1:
+                shader_name = "动态材质"
+                # 导入shader
                 shader = bpy.data.materials.get(shader_name)
-            # 复制 shader，并将其重命名为 mat_name
-            mat = shader.copy()
-            mat.name = mat_name
-            # 设置图像纹理节点的图片路径
-            for node in mat.node_tree.nodes:
-                if node.name == "默认图片":
-                    node.image = bpy.data.images.load(texture_paths[0])
+                if shader is None:
+                    path = __file__.rsplit(
+                        "\\", 1)[0]+"\\Material.blend"
+                    with bpy.data.libraries.load(path) as (data_from, data_to):
+                        if shader_name in data_from.materials:
+                            data_to.materials = [shader_name]
+                    # 获取shader
+                    shader = bpy.data.materials.get(shader_name)
+                # 复制 shader，并将其重命名为 mat_name
+                mat = shader.copy()
+                mat.name = mat_name
+                # 设置图像纹理节点的图片路径
+                for node in mat.node_tree.nodes:
+                    if node.name == "默认图片":
+                        node.image = image
+                    elif node.name =="行":
+                        node.outputs[0].default_value = height/width
+                    elif node.name =="值":
+                        node.outputs[0].default_value = get_frametime(texture_paths[0]+".mcmeta")
+            else:
+                shader_name = "默认着色器"
+                # 导入shader
+                shader = bpy.data.materials.get(shader_name)
+                if shader is None:
+                    path = __file__.rsplit(
+                        "\\", 1)[0]+"\\Material.blend"
+                    with bpy.data.libraries.load(path) as (data_from, data_to):
+                        if shader_name in data_from.materials:
+                            data_to.materials = [shader_name]
+                    # 获取shader
+                    shader = bpy.data.materials.get(shader_name)
+                # 复制 shader，并将其重命名为 mat_name
+                mat = shader.copy()
+                mat.name = mat_name
+                # 设置图像纹理节点的图片路径
+                for node in mat.node_tree.nodes:
+                    if node.name == "默认图片":
+                        node.image = image
 
     return mat
 
 
-def rot(origin, display, position, coords,rotation, rotation_matrix=None):
+def rot(origin, display, position, coords,rotation= [0,0,0], rotation_matrix=None):
     scale_factor = 1/16
     if rotation_matrix is not None:
         coords = [tuple(np.dot(rotation_matrix, (point - origin)) + origin) for point in coords]

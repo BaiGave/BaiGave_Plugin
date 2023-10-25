@@ -66,3 +66,10 @@ def get_file_path(modid, type):
         return filepath + mod + "\\models\\" + id + ".json"
     elif type == 't':
         return filepath + mod + "\\textures\\" + id + ".png"
+
+def get_frametime(filepath):
+    with open(filepath, "r") as f:
+        data = json.load(f)
+    frametime = data.get("animation", {}).get("frametime", {})
+    
+    return frametime
