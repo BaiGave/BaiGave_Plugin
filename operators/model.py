@@ -249,7 +249,7 @@ def rot(origin, display, position, coords,rotation= [0,0,0], rotation_matrix=Non
     coords = [tuple(np.array(point)*scale_factor) for point in coords]       
     
     if position is not None:
-        coords = [(point[0] + position[0], point[1] + position[1], point[2] + position[2]) for point in coords]
+        coords = [(point[0] + position[0], point[1] - position[1], point[2] + position[2]) for point in coords]
     return coords
 def fac(origin, display, position, element, vertices, faces, vertices_dict, directions, has_air, rotation,rotation_matrix=None):
     from_coord = np.array(element['from'])

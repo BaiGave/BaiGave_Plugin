@@ -6,8 +6,8 @@ def CullBlocks(coord, d,vertices,faces,direction,texture_list,uv_list,uv_rotatio
     if coord in d:
         block_id = d[coord]
         # 定义一个元组，存储六个方向的偏移量，按照 上下北南东西 的顺序排序
-        offsets = ((0, 1, 0),  # 东
-                   (0, -1, 0),  # 西
+        offsets = ((0, -1, 0),  # 东
+                   (0, 1, 0),  # 西
                    (-1, 0, 0),  # 北
                    (1, 0, 0),  # 南
                    (0, 0, -1),  # 下

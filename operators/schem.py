@@ -177,8 +177,8 @@ def schem_liquid(d, filename="", position=(0, 0, 0)):
     
     for key, value in d.items():
         # 定义一个元组，存储六个方向的偏移量，按照 上下北南东西 的顺序排序
-        offsets = ((0, 1, 0),  # 东
-                (0, -1, 0),  # 西
+        offsets = ((0, -1, 0),  # 东
+                (0, 1, 0),  # 西
                 (-1, 0, 0),  # 北
                 (1, 0, 0),  # 南
                 (0, 0, -1),  # 下
@@ -207,7 +207,7 @@ def schem_liquid(d, filename="", position=(0, 0, 0)):
             if result in liquid:
                 water_level = water_levels.get(value, 0)
                 z_offset = water_level / 16 
-                key = (key[0], key[1]-1, key[2])
+                key = (key[0], -key[1]-1, key[2])
                 for face_index in faces_to_generate:
                     if face_index == 5:
                         coords = np.array([
