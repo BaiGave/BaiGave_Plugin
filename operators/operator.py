@@ -158,6 +158,7 @@ class ImportSchem(bpy.types.Operator):
         nbt_data = amulet_nbt._load_nbt.load(self.filepath)
         Palette = dict(nbt_data["Palette"])
         Palette = {int(v): k for k, v in Palette.items()}
+        print(Palette)
         size = {
             "x":int(nbt_data["Length"]),
             "y":int(nbt_data["Height"]),

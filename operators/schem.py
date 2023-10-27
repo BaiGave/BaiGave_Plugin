@@ -4,7 +4,7 @@ from .model import create_mesh,add_mesh_to_collection,get_or_create_material,set
 from .cullblocks import CullBlocks
 from .blockstates import blockstates
 
-from .classification import flowers,leaves,liquid,exclude
+from .classification import flowers,leaves,liquid,exclude,sea_plants
 import numpy as np
 
 #用于删除[]的部分 
@@ -187,10 +187,11 @@ def schem_liquid(d, filename="", position=(0, 0, 0)):
         adjacent_coords = [(key[0] + offset[0], key[1] + offset[1], key[2] + offset[2]) for offset in offsets]
         # 使用 any 函数判断是否有流体方块
         #最少面
-        has_air = [adj_coord not in d or d[adj_coord].split('[')[0] =="minecraft:air" for adj_coord in adjacent_coords]
+        #has_air = [adj_coord not in d or d[adj_coord].split('[')[0] =="minecraft:air" for adj_coord in adjacent_coords]
 
         #体积水
-        #has_air = [adj_coord not in d or d[adj_coord].split('[')[0] not in liquid for adj_coord in adjacent_coords]
+        has_air = [adj_coord not in d or (d[adj_coord].split('[')[0] not in liquid and d[adj_coord].split('[')[0] not in sea_plants) for adj_coord in adjacent_coords]
+
 
         # 将 has_air 中的值按照 东西北南上下 的顺序排列
         has_air = [has_air[2], has_air[3], has_air[0], has_air[1], has_air[5], has_air[4]]
@@ -200,6 +201,9 @@ def schem_liquid(d, filename="", position=(0, 0, 0)):
 
         if faces_to_generate:
             result = remove_brackets(value)
+            if result in sea_plants:
+                result="minecraft:water"
+                value ="minecraft:water[level=0]"
             if result in liquid:
                 water_level = water_levels.get(value, 0)
                 z_offset = water_level / 16 
