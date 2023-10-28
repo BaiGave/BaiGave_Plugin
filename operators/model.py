@@ -2,7 +2,10 @@ import bpy
 import numpy as np
 from .shader_type import Type1,Type2,Type3
 from .functions import get_frametime
+from mathutils import Matrix
+from mathutils import Vector
 
+import math
 def create_node_material(texture_paths, mat_name,filename):
     mat_name = mat_name.replace("block/", "")  # 去除"block/"部分
      # 尝试找到名为mat_name的材质
@@ -167,76 +170,35 @@ def rot(origin, display, position, coords,rotation= [0,0,0], rotation_matrix=Non
         coords = [tuple(np.dot(rotation_matrix, (point - origin)) + origin) for point in coords]
 
     if 'fixed' in display:
+        center = Vector((8, 8, 8))
+        # 将原点平移到方块的中心
+        coords = [Vector(point) - center for point in coords]
         display_rotation = display.get('fixed', {}).get('rotation', [0,0,0])
-        rotation_matrix_x = np.array([
-            [1, 0, 0],
-            [0, np.cos(np.radians(display_rotation[0]+rotation[0])), -np.sin(np.radians(display_rotation[0]+rotation[0]))],
-            [0, np.sin(np.radians(display_rotation[0]+rotation[0])), np.cos(np.radians(display_rotation[0]+rotation[0]))]
-        ])
-        
-        rotation_matrix_y = np.array([
-            [np.cos(np.radians(display_rotation[1]+rotation[1])), 0, np.sin(np.radians(display_rotation[1]+rotation[1]))],
-            [0, 1, 0],
-            [-np.sin(np.radians(display_rotation[1]+rotation[1])), 0, np.cos(np.radians(display_rotation[1]+rotation[1]))]
-        ])
-        
-        rotation_matrix_z = np.array([
-            [np.cos(np.radians(display_rotation[2]+rotation[2])), -np.sin(np.radians(display_rotation[2]+rotation[2])), 0],
-            [np.sin(np.radians(display_rotation[2]+rotation[2])), np.cos(np.radians(display_rotation[2]+rotation[2])), 0],
-            [0, 0, 1]
-        ])
-        
-        rotation_matrix = np.dot(np.dot(rotation_matrix_x, rotation_matrix_z), rotation_matrix_y)
+        # 构建旋转矩阵
+        rotation_matrix = Matrix.Rotation(math.radians(display_rotation[2]+rotation[2]), 3, 'Z')@ \
+                        Matrix.Rotation(math.radians(display_rotation[1]+rotation[1]), 3, 'Y')@ \
+                        Matrix.Rotation(math.radians(display_rotation[0]+rotation[0]+90), 3, 'X')
 
-        if rotation_matrix is not None:
-            coords = [tuple(np.dot(rotation_matrix, point)) for point in coords]
+        coords = [tuple(rotation_matrix @ Vector(point)) for point in coords]
+        # 将坐标还原回原始坐标
+        coords = [tuple(Vector(point) + center) for point in coords]
 
-        rotation_matrix_x = np.array([
-            [1, 0, 0],
-            [0, 0, -1],
-            [0, 1, 0]
-        ])
-        
-        coords = [tuple(np.dot(rotation_matrix_x, point)) for point in coords]
     elif rotation != [0, 0, 0] or rotation is not None:
-        # 计算旋转矩阵
-        center = np.array([8, 8, 8])  # 旋转中心
-        rotation_matrix_x = np.array([
-            [1, 0, 0],
-            [0, np.cos(np.radians(rotation[0])), -np.sin(np.radians(rotation[0]))],
-            [0, np.sin(np.radians(rotation[0])), np.cos(np.radians(rotation[0]))]
-        ])
-        
-        rotation_matrix_y = np.array([
-            [np.cos(np.radians(rotation[1])), 0, np.sin(np.radians(rotation[1]))],
-            [0, 1, 0],
-            [-np.sin(np.radians(rotation[1])), 0, np.cos(np.radians(rotation[1]))]
-        ])
-        
-        rotation_matrix_z = np.array([
-            [np.cos(np.radians(rotation[2])), -np.sin(np.radians(rotation[2])), 0],
-            [np.sin(np.radians(rotation[2])), np.cos(np.radians(rotation[2])), 0],
-            [0, 0, 1]
-        ])
-        
-        # 组合三个旋转矩阵
-        rotation_matrix = np.dot(np.dot(rotation_matrix_x, rotation_matrix_y), rotation_matrix_z)
+        center = Vector((8, 8, 8))
+        # 将原点平移到方块的中心
+        coords = [Vector(point) - center for point in coords]
+        # 构建旋转矩阵
+        rotation_matrix = Matrix.Rotation(math.radians(rotation[2]), 3, 'Z') @ \
+                        Matrix.Rotation(math.radians(rotation[1]), 3, 'Y') @ \
+                        Matrix.Rotation(math.radians(rotation[0]+90), 3, 'X')
 
-        if rotation_matrix is not None:
-            # 对方块的每个顶点坐标减去旋转中心，应用旋转矩阵，再加上旋转中心
-            coords = [tuple(np.dot(rotation_matrix, point - center) + center) for point in coords]
+        # 对坐标列表中的每个点应用旋转矩阵
+        coords = [tuple(rotation_matrix @ Vector(point)) for point in coords]
 
-        rotation_matrix_x = np.array([
-            [1, 0, 0],
-            [0, 0, -1],
-            [0, 1, 0]
-        ])
-        
-        coords = [tuple(np.dot(rotation_matrix_x, point)) for point in coords]
+        # 将坐标还原回原始坐标
+        coords = [tuple(Vector(point) + center) for point in coords]
+
     else:
-        if rotation_matrix is not None:
-            coords = [tuple(np.dot(rotation_matrix, point)) for point in coords]
-
         rotation_matrix_x = np.array([
             [1, 0, 0],
             [0, 0, -1],
@@ -249,7 +211,7 @@ def rot(origin, display, position, coords,rotation= [0,0,0], rotation_matrix=Non
     coords = [tuple(np.array(point)*scale_factor) for point in coords]       
     
     if position is not None:
-        coords = [(point[0] + position[0], point[1] - position[1], point[2] + position[2]) for point in coords]
+        coords = [(point[0] + position[0], point[1] - position[1]-1, point[2] + position[2]) for point in coords]
     return coords
 def fac(origin, display, position, element, vertices, faces, vertices_dict, directions, has_air, rotation,rotation_matrix=None):
     from_coord = np.array(element['from'])

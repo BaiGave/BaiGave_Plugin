@@ -131,6 +131,7 @@ class WorldPanel(bpy.types.Panel):
         # row.operator("baigave.import_world", text="导入世界")
         # row = layout.row()
         # row.operator("baigave.create_save", text="创建存档")
+from .schem import schem_all,schem
 
 # 定义一个导入.schem文件的操作类
 class ImportSchem(bpy.types.Operator):
@@ -192,6 +193,9 @@ class ImportSchem(bpy.types.Operator):
                 print(x)
                 print(z)
                 print(y)
+        #测试，把每个方块都单独作为一个物体生成出来
+        #schem_all(d)
+        #schem(d)
         end_time = time.time()
         print("预处理时间：", end_time - start_time, "秒")
 
@@ -493,7 +497,7 @@ class Importjson(bpy.types.Operator):
             textures, elements, display = get_all_data(os.path.dirname(self.filepath)+"\\", filename)
             position = [0, 0, 0]
             has_air = [True, True, True, True, True, True]
-            block(textures, elements, display, position, filename, has_air)
+            block(textures, elements, display, position,[0,0,0], filename, has_air)
             return {'FINISHED'}
         else:
             self.report({'ERROR'}, "请选择有效的.json文件")

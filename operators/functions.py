@@ -70,6 +70,5 @@ def get_file_path(modid, type):
 def get_frametime(filepath):
     with open(filepath, "r") as f:
         data = json.load(f)
-    frametime = data.get("animation", {}).get("frametime", {})
-    
+    frametime = data.get("animation", {}).get("frametime", 1)
     return frametime

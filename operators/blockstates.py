@@ -19,8 +19,6 @@ def blockstates(pos, id, has_air, vertices, faces, direction, texture_list, uv_l
         for prop in properties_str.split(','):
             key, value = prop.split('=')
             properties_dict[key.strip().replace('"', '')] = value.strip().replace('"', '')
-    # print(filepath)
-    # print(block_name+":")
     try:
         with open(filepath, "r") as f:
             data = json.load(f)
@@ -40,9 +38,9 @@ def blockstates(pos, id, has_air, vertices, faces, direction, texture_list, uv_l
                         else:
                             filepath = value["model"]
                         if "z" in value:
-                            rotation[2] = value["z"]
+                            rotation[1] = value["z"]
                         if "y" in value:
-                            rotation[1] = value["y"]
+                            rotation[2] = 360-value["y"]
                         if "x" in value:
                             rotation[0] = value["x"]
                         break
@@ -64,16 +62,16 @@ def blockstates(pos, id, has_air, vertices, faces, direction, texture_list, uv_l
                             if "model" in apply:
                                 filepath = apply["model"]
                             if "z" in value:
-                                rotation[2] = value["z"]
+                                rotation[1] = value["z"]
                             if "y" in value:
-                                rotation[1] = value["y"]
+                                rotation[2] = 360-value["y"]
                             if "x" in value:
                                 rotation[0] = value["x"]
                             break
 
             if filepath == "":
                 print("No matching model found")
-                return [], [], [], [], [], []
+                #return [], [], [], [], [], []
         filepath = get_file_path(filepath, 'm')
         dirname, filename = os.path.split(filepath)
         dirname = dirname + '\\'
@@ -82,5 +80,5 @@ def blockstates(pos, id, has_air, vertices, faces, direction, texture_list, uv_l
         textures = {}
         elements = []
         display = {}
-        pass         
+        pass        
     return extract_vertices_from_elements(textures, elements, display, has_air, pos, rotation, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)

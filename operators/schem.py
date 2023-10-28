@@ -4,9 +4,12 @@ from .model import create_mesh,add_mesh_to_collection,get_or_create_material,set
 from .cullblocks import CullBlocks
 from .blockstates import blockstates
 
-from .classification import flowers,leaves,liquid,exclude,sea_plants
+from .classification import flowers,leaves,liquid,exclude,sea_plants,air_blocks
 import numpy as np
-
+from .block import block
+from .functions import get_all_data,get_file_path
+import os
+import json
 #用于删除[]的部分 
 def remove_brackets(input_string):
     output_string = ""
@@ -145,6 +148,104 @@ def schem_leaves(d,filename="",position=(0,0,0)):
     bm.to_mesh(mesh)
     bm.free()
 
+
+#测试
+def schem_all(d):
+    # 定义一个元组，存储六个方向的偏移量，按照 上下北南东西 的顺序排序
+    offsets = ((0, -1, 0),  # 东
+            (0, 1, 0),  # 西
+            (-1, 0, 0),  # 北
+            (1, 0, 0),  # 南
+            (0, 0, -1),  # 下
+            (0, 0, 1))  # 上
+    for key, value in d.items():
+        pos =key
+        result = remove_brackets(value)
+        # 使用列表推导式生成相邻坐标
+        adjacent_coords = [(key[0] + offset[0], key[1] + offset[1], key[2] + offset[2]) for offset in offsets]
+        has_air = [adj_coord not in d or d[adj_coord].split('[')[0] in air_blocks for adj_coord in adjacent_coords]
+        # 将 has_air 中的值按照 东西北南上下 的顺序排列
+        has_air = [has_air[2], has_air[3], has_air[0], has_air[1], has_air[5], has_air[4]]
+        if result not in liquid:
+            if any(has_air):
+                block_name = value.split('[')[0]
+                filepath = get_file_path(block_name, 's')
+                rotation = [0, 0, 0]
+                # 获取方块属性的起始位置和结束位置
+                start_index = value.find('[')
+                end_index = value.find(']')
+                # 如果找不到方块属性，则使用空字典
+                properties_dict = {}
+                if start_index != -1 and end_index != -1:
+                    # 使用字符串切片来提取方块属性部分
+                    properties_str = value[start_index + 1:end_index]
+                    # 将方块属性字符串转换为字典格式
+                    for prop in properties_str.split(','):
+                        key, value = prop.split('=')
+                        properties_dict[key.strip().replace('"', '')] = value.strip().replace('"', '')
+                try:
+                    with open(filepath, "r") as f:
+                        data = json.load(f)
+                        filepath = ""
+                        if "variants" in data:
+                            for key, value in data["variants"].items():
+                                key_props = key.split(",")
+                                flag = True
+                                for key_prop in key_props:
+                                    key_prop = key_prop.split("=")
+                                    if key_prop[0] in properties_dict and key_prop[1] != properties_dict[key_prop[0]]:
+                                        flag = False
+                                        break
+                                if flag:
+                                    if isinstance(value, list):
+                                        filepath = value[0]["model"]
+                                    else:
+                                        filepath = value["model"]
+                                    if "z" in value:
+                                        rotation[1] = value["z"]
+                                    if "y" in value:
+                                        rotation[2] = 360-value["y"]
+                                    if "x" in value:
+                                        rotation[0] = value["x"]
+                                    break
+                        elif "multipart" in data:
+                            for part in data["multipart"]:
+                                if "when" in part:
+                                    when = part["when"]
+                                    flag = True
+                                    for key, value in when.items():
+                                        if key in properties_dict:
+                                            if value != properties_dict[key]:
+                                                flag = False
+                                                break
+                                        else:
+                                            flag = False
+                                            break
+                                    if flag:
+                                        apply = part["apply"]
+                                        if "model" in apply:
+                                            filepath = apply["model"]
+                                        if "z" in value:
+                                            rotation[2] = value["z"]
+                                        if "y" in value:
+                                            rotation[1] = value["y"]
+                                        if "x" in value:
+                                            rotation[0] = value["x"]
+                                        break
+
+                        if filepath == "":
+                            print("No matching model found")
+                            print(block_name)
+                    filepath = get_file_path(filepath, 'm')
+                    dirname, filename = os.path.split(filepath)
+                    dirname = dirname + '\\'
+                    textures, elements, display = get_all_data(dirname, filename)
+                except:
+                    textures = {}
+                    elements = []
+                    display = {}
+                    pass
+                block(textures,elements,display,(pos[0],-pos[1]-1,pos[2]),rotation,filename,has_air)
 #流体
 def schem_liquid(d, filename="", position=(0, 0, 0)):
     vertices = []
@@ -174,15 +275,15 @@ def schem_liquid(d, filename="", position=(0, 0, 0)):
         "minecraft:water[level=14]": 16,
         "minecraft:water[level=15]": 16,
     }
-    
+    # 定义一个元组，存储六个方向的偏移量，按照 上下北南东西 的顺序排序
+    offsets = ((0, -1, 0),  # 东
+            (0, 1, 0),  # 西
+            (-1, 0, 0),  # 北
+            (1, 0, 0),  # 南
+            (0, 0, -1),  # 下
+            (0, 0, 1))  # 上
     for key, value in d.items():
-        # 定义一个元组，存储六个方向的偏移量，按照 上下北南东西 的顺序排序
-        offsets = ((0, -1, 0),  # 东
-                (0, 1, 0),  # 西
-                (-1, 0, 0),  # 北
-                (1, 0, 0),  # 南
-                (0, 0, -1),  # 下
-                (0, 0, 1))  # 上
+        
         # 使用列表推导式生成相邻坐标
         adjacent_coords = [(key[0] + offset[0], key[1] + offset[1], key[2] + offset[2]) for offset in offsets]
         # 使用 any 函数判断是否有流体方块
@@ -343,7 +444,6 @@ def schem_liquid(d, filename="", position=(0, 0, 0)):
 
     bm.to_mesh(mesh)
     bm.free()
-
 
 
 
