@@ -150,7 +150,7 @@ def schem_leaves(d,filename="",position=(0,0,0)):
 
 
 #测试
-def schem_all(d):
+def schem_all(d,filename="a"):
     # 定义一个元组，存储六个方向的偏移量，按照 上下北南东西 的顺序排序
     offsets = ((0, -1, 0),  # 东
             (0, 1, 0),  # 西

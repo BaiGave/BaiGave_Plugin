@@ -1,5 +1,5 @@
-air_blocks = ["minecraft:air","minecraft:water","minecraft:dandelion","minecraft:brown_mushroom","minecraft:snow", "minecraft:spruce_leaves","minecraft:glass","minecraft:fern","minecraft:large_fern",
-              "minecraft:grass","minecraft:tall_grass","minecraft:seagrass","minecraft:tall_seagrass","minecraft:kelp_plant","minecraft:kelp","minecraft:pointed_dripstone","minecraft:dead_bush","minecraft:peony","minecraft:birch_stairs","minecraft:crimson_fence","minecraft:oxidized_cut_copper_stairs","byg:pink_anemone",
+air_blocks = ["minecraft:air","minecraft:water","minecraft:fire","minecraft:dandelion","minecraft:brown_mushroom","minecraft:snow", "minecraft:spruce_leaves","minecraft:glass","minecraft:fern","minecraft:large_fern",
+              "minecraft:grass","minecraft:tall_grass","minecraft:seagrass","minecraft:tall_seagrass","minecraft:pink_petals","minecraft:kelp_plant","minecraft:kelp","minecraft:pointed_dripstone","minecraft:dead_bush","minecraft:peony","minecraft:birch_stairs","minecraft:crimson_fence","minecraft:oxidized_cut_copper_stairs","byg:pink_anemone",
               "byg:white_anemone","byg:hydrangea_hedge","byg:yellow_daffodil","byg:clover_patch","byg:crocus","byg:white_sage","byg:purple_sage","byg:lollipop_flower",
               "byg:pink_allium","byg:black_rose","byg:winter_succulent","byg:white_puffball","yuushya:white_windows_2","yuushya:white_windows_1","yuushya:roof_2",
               "yuushya:birch_tall_door","yuushya:completely_broken_list","yuushya:oak_leaves_branch","yuushya:goods_shelf_jam","yuushya:goods_shelf_paste",

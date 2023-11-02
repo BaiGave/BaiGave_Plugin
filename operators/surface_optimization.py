@@ -1,4 +1,5 @@
 import bpy  
+import os
 
 class MapOptimize(bpy.types.Operator):
     """优化面"""
@@ -35,13 +36,18 @@ class MapOptimize(bpy.types.Operator):
             try:
                 mg.node_group = bpy.data.node_groups[nodetree_target]
             except:
-                path = __file__.rsplit(
+                
+                file_path = __file__.rsplit(
                     "\\", 1)[0]+"\\GeometryNodes.blend"
-                with bpy.data.libraries.load(path) as (data_from, data_to):
-                    strs = nodetree_target
-                    if strs in (nodetree_target):
-                        if not strs in bpy.data.node_groups:
-                            data_to.node_groups = [strs]
+                inner_path = 'NodeTree'
+                object_name = 'UV'
+                bpy.ops.wm.append(
+                    filepath=os.path.join(file_path, inner_path, object_name),
+                    directory=os.path.join(file_path, inner_path),
+                    filename=object_name
+                )
+                
+                
             #设置几何节点        
             mg.node_group = bpy.data.node_groups[nodetree_target]
 

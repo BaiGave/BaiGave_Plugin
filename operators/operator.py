@@ -7,7 +7,6 @@ import threading
 import subprocess
 import sys
 
-from math import floor
 from .block import block
 from .level import create_level
 from .tip import button_callback
@@ -16,122 +15,71 @@ from .functions import get_all_data
 from .schem import schem,schem_p,schem_leaves,schem_liquid,schem_dirtgrass,schem_snow,schem_deepstone,schem_sandgravel
 from .generate import generate
 from .chunk  import chunk as create_chunk
+from .schem import schem_all,schem
 
 import gzip
 import amulet
 import amulet_nbt
+import zipfile
 import logging
 logging.getLogger("amulet").setLevel(logging.FATAL)
 logging.getLogger("PyMCTranslate").setLevel(logging.FATAL)
 
-#主面板
-class MainPanel(bpy.types.Panel):
-    bl_label ="白给的工具"
-    bl_idname ="MainPanel"
-    bl_space_type ='VIEW_3D'
-    bl_region_type = 'UI'
-    bl_category ='白给的工具'
-    bl_options = {'HEADER_LAYOUT_EXPAND'}
-    
-    def draw(self,context):
-        layout = self.layout
-        row = layout.row()
-        row.label(text = "白给的工具",icon='BOLD')
-#人模绑定面板        
-class RigPanel(bpy.types.Panel):
-    bl_label ="人模"
-    bl_idname ="RigPanel"
-    bl_space_type ='VIEW_3D'
-    bl_region_type ='UI'
-    bl_category ='BaiGave'
-    bl_parent_id ='MainPanel'
-    bl_options = {'DEFAULT_CLOSED'}
-    
-    def draw(self,context):
-        layout = self.layout
-        scene = context.scene
-        BaiGave = scene.BaiGave
-        row = layout.row()    
-        
-        row.label(text = "白给的人模",icon='ERROR')
-        row = layout.row()
-        row.operator("spawn.model")
-        row = layout.row()
-        row.label(text = "角色类别：",icon='COLLECTION_COLOR_01')
-        row = layout.row()
-        row = layout.row()
-        row.prop(BaiGave,"steve")
-        row.prop(BaiGave,"alex")
-        row = layout.row()
-        row.label(text = "骨骼权重：",icon='BONE_DATA')
-        row = layout.row()
-        row.prop(BaiGave,"vanllia")
-        row.prop(BaiGave,"normal")
-        row = layout.row()
-        row.label(text = "2d/3d",icon='LIGHT_DATA')
-        row = layout.row()
-        row.prop(BaiGave,"Layer2d")
-        row.prop(BaiGave,"Layer3d")
-#方块面板        
-class BlockPanel(bpy.types.Panel):
-    bl_label ="方块"
-    bl_idname ="BlockPanel"
-    bl_space_type ='VIEW_3D'
-    bl_region_type ='UI'
-    bl_category ='BaiGave'
-    bl_parent_id ='MainPanel'
-    bl_options = {'DEFAULT_CLOSED'}
-    
-    def draw(self,context):
-        layout = self.layout
-        scene = context.scene
-        BaiGave = scene.BaiGave
-        
-        row = layout.row()    
-        row.label(text = "方块",icon='SNAP_VOLUME')
-        
-        row = layout.row()
-        #layout.prop(BaiGave,"JsonImportSpeed")
-        row.operator("baigave.import_json", text="导入.json文件")
-#世界面板     
-class WorldPanel(bpy.types.Panel):
-    bl_label ="世界"
-    bl_idname ="WorldPanel"
-    bl_space_type ='VIEW_3D'
-    bl_region_type ='UI'
-    bl_category ='BaiGave'
-    bl_parent_id ='MainPanel'
-    bl_options = {'DEFAULT_CLOSED'}
-    
-    def draw(self,context):
-        layout = self.layout
-        scene = context.scene
-        
-        row = layout.row()    
-        row.label(text = "世界",icon='ERROR')
-        
-        row = layout.row()
-        row.operator("baigave.import_schem", text="导入.schem文件")
 
-        row = layout.row()
-        row.operator("object.add_sway_animation", text="草摇摆")
 
-        row = layout.row()
-        row.operator("baigave.map_optimize", text="执行优化")
 
-        # 添加布尔属性的选项
-        row = layout.row()
-        row.prop(scene, "is_weld", text="合并重叠顶点")
-        
-        # row = layout.row()
-        # row.operator("baigave.spawn_map", text="生成地图")
-        # row = layout.row()
-        # row.operator("baigave.select", text="选择区域")
-        # row = layout.row()
-        # row.operator("baigave.import_world", text="导入世界")
-        # row = layout.row()
-        # row.operator("baigave.create_save", text="创建存档")
-from .schem import schem_all,schem
+# 定义 Operator 类 VIEW3D_read_dir
+class VIEW3D_read_dir(bpy.types.Operator):
+    """读取目录"""
+    bl_idname = "view3d.read_dir"
+    bl_label = "读取目录"
+    
+    def execute(self, context):
+        scene = context.scene
+        my_properties = scene.my_properties
+        my_properties.my_list.clear()
+
+        path = context.scene.view3d_read_dir  # 使用自定义路径
+
+        for path, dirs, files in os.walk(path):
+            for filename in files:
+                if filename.lower().endswith(".zip"):  # 检查文件扩展名
+                    # 将文件名添加到列表属性
+                    item = my_properties.my_list.add()
+                    item.name = filename.replace(".zip", "")
+
+        return {'FINISHED'}
+    
+# 定义 UIList 类 MyFileList
+class MyFileList(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            layout.label(text=item.name)
+
+class PRINT_SELECTED_ITEM(bpy.types.Operator):
+    """打印选中的项目"""
+    bl_idname = "view3d.print_selected_item"
+    bl_label = "打印选中的项目"
+
+    def execute(self, context):
+        scene = context.scene
+        my_properties = scene.my_properties
+        selected_item = my_properties.my_list[my_properties.my_list_index]
+        zip_file_path = context.scene.view3d_read_dir + "\\" + selected_item.name + ".zip"  # 使用自定义路径
+        mcmeta_content = ""
+
+        try:
+            with zipfile.ZipFile(zip_file_path, 'r') as zip_file:
+                if "pack.mcmeta" in zip_file.namelist():
+                    with zip_file.open("pack.mcmeta") as mcmeta_file:
+                        mcmeta_content = mcmeta_file.read().decode("utf-8")
+                else:
+                    self.report({'INFO'}, "文件 'pack.mcmeta' 不存在于.zip文件中。")
+            self.report({'INFO'}, f"pack.mcmeta 内容：\n{mcmeta_content}")
+        except Exception as e:
+            self.report({'ERROR'}, f"无法打开或读取.zip文件: {e}")
+
+        return {'FINISHED'}
 
 # 定义一个导入.schem文件的操作类
 class ImportSchem(bpy.types.Operator):
@@ -156,15 +104,37 @@ class ImportSchem(bpy.types.Operator):
             
         # 遍历字典的键值对
         d = {}
+        
         nbt_data = amulet_nbt._load_nbt.load(self.filepath)
+        
         Palette = dict(nbt_data["Palette"])
         Palette = {int(v): k for k, v in Palette.items()}
-        #print(Palette)
         size = {
-            "x":int(nbt_data["Length"]),
+            "x":int(nbt_data["Width"]),
             "y":int(nbt_data["Height"]),
-            "z":int(nbt_data["Width"])
+            "z":int(nbt_data["Length"])
         }
+        def get_block_data(x, y, z):
+            if 0 <= x < size["x"] and 0 <= y < size["y"] and 0 <= z < size["z"]:
+                index = y * size["x"]* size["z"] + z* size["x"] + x
+                if 0 <= index < len(nbt_data["BlockData"]):
+                    return nbt_data["BlockData"][index]
+            return None
+
+        # 遍历 x, y, z 坐标
+        for x in range(size["x"]):
+            for y in range(size["y"]):
+                for z in range(size["z"]):
+                    block_data = get_block_data(x, y, z)
+                    if block_data is not None:
+                        block_id = Palette.get(block_data)
+                        d[(x, z, y)] = str(block_id)
+                    else:
+                        print("a")
+                        d[(x, z, y)] = "minecraft:air"
+        #print(d)
+        # print("x*y*z:"+str(size["x"]*size["y"]*size["z"]))
+        # print(len(nbt_data["BlockData"]))
         # 设置图片的大小和颜色
         image_width = int(size["z"])
         image_height = int(size["x"])
@@ -180,21 +150,9 @@ class ImportSchem(bpy.types.Operator):
                 pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
                 image.pixels[pixel_index : pixel_index + 4] = default_color
 
-        lennbt = len(nbt_data["BlockData"])
-        sizezx = size["z"] * size["x"]
-        sizez = size["z"]
-        for i in range(lennbt):
-            x = floor((i % sizezx) % sizez)
-            y = floor(i / sizezx)
-            z = floor((i % sizezx) / sizez)
-            try:
-                d[(x, z, y)] = str(Palette[abs(int(nbt_data["BlockData"][i]))])
-            except:
-                print(x)
-                print(z)
-                print(y)
         #测试，把每个方块都单独作为一个物体生成出来
         #schem_all(d)
+        #测试 单独导出自定义方块
         #schem(d)
         end_time = time.time()
         print("预处理时间：", end_time - start_time, "秒")
@@ -480,8 +438,6 @@ class ImportSchemSnow(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 
-
-
 class Importjson(bpy.types.Operator):
     """导入选定的json文件"""
     bl_idname = "baigave.import_json"
@@ -494,10 +450,10 @@ class Importjson(bpy.types.Operator):
         if os.path.isfile(self.filepath) and self.filepath.endswith(".json"):
             # 获取文件名
             filename = os.path.basename(self.filepath)
-            textures, elements, display = get_all_data(os.path.dirname(self.filepath)+"\\", filename)
+            textures, elements = get_all_data(os.path.dirname(self.filepath)+"\\", filename)
             position = [0, 0, 0]
             has_air = [True, True, True, True, True, True]
-            block(textures, elements, display, position,[0,0,0], filename, has_air)
+            block(textures, elements, position,[0,0,0], filename, has_air)
             return {'FINISHED'}
         else:
             self.report({'ERROR'}, "请选择有效的.json文件")

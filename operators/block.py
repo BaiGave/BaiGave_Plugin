@@ -3,12 +3,12 @@ import bmesh
 from .model import create_mesh,add_mesh_to_collection,extract_vertices_from_elements,get_or_create_material,set_uv
 import math
 
-def block(textures,elements,display,position,rot,filename,has_air):
+def block(textures,elements,position,rot,filename,has_air):
     collection = bpy.context.collection
     mesh_name = filename
     mesh = create_mesh(mesh_name)
     obj = add_mesh_to_collection(collection, mesh)
-    
+    print(filename)
     vertices = []
     faces = []
     direction = []
@@ -17,7 +17,7 @@ def block(textures,elements,display,position,rot,filename,has_air):
     uv_rotation_list = []
     vertices_dict ={}
 
-    vertices,faces,direction,texture_list,uv_list,uv_rotation_list = extract_vertices_from_elements(textures, elements, display, has_air, None,[0,0,0], vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
+    vertices,faces,direction,texture_list,uv_list,uv_rotation_list = extract_vertices_from_elements(textures, elements, has_air, None,[0,0,0], vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
     
     bm = bmesh.new()
     for v in vertices:
