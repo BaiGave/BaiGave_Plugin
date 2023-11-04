@@ -104,9 +104,15 @@ class ImportSchem(bpy.types.Operator):
             
         # 遍历字典的键值对
         d = {}
-        
         nbt_data = amulet_nbt._load_nbt.load(self.filepath)
-        
+        BlockData=[]
+        for id in range(0,len(nbt_data["BlockData"])):
+            BlockData.append(nbt_data["BlockData"][id])
+            if nbt_data["BlockData"][id-1]>=128 and nbt_data["BlockData"][id]==1:
+                BlockData.pop()
+        #for qw in nbt_data["BlockData"]:
+            #print(qw)
+        #print(nbt_data["BlockData"])
         Palette = dict(nbt_data["Palette"])
         Palette = {int(v): k for k, v in Palette.items()}
         size = {
@@ -117,8 +123,8 @@ class ImportSchem(bpy.types.Operator):
         def get_block_data(x, y, z):
             if 0 <= x < size["x"] and 0 <= y < size["y"] and 0 <= z < size["z"]:
                 index = y * size["x"]* size["z"] + z* size["x"] + x
-                if 0 <= index < len(nbt_data["BlockData"]):
-                    return nbt_data["BlockData"][index]
+                if 0 <= index < len(BlockData):
+                    return BlockData[index]
             return None
 
         # 遍历 x, y, z 坐标
