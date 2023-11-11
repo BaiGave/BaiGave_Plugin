@@ -1,4 +1,5 @@
 import bpy
+
 #主面板
 class MainPanel(bpy.types.Panel):
     bl_label ="白给的工具"
@@ -7,7 +8,13 @@ class MainPanel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category ='白给的工具'
     bl_options = {'HEADER_LAYOUT_EXPAND'}
-    
+
+    def __init__(self) -> None:
+        if not hasattr(bpy.types.Scene, "mods_dir_read"):
+            bpy.ops.baigave.read_mods_dir()
+            bpy.types.Scene.mods_dir_read = True
+        super().__init__()
+
     def draw(self,context):
         layout = self.layout
         row = layout.row()
@@ -118,18 +125,77 @@ class ResourcepacksPanel(bpy.types.Panel):
     #bl_options = {'DEFAULT_CLOSED'}
 
     def __init__(self) -> None:
-        bpy.ops.view3d.read_dir()
+        bpy.ops.baigave.read_dir()
         super().__init__()
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(context.scene, "view3d_read_dir", text="路径")  # 添加路径字段
+        layout.prop(context.scene, "resourcepacks_dir", text="路径")  # 添加路径字段
 
         scene = context.scene
-        row = layout.row()
-
         # 使用layout.template_list显示UIList
         my_properties = scene.my_properties 
-        layout.template_list("MyFileList", "", my_properties, "my_list", my_properties, "my_list_index")
+        layout.template_list("ResourcepackList", "", my_properties, "resourcepack_list", my_properties, "resourcepack_list_index")
         # 添加打印选中项目的按钮
         layout.operator("view3d.print_selected_item", text="更改资源包")
+
+#模组界面
+class ModPanel(bpy.types.Panel):
+    bl_label = "Mod 面板"
+    bl_idname = "ModPanel"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'BaiGave'
+    bl_parent_id = 'MainPanel'
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+        my_properties = scene.my_properties 
+        row = layout.row()
+        # 添加 Minecraft 版本选择
+        row.label(text="选择 Minecraft 版本:")
+        row = layout.row()
+        row.prop(scene, "version_list", text="")
+        row = layout.row()
+        row.label(text="已加载的模组：")
+        row = layout.row()
+        # 使用template_list来显示模组列表
+        row.template_list("ModList", "", my_properties, "mod_list", my_properties, "mod_list_index")
+        col = row.column(align=True)
+         # 上下移动按钮
+        col.operator("my.move_mod_item", text="", icon='TRIA_UP').direction = 'UP'
+        col.operator("my.move_mod_item", text="", icon='TRIA_DOWN').direction = 'DOWN'    
+
+
+# -----------------------------------------------------------------------------
+# UIList
+# -----------------------------------------------------------------------------
+
+# 定义 UIList 类 ResourcepackList
+class ResourcepackList(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            layout.label(text=item.name)
+
+# 定义 UIList 类 ModList
+class ModList(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            # 显示模组名称、图标和描述
+            row = layout.row(align=True)
+            row.label(text=item.name)
+            row.label(text=item.description)
+
+classes=[ResourcepackList,ModList,MainPanel,RigPanel,BlockPanel,WorldPanel,ModPanel,ResourcepacksPanel]
+
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    
+def unregister():
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+        

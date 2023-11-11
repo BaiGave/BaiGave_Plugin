@@ -5,7 +5,7 @@ import random
 import pickle
 import threading
 import subprocess
-import sys
+import json
 
 from .block import block
 from .level import create_level
@@ -16,6 +16,7 @@ from .schem import schem,schem_p,schem_leaves,schem_liquid,schem_dirtgrass,schem
 from .generate import generate
 from .chunk  import chunk as create_chunk
 from .schem import schem_all,schem
+from .functions import read_jar_files_and_extract_data
 
 import gzip
 import amulet
@@ -26,35 +27,98 @@ logging.getLogger("amulet").setLevel(logging.FATAL)
 logging.getLogger("PyMCTranslate").setLevel(logging.FATAL)
 
 
-
-
-# 定义 Operator 类 VIEW3D_read_dir
-class VIEW3D_read_dir(bpy.types.Operator):
+class Read_mods_dir(bpy.types.Operator):
     """读取目录"""
-    bl_idname = "view3d.read_dir"
+    bl_idname = "baigave.read_mods_dir"
     bl_label = "读取目录"
     
     def execute(self, context):
         scene = context.scene
         my_properties = scene.my_properties
-        my_properties.my_list.clear()
+        my_properties.mod_list.clear()
 
-        path = context.scene.view3d_read_dir  # 使用自定义路径
+        path = scene.mods_dir  # 使用自定义路径
+
+        # 创建一个函数，该函数将在新线程中运行
+        def worker_thread():
+            # 初始化版本号列表和Mod列表
+            versions, modids, icons, names, descriptions = read_jar_files_and_extract_data(path)
+            # 清除之前的列表内容
+            my_properties.mod_list.clear()
+            # 获取目标文件路径
+            json_file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "icons", "modid.json")
+            for i in range(len(modids)):
+                icon_path = scene.icons_dir + "\\" + icons[i]
+                mod_item = my_properties.mod_list.add()
+                mod_item.name = names[i]
+                mod_item.description = descriptions[i]
+                mod_item.icon = icons[i]
+            # 打印my_properties.mod_list列表
+            for item in my_properties.mod_list:
+                print(f"Name: {item.name}, Description: {item.description}, Icon: {item.icon}")
+            # 我的世界版本列表    
+            version_items = [(ver, ver, f"Description for {ver}") for ver in versions]
+            bpy.types.Scene.version_list = bpy.props.EnumProperty(
+                name="版本列表",
+                description="选择版本",
+                items=version_items
+            )
+            # 清除之前的内容
+            if os.path.exists(json_file_path):
+                os.remove(json_file_path)
+            modids.append(("minecraft",versions[1]))
+            # 写入新的内容
+            with open(json_file_path, 'w') as json_file:
+                json.dump(modids, json_file)
+        # 创建并启动新线程
+        thread = threading.Thread(target=worker_thread)
+        thread.start()
+        
+        return {'FINISHED'}
+
+
+# 定义 Operator 类 VIEW3D_read_dir
+class VIEW3D_read_dir(bpy.types.Operator):
+    """读取目录"""
+    bl_idname = "baigave.read_dir"
+    bl_label = "读取目录"
+    
+    def execute(self, context):
+        scene = context.scene
+        my_properties = scene.my_properties
+        my_properties.resourcepack_list.clear()
+
+        path = context.scene.resourcepacks_dir  # 使用自定义路径
 
         for path, dirs, files in os.walk(path):
             for filename in files:
                 if filename.lower().endswith(".zip"):  # 检查文件扩展名
                     # 将文件名添加到列表属性
-                    item = my_properties.my_list.add()
+                    item = my_properties.resourcepack_list.add()
                     item.name = filename.replace(".zip", "")
-
         return {'FINISHED'}
     
-# 定义 UIList 类 MyFileList
-class MyFileList(bpy.types.UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            layout.label(text=item.name)
+
+# 添加一个操作类来处理上下移动和删除模组
+class MoveModItem(bpy.types.Operator):
+    bl_idname = "my.move_mod_item"
+    bl_label = "Move Mod Item"
+    direction: bpy.props.StringProperty()  # 'UP' or 'DOWN'
+
+    def execute(self, context):
+        scene = context.scene
+        my_properties = scene.my_properties
+        mod_list = my_properties.mod_list
+        index = my_properties.mod_list_index
+
+        if self.direction == 'UP' and index > 0:
+            mod_list.move(index, index - 1)
+            my_properties.mod_list_index -= 1
+        elif self.direction == 'DOWN' and index < len(mod_list) - 1:
+            mod_list.move(index, index + 1)
+            my_properties.mod_list_index += 1
+
+        return {'FINISHED'}
 
 class PRINT_SELECTED_ITEM(bpy.types.Operator):
     """打印选中的项目"""
@@ -64,8 +128,8 @@ class PRINT_SELECTED_ITEM(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         my_properties = scene.my_properties
-        selected_item = my_properties.my_list[my_properties.my_list_index]
-        zip_file_path = context.scene.view3d_read_dir + "\\" + selected_item.name + ".zip"  # 使用自定义路径
+        selected_item = my_properties.resourcepack_list[my_properties.resourcepack_list_index]
+        zip_file_path = context.scene.resourcepacks_dir + "\\" + selected_item.name + ".zip"  # 使用自定义路径
         mcmeta_content = ""
 
         try:
@@ -88,7 +152,6 @@ class ImportSchem(bpy.types.Operator):
     
     # 定义一个属性来存储文件路径
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    
     # 定义一个属性来过滤文件类型，只显示.schem文件
     filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
 
@@ -110,9 +173,7 @@ class ImportSchem(bpy.types.Operator):
             BlockData.append(nbt_data["BlockData"][id])
             if nbt_data["BlockData"][id-1]>=128 and nbt_data["BlockData"][id]==1:
                 BlockData.pop()
-        #for qw in nbt_data["BlockData"]:
-            #print(qw)
-        #print(nbt_data["BlockData"])
+        
         Palette = dict(nbt_data["Palette"])
         Palette = {int(v): k for k, v in Palette.items()}
         size = {
@@ -123,8 +184,9 @@ class ImportSchem(bpy.types.Operator):
         def get_block_data(x, y, z):
             if 0 <= x < size["x"] and 0 <= y < size["y"] and 0 <= z < size["z"]:
                 index = y * size["x"]* size["z"] + z* size["x"] + x
-                if 0 <= index < len(BlockData):
-                    return BlockData[index]
+                if 0 <= index < len(nbt_data["BlockData"]):
+                    if 0 <= index < len(BlockData):
+                        return BlockData[index]
             return None
 
         # 遍历 x, y, z 坐标
@@ -138,7 +200,6 @@ class ImportSchem(bpy.types.Operator):
                     else:
                         print("a")
                         d[(x, z, y)] = "minecraft:air"
-        #print(d)
         # print("x*y*z:"+str(size["x"]*size["y"]*size["z"]))
         # print(len(nbt_data["BlockData"]))
         # 设置图片的大小和颜色
@@ -456,9 +517,10 @@ class Importjson(bpy.types.Operator):
         if os.path.isfile(self.filepath) and self.filepath.endswith(".json"):
             # 获取文件名
             filename = os.path.basename(self.filepath)
-            textures, elements = get_all_data(os.path.dirname(self.filepath)+"\\", filename)
+            textures, elements,parent = get_all_data(os.path.dirname(self.filepath)+"\\", filename)
             position = [0, 0, 0]
             has_air = [True, True, True, True, True, True]
+            print(textures)
             block(textures, elements, position,[0,0,0], filename, has_air)
             return {'FINISHED'}
         else:
@@ -623,3 +685,19 @@ class ImportWorld(bpy.types.Operator):
     def process_chunk(self, level,chunk, x, z):
         vertices,faces,texture_list,uv_list,direction,uv_rotation_list = create_chunk(chunk, level)
         generate(x, z, vertices, faces, texture_list, uv_list, direction, uv_rotation_list)
+
+classes=[ImportSchem,ImportSchemPlants,ImportSchemLeaves,ImportSchemLiquid,ImportSchemSnow,ImportSchemDeepStone,
+         ImportSchemDirtGrass,ImportSchemOthers,ImportSchemSandGravel,Importjson,ImportWorld,SelectArea, GenerateWorld,
+         VIEW3D_read_dir,Read_mods_dir, PRINT_SELECTED_ITEM,MoveModItem]
+
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    
+    
+def unregister():
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+        
+    

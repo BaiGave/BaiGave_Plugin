@@ -1,9 +1,7 @@
 import bpy
 import bmesh
 from .model import create_mesh,add_mesh_to_collection,get_or_create_material,set_uv
-from .cullblocks import CullBlocks
 from .blockstates import blockstates
-
 from .classification import flowers,leaves,liquid,exclude,sea_plants,air_blocks
 import numpy as np
 from .block import block
@@ -38,8 +36,7 @@ def schem_p(d, filename="", position=(0, 0, 0)):
     for key, value in d.items():
         result = remove_brackets(value)
         if result in flowers:
-            has_air = [True, True,True, True, True,True]
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, value,has_air,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
+            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, d, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
             
     collection = bpy.context.collection
     mesh_name = filename
@@ -99,8 +96,7 @@ def schem_leaves(d,filename="",position=(0,0,0)):
     for key, value in d.items():
         result = remove_brackets(value)
         if result in leaves:
-            has_air = [True, True,True, True, True,True]
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, value,has_air,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
+            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, d, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
             
     collection = bpy.context.collection
     mesh_name = filename
@@ -239,13 +235,12 @@ def schem_all(d,filename="a"):
                     filepath = get_file_path(filepath, 'm')
                     dirname, filename = os.path.split(filepath)
                     dirname = dirname + '\\'
-                    textures, elements, display = get_all_data(dirname, filename)
+                    textures, elements, parent = get_all_data(dirname, filename)
                 except:
                     textures = {}
                     elements = []
-                    display = {}
                     pass
-                block(textures,elements,display,(pos[0],-pos[1]-1,pos[2]),rotation,filename,has_air)
+                block(textures,elements,(pos[0],-pos[1]-1,pos[2]),rotation,filename,has_air)
 #流体
 def schem_liquid(d, filename="", position=(0, 0, 0)):
     vertices = []
@@ -446,8 +441,6 @@ def schem_liquid(d, filename="", position=(0, 0, 0)):
     bm.free()
 
 
-
-
 def schem(d,filename="",position=(0,0,0)):
     vertices = []
     faces = []
@@ -460,7 +453,8 @@ def schem(d,filename="",position=(0,0,0)):
     for key, value in d.items():
         result = remove_brackets(value)
         if result not in exclude:
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
+            
+            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, d, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
             
     collection = bpy.context.collection
     mesh_name = filename
@@ -521,7 +515,7 @@ def schem_dirtgrass(d,filename="",position=(0,0,0)):
     for key, value in d.items():
         result = remove_brackets(value)
         if result == "minecraft:dirt" or result == "minecraft:grass_block":
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
+            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, d, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
             
     collection = bpy.context.collection
     mesh_name = filename
@@ -583,7 +577,7 @@ def schem_deepstone(d,filename="",position=(0,0,0)):
     for key, value in d.items():
         result = remove_brackets(value)
         if result == "minecraft:stone" or result == "minecraft:deepslate":
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
+            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, d, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
             
     collection = bpy.context.collection
     mesh_name = filename
@@ -643,7 +637,7 @@ def schem_sandgravel(d,filename="",position=(0,0,0)):
     for key, value in d.items():
         result = remove_brackets(value)
         if result == "minecraft:sand" or result == "minecraft:gravel":
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
+            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, d, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
             
     collection = bpy.context.collection
     mesh_name = filename
@@ -703,7 +697,7 @@ def schem_snow(d,filename="",position=(0,0,0)):
     for key, value in d.items():
         result = remove_brackets(value)
         if result == "minecraft:snow" or result == "minecraft:snow_block" or result == "minecraft:powder_snow":
-            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = CullBlocks(key, d,vertices,faces,direction,texture_list,uv_list,uv_rotation_list,vertices_dict)
+            vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, d, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
             
     collection = bpy.context.collection
     mesh_name = filename

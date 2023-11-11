@@ -240,6 +240,20 @@ class Settings(bpy.types.PropertyGroup):
     Layer3d : bpy.props.BoolProperty( name="3d", description="A simple bool property",
      default = False ,update = layer3d)
     
+classes=[Settings,SPAWN_MODEL]
+
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    bpy.types.Scene.BaiGave = bpy.props.PointerProperty(type = Settings)
+    
+    
+def unregister():
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+        
     
         
 
