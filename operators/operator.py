@@ -145,6 +145,8 @@ class PRINT_SELECTED_ITEM(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
+
 # 定义一个导入.schem文件的操作类
 class ImportSchem(bpy.types.Operator):
     bl_idname = "baigave.import_schem"
@@ -164,44 +166,32 @@ class ImportSchem(bpy.types.Operator):
         for file_name in file_names:
             file_path = os.path.join(folder_path, file_name)
             os.remove(file_path)
-            
+        
+        
         # 遍历字典的键值对
         d = {}
-        nbt_data = amulet_nbt._load_nbt.load(self.filepath)
-        BlockData=[]
-        for id in range(0,len(nbt_data["BlockData"])):
-            BlockData.append(nbt_data["BlockData"][id])
-            if nbt_data["BlockData"][id-1]>=128 and nbt_data["BlockData"][id]==1:
-                BlockData.pop()
+        a = amulet.load_level(self.filepath)
+        a.translation_manager.platforms()
+        bounds =a.bounds("main").bounds
+        # 遍历边界内的每个坐标
+        for x in range(bounds[0][0], bounds[1][0]):
+            for y in range(bounds[0][1], bounds[1][1]):
+                for z in range(bounds[0][2], bounds[1][2]):
+                    # 获取坐标处的方块
+                    id = a.get_block(x, y, z, "main")
+                    id =str(a.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(id)[0])
+                    #block = convert_block_state(block)
+                    # 将方块和坐标添加到字典中
+                    d[(x-bounds[0][0], z-bounds[0][2], y-bounds[0][1])] = id.replace('"', '')
         
-        Palette = dict(nbt_data["Palette"])
-        Palette = {int(v): k for k, v in Palette.items()}
+        nbt_data = amulet_nbt._load_nbt.load(self.filepath)
         size = {
             "x":int(nbt_data["Width"]),
             "y":int(nbt_data["Height"]),
             "z":int(nbt_data["Length"])
         }
-        def get_block_data(x, y, z):
-            if 0 <= x < size["x"] and 0 <= y < size["y"] and 0 <= z < size["z"]:
-                index = y * size["x"]* size["z"] + z* size["x"] + x
-                if 0 <= index < len(nbt_data["BlockData"]):
-                    if 0 <= index < len(BlockData):
-                        return BlockData[index]
-            return None
 
-        # 遍历 x, y, z 坐标
-        for x in range(size["x"]):
-            for y in range(size["y"]):
-                for z in range(size["z"]):
-                    block_data = get_block_data(x, y, z)
-                    if block_data is not None:
-                        block_id = Palette.get(block_data)
-                        d[(x, z, y)] = str(block_id)
-                    else:
-                        print("a")
-                        d[(x, z, y)] = "minecraft:air"
-        # print("x*y*z:"+str(size["x"]*size["y"]*size["z"]))
-        # print(len(nbt_data["BlockData"]))
+        #print(d)
         # 设置图片的大小和颜色
         image_width = int(size["z"])
         image_height = int(size["x"])
@@ -230,8 +220,6 @@ class ImportSchem(bpy.types.Operator):
         with open(VarCachePath, 'rb') as file:
             d,schempath = pickle.load(file)
         
-        #bpy.context.space_data.shading.color_type = 'TEXTURE'
-        #bpy.context.space_data.overlay.show_stats = True
 
         #多进程导入模型
         def import_schems():

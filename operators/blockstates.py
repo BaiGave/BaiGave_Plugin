@@ -70,8 +70,11 @@ def get_parent(id):
     if start_index != -1 and end_index != -1:
         properties_str = id[start_index + 1:end_index]
         for prop in properties_str.split(','):
-            key, value = prop.split('=')
-            properties_dict[key.strip().replace('"', '')] = value.strip().replace('"', '')
+            try:
+                key, value = prop.split('=')
+                properties_dict[key.strip().replace('"', '')] = value.strip().replace('"', '')
+            except:
+                pass
 
     try:
         with open(filepath, "r") as f:
@@ -140,8 +143,11 @@ def get_model(id):
     if start_index != -1 and end_index != -1:
         properties_str = id[start_index + 1:end_index]
         for prop in properties_str.split(','):
-            key, value = prop.split('=')
-            properties_dict[key.strip().replace('"', '')] = value.strip().replace('"', '')
+            try:
+                key, value = prop.split('=')
+                properties_dict[key.strip().replace('"', '')] = value.strip().replace('"', '')
+            except:
+                pass
 
     try:
         with open(filepath, "r") as f:
