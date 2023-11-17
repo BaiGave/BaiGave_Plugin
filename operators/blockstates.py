@@ -153,6 +153,8 @@ def get_model(id):
         with open(filepath, "r") as f:
             data = json.load(f)
             filepath = ""
+            textures = {}
+            elements = []
             if "variants" in data:
                 for key, value in data["variants"].items():
                     key_props = key.split(",")
@@ -168,7 +170,13 @@ def get_model(id):
                             rotation[2] = 360 - value["y"]
                         if "x" in value:
                             rotation[0] = value["x"]
-                        break
+                        filepath = get_file_path(filepath, 'm')
+                        dirname, filename = os.path.split(filepath)
+                        dirname = dirname + '\\'
+                        t, e, _ = get_all_data(dirname, filename)
+                        textures.update(t)
+                        elements.extend(e)
+                        
             elif "multipart" in data:
                 for part in data["multipart"]:
                     if "when" in part:
@@ -177,23 +185,51 @@ def get_model(id):
                             when[key] == properties_dict[key] if key in properties_dict else False
                             for key in when
                         )
-
                         if flag:
                             apply = part["apply"]
                             filepath = apply["model"] if "model" in apply else ""
-                            if "y" in value:
-                                rotation[2] = 360 - value["y"]
-                            if "x" in value:
-                                rotation[0] = value["x"]
-                            break
+                            # if "y" in value:
+                            #     rotation[2] = 360 - value["y"]
+                            # if "x" in value:
+                            #     rotation[0] = value["x"]
+
+                            filepath = get_file_path(filepath, 'm')
+                            dirname, filename = os.path.split(filepath)
+                            dirname = dirname + '\\'
+                            t, e, _ = get_all_data(dirname, filename)
+                            if "y" in apply:
+                                for item in e:
+                                    item["rotation"] = {"angle": 360-apply["y"], "axis": "y", "origin": [0, 0, 0]}
+                                print(e)
+                            textures.update(t)
+                            elements.extend(e)
+
+                    elif "when" not in part:
+                        apply = part["apply"]
+                        filepath = apply["model"] if "model" in apply else ""
+                        # if "y" in value:
+                        #     rotation[2] = 360 - value["y"]
+                        # if "x" in value:
+                        #     rotation[0] = value["x"]
+                        filepath = get_file_path(filepath, 'm')
+                        dirname, filename = os.path.split(filepath)
+                        dirname = dirname + '\\'
+                        t, e, _ = get_all_data(dirname, filename)
+                        if "y" in apply:
+                            print(apply["y"])
+                            for item in e:
+                                item["rotation"] = {"angle": 360-apply["y"], "axis": "y", "origin": [0, 0, 0]}
+                            print(e)
+                        textures.update(t)
+                        elements.extend(e)
 
             if filepath == "":
                 print("No matching model found")
 
-        filepath = get_file_path(filepath, 'm')
-        dirname, filename = os.path.split(filepath)
-        dirname = dirname + '\\'
-        textures, elements, _ = get_all_data(dirname, filename)
+        # filepath = get_file_path(filepath, 'm')
+        # dirname, filename = os.path.split(filepath)
+        # dirname = dirname + '\\'
+        # textures, elements, _ = get_all_data(dirname, filename)
 
         # 将模型数据缓存起来
         cached_models[id] = (textures, elements, rotation)

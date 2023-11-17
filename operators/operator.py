@@ -22,9 +22,7 @@ import gzip
 import amulet
 import amulet_nbt
 import zipfile
-import logging
-logging.getLogger("amulet").setLevel(logging.FATAL)
-logging.getLogger("PyMCTranslate").setLevel(logging.FATAL)
+
 
 
 class Read_mods_dir(bpy.types.Operator):
@@ -191,7 +189,6 @@ class ImportSchem(bpy.types.Operator):
             "z":int(nbt_data["Length"])
         }
 
-        #print(d)
         # 设置图片的大小和颜色
         image_width = int(size["z"])
         image_height = int(size["x"])
