@@ -17,7 +17,7 @@ class Property(bpy.types.PropertyGroup):
     )
     bpy.types.Scene.resourcepacks_dir = bpy.props.StringProperty(
         name="资源包路径",
-        default="C:\\Users\\user\\Desktop\\BaiGave_Plugin\\resourcepacks"
+        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "resourcepacks")
     )
     bpy.types.Scene.is_weld = bpy.props.BoolProperty(name="合并重叠顶点", default=True)
     

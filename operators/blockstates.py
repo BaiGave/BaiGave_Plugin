@@ -176,8 +176,9 @@ def get_model(id):
                         t, e, _ = get_all_data(dirname, filename)
                         textures.update(t)
                         elements.extend(e)
-                        
+            #这里有问题
             elif "multipart" in data:
+                temp_ele= []
                 for part in data["multipart"]:
                     if "when" in part:
                         when = part["when"]
@@ -188,41 +189,33 @@ def get_model(id):
                         if flag:
                             apply = part["apply"]
                             filepath = apply["model"] if "model" in apply else ""
-                            # if "y" in value:
-                            #     rotation[2] = 360 - value["y"]
-                            # if "x" in value:
-                            #     rotation[0] = value["x"]
-
                             filepath = get_file_path(filepath, 'm')
                             dirname, filename = os.path.split(filepath)
                             dirname = dirname + '\\'
                             t, e, _ = get_all_data(dirname, filename)
                             if "y" in apply:
+                                temp_element = []
                                 for item in e:
-                                    item["rotation"] = {"angle": 360-apply["y"], "axis": "y", "origin": [0, 0, 0]}
-                                print(e)
+                                    item["rotation"] = {"angle": 360 - apply["y"],"axis": "y","origin": [8, 8, 8]}
+                                    temp_element.append(item)
+                                    #print(temp_element)
                             textures.update(t)
-                            elements.extend(e)
-
+                            #elements.extend(e)
+                            for t in temp_element:
+                                #print(t)
+                                temp_ele.append(t)
+                            print(temp_ele)
+                        
                     elif "when" not in part:
                         apply = part["apply"]
                         filepath = apply["model"] if "model" in apply else ""
-                        # if "y" in value:
-                        #     rotation[2] = 360 - value["y"]
-                        # if "x" in value:
-                        #     rotation[0] = value["x"]
                         filepath = get_file_path(filepath, 'm')
                         dirname, filename = os.path.split(filepath)
                         dirname = dirname + '\\'
                         t, e, _ = get_all_data(dirname, filename)
-                        if "y" in apply:
-                            print(apply["y"])
-                            for item in e:
-                                item["rotation"] = {"angle": 360-apply["y"], "axis": "y", "origin": [0, 0, 0]}
-                            print(e)
                         textures.update(t)
                         elements.extend(e)
-
+                
             if filepath == "":
                 print("No matching model found")
 
@@ -233,6 +226,7 @@ def get_model(id):
 
         # 将模型数据缓存起来
         cached_models[id] = (textures, elements, rotation)
+        #print(elements)
         return textures, elements, rotation
 
     except Exception as e:

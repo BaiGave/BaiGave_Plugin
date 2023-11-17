@@ -55,7 +55,7 @@ def get_all_data(filepath, filename):
             extract_textures_and_elements(data)
             textures, elements = process_data(data)
 
-        file_data_cache[(filepath, filename)] = (textures, elements,parent)
+        file_data_cache[(filepath, filename)] = (textures, elements , parent)
     return textures, elements ,parent
 
 
