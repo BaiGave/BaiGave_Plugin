@@ -242,7 +242,6 @@ def schem_all(d,filename="a",position=(0,0,0)):
     vertices_dict ={}
 
     for key, value in d.items():
-        result = remove_brackets(value) 
         vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates(key, d, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
             
     collection = bpy.context.collection

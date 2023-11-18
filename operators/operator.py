@@ -157,6 +157,7 @@ class ImportNBT(bpy.types.Operator):
     def execute(self, context):
         # 获取文件路径
         filepath = self.filepath
+        start_time = time.time()
         data = amulet_nbt.load(filepath)
         
         blocks =data["blocks"]
@@ -170,10 +171,24 @@ class ImportNBT(bpy.types.Operator):
             pos = tuple(tag.value for tag in pos_tags)  
             state = block['state'].value 
             block_name = palette[state]['Name'].value if 'Name' in palette[state] else palette[state]['nbt']['name'].value
+            if 'Properties' in palette[state]:
+                block_state = palette[state]['Properties'].value
+                block_state = ', '.join([f'{k}:{v}' for k, v in block_state.items()])
+            elif 'nbt' in palette[state] and 'name' in palette[state]['nbt']:
+                block_state = palette[state]['nbt']['name'].value
+                block_state = ', '.join([f'{k}:{v}' for k, v in block_state.items()])
+            else:
+                block_state = None
             
-            d[(pos[0],pos[2],pos[1])] = block_name
-        schem_all(d)
+            if block_state is not None:
+                d[(pos[0],pos[2],pos[1])] = str(block_name)+"["+block_state+"]"
+            else:
+                d[(pos[0],pos[2],pos[1])] = block_name
+        end_time = time.time()
         #print(d)
+        print("代码块执行时间：", end_time - start_time, "秒")
+        schem_all(d)
+        
         return {'FINISHED'}
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
