@@ -26,6 +26,7 @@ def blockstates(coord, d, vertices, faces, direction, texture_list, uv_list, uv_
                     has_air[i] = False
                 if parent =="yuushya:block/template_column":
                     has_air[i] = False
+        
         if any(has_air):
             textures,elements,rotation =get_model(id)
             has_air = [has_air[2], has_air[3], has_air[0], has_air[1], has_air[5], has_air[4]]

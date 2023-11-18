@@ -144,6 +144,40 @@ class PRINT_SELECTED_ITEM(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class ImportNBT(bpy.types.Operator):
+    bl_idname = "baigave.import_nbt"
+    bl_label = "导入.nbt文件"
+    
+    # 定义一个属性来存储文件路径
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    # 定义一个属性来过滤文件类型，只显示.nbt文件
+    filter_glob: bpy.props.StringProperty(default="*.nbt", options={'HIDDEN'})
+
+    # 定义操作的执行函数
+    def execute(self, context):
+        # 获取文件路径
+        filepath = self.filepath
+        data = amulet_nbt.load(filepath)
+        
+        blocks =data["blocks"]
+        entities = data["entities"]
+        palette = data["palette"]
+        size = data["size"]
+        d = {}  
+
+        for block in blocks:
+            pos_tags = block['pos']  
+            pos = tuple(tag.value for tag in pos_tags)  
+            state = block['state'].value 
+            block_name = palette[state]['Name'].value if 'Name' in palette[state] else palette[state]['nbt']['name'].value
+            
+            d[(pos[0],pos[2],pos[1])] = block_name
+        schem_all(d)
+        #print(d)
+        return {'FINISHED'}
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
 # 定义一个导入.schem文件的操作类
 class ImportSchem(bpy.types.Operator):
@@ -673,7 +707,7 @@ class ImportWorld(bpy.types.Operator):
 
 classes=[ImportSchem,ImportSchemPlants,ImportSchemLeaves,ImportSchemLiquid,ImportSchemSnow,ImportSchemDeepStone,
          ImportSchemDirtGrass,ImportSchemOthers,ImportSchemSandGravel,Importjson,ImportWorld,SelectArea, GenerateWorld,
-         VIEW3D_read_dir,Read_mods_dir, PRINT_SELECTED_ITEM,MoveModItem]
+         VIEW3D_read_dir,Read_mods_dir, PRINT_SELECTED_ITEM,MoveModItem,ImportNBT]
 
 
 def register():
