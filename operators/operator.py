@@ -143,6 +143,7 @@ class PRINT_SELECTED_ITEM(bpy.types.Operator):
 
         return {'FINISHED'}
 
+from amulet_nbt import TAG_String, TAG_Compound
 
 class ImportNBT(bpy.types.Operator):
     bl_idname = "baigave.import_nbt"
@@ -162,7 +163,12 @@ class ImportNBT(bpy.types.Operator):
         
         blocks =data["blocks"]
         entities = data["entities"]
-        palette = data["palette"]
+        if "palette" in data:
+            palette = data["palette"]
+        elif "palettes" in data:
+            palette = data["palettes"][3]
+           
+
         size = data["size"]
         d = {}  
 
@@ -173,10 +179,10 @@ class ImportNBT(bpy.types.Operator):
             block_name = palette[state]['Name'].value if 'Name' in palette[state] else palette[state]['nbt']['name'].value
             if 'Properties' in palette[state]:
                 block_state = palette[state]['Properties'].value
-                block_state = ', '.join([f'{k}:{v}' for k, v in block_state.items()])
+                block_state = ', '.join([f'{k}={v}' for k, v in block_state.items()])
             elif 'nbt' in palette[state] and 'name' in palette[state]['nbt']:
                 block_state = palette[state]['nbt']['name'].value
-                block_state = ', '.join([f'{k}:{v}' for k, v in block_state.items()])
+                block_state = ', '.join([f'{k}={v}' for k, v in block_state.items()])
             else:
                 block_state = None
             
@@ -185,7 +191,6 @@ class ImportNBT(bpy.types.Operator):
             else:
                 d[(pos[0],pos[2],pos[1])] = block_name
         end_time = time.time()
-        #print(d)
         print("代码块执行时间：", end_time - start_time, "秒")
         schem_all(d)
         

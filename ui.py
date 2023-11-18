@@ -9,11 +9,11 @@ class MainPanel(bpy.types.Panel):
     bl_category ='白给的工具'
     bl_options = {'HEADER_LAYOUT_EXPAND'}
 
-    def __init__(self) -> None:
-        if not hasattr(bpy.types.Scene, "mods_dir_read"):
-            bpy.ops.baigave.read_mods_dir()
-            bpy.types.Scene.mods_dir_read = True
-        super().__init__()
+    # def __init__(self) -> None:
+    #     if not hasattr(bpy.types.Scene, "mods_dir_read"):
+    #         bpy.ops.baigave.read_mods_dir()
+    #         bpy.types.Scene.mods_dir_read = True
+    #     super().__init__()
 
     def draw(self,context):
         layout = self.layout
@@ -94,6 +94,9 @@ class WorldPanel(bpy.types.Panel):
         
         row = layout.row()
         row.operator("baigave.import_schem", text="导入.schem文件")
+
+        row = layout.row()
+        row.operator("baigave.import_nbt", text="导入.nbt文件")
 
         row = layout.row()
         row.operator("object.add_sway_animation", text="草摇摆")

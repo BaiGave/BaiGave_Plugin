@@ -1,4 +1,6 @@
-import bpy
+import logging
+logging.getLogger("amulet").setLevel(logging.FATAL)
+logging.getLogger("PyMCTranslate").setLevel(logging.FATAL)
 import importlib
 
 bl_info={
