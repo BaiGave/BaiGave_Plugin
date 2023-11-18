@@ -18,10 +18,10 @@ def load_modid_list():
 
 mod_list = load_modid_list()
 
-def get_all_data(filepath, filename):
+def get_all_data(filepath, filename,rot=0):
     parent =None
-    if (filepath, filename) in file_data_cache:
-        textures, elements,parent = file_data_cache[(filepath, filename)]
+    if (filepath, filename,rot) in file_data_cache:
+        textures, elements,parent = file_data_cache[(filepath, filename,rot)]
     else:
         textures = {}
         elements = []
@@ -55,7 +55,7 @@ def get_all_data(filepath, filename):
             extract_textures_and_elements(data)
             textures, elements = process_data(data)
 
-        file_data_cache[(filepath, filename)] = (textures, elements , parent)
+        file_data_cache[(filepath, filename,rot)] = (textures, elements , parent)
     return textures, elements ,parent
 
 

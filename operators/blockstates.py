@@ -178,7 +178,6 @@ def get_model(id):
                         elements.extend(e)
             #这里有问题
             elif "multipart" in data:
-                temp_ele= []
                 for part in data["multipart"]:
                     if "when" in part:
                         when = part["when"]
@@ -192,19 +191,14 @@ def get_model(id):
                             filepath = get_file_path(filepath, 'm')
                             dirname, filename = os.path.split(filepath)
                             dirname = dirname + '\\'
-                            t, e, _ = get_all_data(dirname, filename)
                             if "y" in apply:
-                                temp_element = []
+                                t, e, _ = get_all_data(dirname, filename,apply["y"])
                                 for item in e:
                                     item["rotation"] = {"angle": 360 - apply["y"],"axis": "y","origin": [8, 8, 8]}
-                                    temp_element.append(item)
-                                    #print(temp_element)
+                            else:
+                                t, e, _ = get_all_data(dirname, filename)
                             textures.update(t)
-                            #elements.extend(e)
-                            for t in temp_element:
-                                #print(t)
-                                temp_ele.append(t)
-                            print(temp_ele)
+                            elements.extend(e)
                         
                     elif "when" not in part:
                         apply = part["apply"]
