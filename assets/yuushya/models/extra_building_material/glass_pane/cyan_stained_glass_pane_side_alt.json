@@ -1,7 +1,0 @@
-{
-  "parent": "yuushya:extra_building_material/glass_pane/template_glass_pane_side_alt",
-  "textures": {
-    "pane": "minecraft:block/cyan_stained_glass",
-    "edge": "minecraft:block/cyan_stained_glass_pane_top"
-  }
-}

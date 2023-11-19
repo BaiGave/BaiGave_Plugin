@@ -1,8 +1,0 @@
-{
-	"cwhiteit": "Yuushya",
-	"parent": "yuushya:extra_building_material/fence/horizontal_fence/template_fence_none",
-	"textures": {
-		"0": "yuushya:0extra_building_block/concrete/white_concrete_",
-		"particle": "#0"
-	}
-}

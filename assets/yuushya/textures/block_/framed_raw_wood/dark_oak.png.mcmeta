@@ -1,9 +1,0 @@
-{
-    "ctm":{
-        "ctm_version": 1,
-        "type":"CTM",
-        "textures":[
-            "yuushya:block_/framed_raw_wood/dark_oak_compact"
-        ]
-    }
-}

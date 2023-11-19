@@ -1,8 +1,0 @@
-{
-	"credit": "Yuushya",
-	"parent": "yuushya:extra_building_material/stairs/template_stairs_inner",
-	"textures": {
-		"0": "yuushya:0extra_building_block/stripped_dark_oak_planks",
-		"particle": "#0"
-	}
-}

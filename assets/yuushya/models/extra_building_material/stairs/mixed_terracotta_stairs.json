@@ -1,8 +1,0 @@
-{
-	"credit": "Yuushya",
-	"parent": "yuushya:extra_building_material/stairs/template_stairs",
-	"textures": {
-		"0": "yuushya:0extra_building_block/mixed_terracotta",
-		"particle": "#0"
-	}
-}

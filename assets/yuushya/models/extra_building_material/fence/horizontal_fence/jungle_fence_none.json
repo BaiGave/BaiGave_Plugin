@@ -1,8 +1,0 @@
-{
-	"credit": "Yuushya",
-	"parent": "yuushya:extra_building_material/fence/horizontal_fence/template_fence_none",
-	"textures": {
-		"0": "yuushya:0extra_building_block/no_strip/jungle",
-		"particle": "#0"
-	}
-}

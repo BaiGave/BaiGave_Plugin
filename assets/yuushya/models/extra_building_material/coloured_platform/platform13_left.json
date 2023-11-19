@@ -1,6 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/template_platform_left",
-    "textures": {
-        "0": "yuushya:0extra_building_block/concrete/green_concrete_"
-    }
-}

@@ -1,6 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/cross",
-    "textures": {
-        "cross": "minecraft:block/blue_orchid"
-    }
-}

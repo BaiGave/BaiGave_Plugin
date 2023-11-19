@@ -1,6 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/wire/template",
-      "textures": { 
-      "0": "yuushya:0extra_building_material/preview/power_line/1"}
-    }
-}
