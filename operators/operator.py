@@ -392,7 +392,7 @@ class ImportSchem(bpy.types.Operator):
             # 多线程防止blender卡死  
             # threading.Thread(target=import_schems).start()
             '''以上会闪退'''
-            #import_schems()
+            import_schems()
             return {'FINISHED'}
     
     def invoke(self, context, event):
