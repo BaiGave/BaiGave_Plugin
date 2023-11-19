@@ -17,7 +17,7 @@ from .functions import get_all_data
 from .schem import schem_all,schem_liquid
 from .generate import generate
 from .chunk  import chunk as create_chunk
-from .schem import schem_all,schem
+from .schem import schem_all
 from .functions import read_jar_files_and_extract_data
 
 import gzip
@@ -265,8 +265,8 @@ class ImportSchem(bpy.types.Operator):
                         d[(x-chunks[0][0], z-chunks[0][2], y-chunks[0][1])] = id.replace('"', '')
             
             #测试，把每个方块都单独作为一个物体生成出来
-            #schem_all(d)
-            #schem_liquid(d)
+            schem_all(d)
+            schem_liquid(d)
             #测试 单独导出自定义方块
             #schem(d)
             materials = bpy.data.materials
