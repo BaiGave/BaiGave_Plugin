@@ -63,6 +63,7 @@ def get_parent(id):
 
     block_name = id.split('[')[0]
     filepath = get_file_path(block_name, 's')
+
     start_index = id.find('[')
     end_index = id.find(']')
     properties_dict = {}
@@ -108,9 +109,7 @@ def get_parent(id):
                             break
 
             if filepath == "":
-                return None
                 print("No matching model found")
-                
 
         filepath = get_file_path(filepath, 'm')
         dirname, filename = os.path.split(filepath)
@@ -128,7 +127,6 @@ def get_parent(id):
 
 # 使用字典来缓存已经计算过的方块ID与其对应的模型数据，避免重复调用
 cached_models = {}
-
 
 def get_model(id):
     # 如果已经计算过该方块ID的模型数据，直接返回缓存中的结果
@@ -214,7 +212,6 @@ def get_model(id):
                         elements.extend(e)
                 
             if filepath == "":
-                print(id)
                 print("No matching model found")
 
         # filepath = get_file_path(filepath, 'm')
