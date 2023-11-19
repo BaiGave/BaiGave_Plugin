@@ -59,17 +59,16 @@ def unzip_files():
             version = None
             file_name_parts = file_name.replace('.jar', '').split('_')
             for part in file_name_parts:
-                if all(char.isdigit() or char == '.' for char in part):
+                if all(char.isdigit() or char == '.' for char in part) and part.count('.') <= 2:
                     version = part
-                    break   
+                    break
+
+
             
             # 解压文件
             with zipfile.ZipFile(file_path, 'r') as zip_ref:
                 mod_id = None 
                 for member in zip_ref.namelist():
-                    if version:
-                        mod_id = "minecraft"
-                        break
                     # 判断是否存在fabric.mod.json，若存在则读取其中的modid
                     if member == 'fabric.mod.json':
                         with zip_ref.open(member) as mod_json_file:
@@ -94,15 +93,20 @@ def unzip_files():
                             else:
                                 print(f"在 {file_name} 中找不到 'mods' 条目")
                         break
+                    elif version and mod_id is not None:
+                        mod_id = "minecraft"
+                        break
 
                 if mod_id:
+                    print(mod_id)
+                    print(version)
                     # 创建新文件夹以modid命名
                     new_folder_path = os.path.join(temp_dir, mod_id)
                     try:
                         if not os.path.exists(new_folder_path):
                             os.makedirs(new_folder_path)
                         elif os.path.exists(new_folder_path):
-                            break
+                            continue
                     except:
                         pass
 
@@ -143,7 +147,6 @@ class UnzipOperator(bpy.types.Operator):
     def execute(self, context):
         thread = threading.Thread(target=unzip_files)
         thread.start()
-        # 不等待线程完成
 
         bpy.app.timers.register(functools.partial(self.check_thread, thread), first_interval=1.0)
         return {'RUNNING_MODAL'}
