@@ -1,7 +1,0 @@
-{
-    "parent": "yuushya:block/template_column",
-    "textures": {
-        "sides": "yuushya:block_/reinforced_concrete",
-        "top": "yuushya:block_/reinforced_concrete"
-    }
-}

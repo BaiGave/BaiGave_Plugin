@@ -1,7 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/open_windows_none",
-    "textures": {
-		"0": "yuushya:block/frame_nctm/frame_black_outer",
-		"1": "yuushya:block/frame_nctm/frame_black_inner"
-    }
-}

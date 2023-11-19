@@ -1,7 +1,0 @@
-{
-    "parent": "yuushya:block/template_drawer",
-    "textures": {
-        "drawer": "yuushya:block_/raw_wood/raw_mangrove_wood_vertical_drawer", "sides": "yuushya:block_/raw_wood/raw_mangrove_wood_sides",
-        "top": "yuushya:block_/raw_wood/raw_mangrove_wood_top"
-    }
-}

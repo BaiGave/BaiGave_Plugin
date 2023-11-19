@@ -1,8 +1,0 @@
-{
-	"credit": "Yuushya",
-	"parent": "yuushya:extra_building_material/stairsnfence/oak_stairs_fence",
-	"textures": {
-		"0": "yuushya:0extra_building_block/concrete/red_concrete_",
-		"particle": "#0"
-	}
-}

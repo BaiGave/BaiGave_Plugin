@@ -1,7 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/roof/roof/tile1_up_middle",
-    "textures": {
-		"0": "yuushya:0extra_building_material/preview/roof/tile2",
-		"particle": "yuushya:0extra_building_material/preview/roof/tile2"
-    }
-}

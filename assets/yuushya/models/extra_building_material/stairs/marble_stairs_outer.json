@@ -1,8 +1,0 @@
-{
-	"credit": "Yuushya",
-	"parent": "yuushya:extra_building_material/stairs/template_stairs_outer",
-	"textures": {
-		"0": "yuushya:block/marble",
-		"particle": "#0"
-	}
-}

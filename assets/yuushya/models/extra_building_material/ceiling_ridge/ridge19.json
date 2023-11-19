@@ -1,6 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/template_concrete_ridge_ceiling",
-    "textures": {
-        "0": "yuushya:block/tile_3"
-    }
-}

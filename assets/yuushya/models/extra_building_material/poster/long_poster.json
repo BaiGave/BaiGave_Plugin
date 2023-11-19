@@ -1,7 +1,0 @@
-{
-    "parent": "yuushya:extra_building_material/poster/poster_2xh",
-	"textures": { 
-		"0": "yuushya:0extra_building_material/preview/poster/poster_2xh",
-		"particle": "#0"
-	}
-}

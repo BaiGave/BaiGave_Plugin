@@ -1,9 +1,0 @@
-{
-	"name": "Yuushya Guidebook 指南",
-	"landing_text": "欢迎使用方块小镇模组的指南手册，您将在这里查阅到模组内各种功能的玩法以及一些建筑技巧。$(br)$(br)$(l:http://yuushya.com/t/)方块小镇模组官网$(/l)",
-	"version": 1,
-	"show_toasts": false,
-    "show_progress": false,
-	"use_resource_pack": true,
-	"model": "yuushya:yuushya_guidebook"
-}
