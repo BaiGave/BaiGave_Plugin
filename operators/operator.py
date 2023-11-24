@@ -18,13 +18,163 @@ from .schem import schem_all,schem_liquid
 from .generate import generate
 from .chunk  import chunk as create_chunk
 from .schem import schem_all
-from .functions import read_jar_files_and_extract_data
 
 import gzip
 import amulet
 import amulet_nbt
 import zipfile
+import numpy as np
+from collections import defaultdict
 
+#新功能 将普通网格体转换成mc的
+class ObjToBlocks(bpy.types.Operator):
+    bl_idname = "baigave.objtoblocks"
+    bl_label = "ObjToBlocks"
+
+    def execute(self, context):
+        nodetree_target = "ObjToBlocks"
+        d = {}
+        # 检查是否有节点修改器，如果没有则添加一个
+        has_nodes_modifier = False
+        for modifier in context.active_object.modifiers:
+            if modifier.type == 'NODES':
+                has_nodes_modifier = True
+                break
+        if not has_nodes_modifier:
+            bpy.ops.object.modifier_add(type='NODES')
+        nodes_modifier=context.active_object.modifiers[0]
+        #导入几何节点
+        try:
+            nodes_modifier.node_group = bpy.data.node_groups[nodetree_target]
+        except:
+            file_path = __file__.rsplit(
+                "\\", 1)[0]+"\\GeometryNodes.blend"
+            inner_path = 'NodeTree'
+            object_name = nodetree_target
+            bpy.ops.wm.append(
+                filepath=os.path.join(file_path, inner_path, object_name),
+                directory=os.path.join(file_path, inner_path),
+                filename=object_name
+            )
+        #设置几何节点        
+        nodes_modifier.node_group = bpy.data.node_groups[nodetree_target]
+        nodes_modifier.show_viewport = True
+
+
+
+        # 在节点树中查找名为“值（明度）”的参数并设置值为1
+        value_brightness = None
+        for node in nodes_modifier.node_group.nodes:
+            if node.type == 'VALUE':
+                value_brightness = node
+                break
+        
+        # 将“值（明度）”参数设置值为0.5
+        if value_brightness:
+            value_brightness.outputs[0].default_value = 0.5
+
+        # 再次获取坐标信息
+        coords_two = self.get_coords(context)
+        #遍历坐标并根据布尔值列表进行判断
+        for coord, values in coords_two.items():
+            if values == [True, True, True, True, True, True, True, True]:
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone"
+            #4F
+            elif values == [False, False, False, True, False, True, True, True]:
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_slab[type=bottom]"
+            elif values == [True, True, True, False, True, False, False, False] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_slab[type=top]"
+            #3F
+            elif values == [True, True, True, False, True, False, False, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=top,shape=outer_left]"
+            elif values == [True, True, True, True, True, False, False, False] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=east,half=top,shape=outer_left]"
+            elif values == [True, True, True, False, True, False, True, False] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=top,shape=outer_left]"
+            elif values == [True, True, True, False, True, True, False, False] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=top,shape=outer_left]"
+
+            elif values == [False, False, False, True, True, True, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=bottom,shape=outer_left]"
+            elif values == [True, False, False, True, False, True, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=east,half=bottom,shape=outer_left]"
+            elif values == [False, False, True, True, False, True, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=bottom,shape=outer_left]"
+            elif values == [False, True, False, True, False, True, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=bottom,shape=outer_left]"
+            #2F 
+            elif values == [True, True, True, False, True, True, False, True] :#3 6
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=top,shape=straight]"
+            elif values == [True, True, True, True, True, False, True, False] :#5 7
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=east,half=top,shape=straight]"
+            elif values == [False, True, False, True, True, True, True, True] :#0 2
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=bottom,shape=straight]"
+            elif values == [True, False, True, True, False, True, True, True] :#1 4
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=east,half=bottom,shape=straight]"
+
+            elif values == [True, True, True, True, True, True, False, False] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=top,shape=straight]"
+            elif values == [True, True, True, False, True, False, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=top,shape=straight]"
+            elif values == [True, True, False, True, False, True, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=bottom,shape=straight]"
+            elif values == [False, False, True, True, True, True, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=bottom,shape=straight]"
+            #1F
+            elif values == [True, True, True, True, True, False, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=top,shape=inner_left]"
+            elif values == [True, True, True, True, True, True, True, False] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=top,shape=inner_right]"
+            elif values == [True, True, True, False, True, True, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=top,shape=inner_left]"
+            elif values == [True, True, True, True, True, True, False, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=top,shape=inner_right]"
+
+            elif values == [True, False, True, True, True, True, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=bottom,shape=inner_left]"
+            elif values == [True, True, True, True, False, True, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=bottom,shape=inner_right]"
+            elif values == [False, True, True, True, True, True, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=bottom,shape=inner_left]"
+            elif values == [True, True, False, True, True, True, True, True] :
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=bottom,shape=inner_right]"
+            
+            
+
+                #print(-int(coord[0]), -int(coord[1]), int(coord[2]))
+        schem_all(d)
+        nodes_modifier.show_viewport = False
+        return {'FINISHED'}
+    
+
+    # 获取顶点坐标
+    def get_coords(self,context):
+        depsgraph = bpy.context.evaluated_depsgraph_get()
+        obj = bpy.context.active_object.evaluated_get(depsgraph)
+        # 获取顶点坐标
+        coords = np.zeros(len(obj.data.vertices) * 3, dtype=float)
+        obj.data.vertices.foreach_get("co", coords)
+        coords = coords.reshape(len(obj.data.vertices), 3)
+        # 获取所有向下取整后的坐标
+        rounded_coords = [tuple(np.floor(coord).astype(int)) for coord in coords]
+        
+        # 创建字典来存储向下取整后的坐标及其情况
+        coord_dict = defaultdict(lambda: [False] * 8)
+        for rounded_coord in rounded_coords:
+            coord_dict[rounded_coord]
+        
+        for rounded_coord in rounded_coords:
+            x, y, z = rounded_coord
+            coord_dict[(x, y, z)][0] = True
+            coord_dict[(x + 1, y, z)][1] = True
+            coord_dict[(x, y + 1, z)][2] = True
+            coord_dict[(x, y, z + 1)][3] = True
+            coord_dict[(x + 1, y + 1, z)][4] = True
+            coord_dict[(x + 1, y, z + 1)][5] = True
+            coord_dict[(x, y + 1, z + 1)][6] = True
+            coord_dict[(x + 1, y + 1, z + 1)][7] = True
+        
+        return dict(coord_dict)
 
 
 class Read_mods_dir(bpy.types.Operator):
@@ -39,48 +189,20 @@ class Read_mods_dir(bpy.types.Operator):
 
         path = scene.mods_dir  # 使用自定义路径
 
-        # 创建一个函数，该函数将在新线程中运行
-        def worker_thread():
-            # 初始化版本号列表和Mod列表
-            versions, modids, icons, names, descriptions = read_jar_files_and_extract_data(path)
-            # 清除之前的列表内容
-            my_properties.mod_list.clear()
-            # 获取目标文件路径
-            json_file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "icons", "modid.json")
-            for i in range(len(modids)):
-                icon_path = scene.icons_dir + "\\" + icons[i]
-                mod_item = my_properties.mod_list.add()
-                mod_item.name = names[i]
-                mod_item.description = descriptions[i]
-                mod_item.icon = icons[i]
-            # 打印my_properties.mod_list列表
-            for item in my_properties.mod_list:
-                print(f"Name: {item.name}, Description: {item.description}, Icon: {item.icon}")
-            # 我的世界版本列表    
-            version_items = [(ver, ver, f"Description for {ver}") for ver in versions]
-            bpy.types.Scene.version_list = bpy.props.EnumProperty(
-                name="版本列表",
-                description="选择版本",
-                items=version_items
-            )
-            # 清除之前的内容
-            if os.path.exists(json_file_path):
-                os.remove(json_file_path)
-            modids.append(("minecraft",versions[1]))
-            # 写入新的内容
-            with open(json_file_path, 'w') as json_file:
-                json.dump(modids, json_file)
-        # 创建并启动新线程
-        thread = threading.Thread(target=worker_thread)
-        thread.start()
+        for path, dirs, files in os.walk(path):
+            for filename in files:
+                if filename.lower().endswith(".jar"):  # 检查文件扩展名
+                    # 将文件名添加到列表属性
+                    item = my_properties.mod_list.add()
+                    item.name = filename.replace(".jar", "")
         
         return {'FINISHED'}
 
 
 # 定义 Operator 类 VIEW3D_read_dir
-class VIEW3D_read_dir(bpy.types.Operator):
+class Read_resourcepacks_dir(bpy.types.Operator):
     """读取目录"""
-    bl_idname = "baigave.read_dir"
+    bl_idname = "baigave.read_resourcepacks_dir"
     bl_label = "读取目录"
     
     def execute(self, context):
@@ -88,7 +210,7 @@ class VIEW3D_read_dir(bpy.types.Operator):
         my_properties = scene.my_properties
         my_properties.resourcepack_list.clear()
 
-        path = context.scene.resourcepacks_dir  # 使用自定义路径
+        path = scene.resourcepacks_dir  # 使用自定义路径
 
         for path, dirs, files in os.walk(path):
             for filename in files:
@@ -483,7 +605,6 @@ class Importjson(bpy.types.Operator):
             textures, elements,parent = get_all_data(os.path.dirname(self.filepath)+"\\", filename)
             position = [0, 0, 0]
             has_air = [True, True, True, True, True, True]
-            print(textures)
             block(textures, elements, position,[0,0,0], filename, has_air)
             return {'FINISHED'}
         else:
@@ -650,7 +771,7 @@ class ImportWorld(bpy.types.Operator):
         generate(x, z, vertices, faces, texture_list, uv_list, direction, uv_rotation_list)
 
 classes=[ImportSchem,MultiprocessSchem,Importjson,ImportWorld,SelectArea, GenerateWorld,
-         VIEW3D_read_dir,Read_mods_dir, PRINT_SELECTED_ITEM,MoveModItem,ImportNBT]
+         Read_resourcepacks_dir,Read_mods_dir, PRINT_SELECTED_ITEM,MoveModItem,ImportNBT,ObjToBlocks]
 
 
 def register():

@@ -17,7 +17,7 @@ class ModInfo(bpy.types.PropertyGroup):
 class Property(bpy.types.PropertyGroup):
     bpy.types.Scene.mods_dir = bpy.props.StringProperty(
         name="模组路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "assets")
+        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "mods")
     )
     bpy.types.Scene.icons_dir = bpy.props.StringProperty(
         name="图标路径",
@@ -36,7 +36,7 @@ class Property(bpy.types.PropertyGroup):
     # 定义 mod_list 属性并附加到 my_properties
     mod_list: bpy.props.CollectionProperty(type=ModInfo)
     mod_list_index: bpy.props.IntProperty()
-
+    
     # 定义一个 EnumProperty 作为下拉列表的选项
     bpy.types.Scene.version_list = bpy.props.EnumProperty(
         name="版本",
@@ -98,8 +98,6 @@ def unzip_files():
                         break
 
                 if mod_id:
-                    print(mod_id)
-                    print(version)
                     # 创建新文件夹以modid命名
                     new_folder_path = os.path.join(temp_dir, mod_id)
                     try:

@@ -9,11 +9,10 @@ class MainPanel(bpy.types.Panel):
     bl_category ='白给的工具'
     bl_options = {'HEADER_LAYOUT_EXPAND'}
 
-    # def __init__(self) -> None:
-    #     if not hasattr(bpy.types.Scene, "mods_dir_read"):
-    #         bpy.ops.baigave.read_mods_dir()
-    #         bpy.types.Scene.mods_dir_read = True
-    #     super().__init__()
+    def __init__(self) -> None:
+        bpy.ops.baigave.read_mods_dir()
+        bpy.ops.baigave.read_resourcepacks_dir()
+        super().__init__()
 
     def draw(self,context):
         layout = self.layout
@@ -108,6 +107,8 @@ class WorldPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, "is_weld", text="合并重叠顶点")
         
+        row = layout.row()
+        row.operator("baigave.objtoblocks", text="Get Object Positions")
         # row = layout.row()
         # row.operator("baigave.spawn_map", text="生成地图")
         # row = layout.row()
@@ -127,9 +128,6 @@ class ResourcepacksPanel(bpy.types.Panel):
     bl_parent_id = 'MainPanel'
     #bl_options = {'DEFAULT_CLOSED'}
 
-    def __init__(self) -> None:
-        bpy.ops.baigave.read_dir()
-        super().__init__()
 
     def draw(self, context):
         layout = self.layout

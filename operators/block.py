@@ -8,7 +8,6 @@ def block(textures,elements,position,rot,filename,has_air):
     mesh_name = filename
     mesh = create_mesh(mesh_name)
     obj = add_mesh_to_collection(collection, mesh)
-    #print(filename)
     vertices = []
     faces = []
     direction = []
