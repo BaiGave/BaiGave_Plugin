@@ -140,11 +140,18 @@ def schem_all(d,filename="Schemetics",position=(0,0,0)):
     uv_layer = bm.loops.layers.uv.new()  # 添加UV图层
     
     for face_index, f in enumerate(faces):
-        existing_face = bm.faces.get([bm.verts[i] for i in f])
+        verts_list=[]
+        for i in f:
+            vert =bm.verts[i]
+            if vert not in verts_list:
+                verts_list.append(vert)
+        existing_face = bm.faces.get(verts_list)
         if existing_face is not None:
             face = existing_face
+        elif len(verts_list)>2:
+            face = bm.faces.new(verts_list)
         else:
-            face = bm.faces.new([bm.verts[i] for i in f])
+            continue
 
         mat = get_or_create_material(texture_list[face_index],filename)
         mat.blend_method = 'CLIP'
