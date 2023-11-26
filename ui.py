@@ -108,7 +108,7 @@ class WorldPanel(bpy.types.Panel):
         row.prop(scene, "is_weld", text="合并重叠顶点")
         
         row = layout.row()
-        row.operator("baigave.objtoblocks", text="Get Object Positions")
+        row.operator("baigave.objtoblocks", text="转换网格体")
         # row = layout.row()
         # row.operator("baigave.spawn_map", text="生成地图")
         # row = layout.row()

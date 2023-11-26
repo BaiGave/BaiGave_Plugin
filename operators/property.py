@@ -3,7 +3,7 @@ import os
 import zipfile
 import threading
 import functools
-import re
+import numpy as np
 import shutil
 import toml
 import json
@@ -153,9 +153,35 @@ class UnzipOperator(bpy.types.Operator):
             return {'FINISHED'}
         return {'RUNNING_MODAL'}
 
+from .functions import get_file_path,get_all_data
 
+from PIL import Image
+
+def calculate_average_color(image_path):
+    # 打开图片
+    img = Image.open(image_path)
+
+    # 调整图片大小以便处理
+    img = img.resize((1, 1))
+
+    # 获取像素值
+    pixel = img.getpixel((0, 0))
+
+    # 转换为0-1之间的浮点数
+    normalized_color = (round(pixel[0] / 255, 2), round(pixel[1] / 255, 2), round(pixel[2] / 255, 2), round(pixel[3] / 255, 2) if len(pixel) == 4 else 1.0)
+
+    return normalized_color
 
 def read_blockstate_files(directory):
+    color_cube_dict = {}
+    color_slab_dict = {}
+    color_slab_top_dict = {}
+    color_stairs_dict = {}
+    color_inner_stairs_dict = {}
+    color_outer_stairs_dict = {}
+
+    processed_models = set()  
+    
     for root, dirs, files in os.walk(directory):
         for dir in dirs:
             blockstate_dir = os.path.join(root, dir, "assets", dir, "blockstates")
@@ -168,12 +194,156 @@ def read_blockstate_files(directory):
                             if 'variants' in data:
                                 variants = data['variants']
                                 for variant_key, variant_value in variants.items():
+                                    if variant_key != "":
+                                        id = str(dir+":"+file.replace(".json","")+"["+variant_key+"]")
+                                    else:
+                                        id = str(dir+":"+file.replace(".json",""))
+                                    
                                     if 'model' in variant_value:
                                         model = variant_value['model']
-                                        # Do something with the 'model' value
-            else:
-                print(f"No 'blockstates' folder found in {dir} folder")
+
+                                        if model in processed_models:
+                                            continue
+                                        processed_models.add(model)
+
+                                        filepath = get_file_path(model, 'm')
+                                        dirname, filename = os.path.split(filepath)
+                                        dirname = dirname + '\\'
+                                        try:
+                                            _, _, parent = get_all_data(dirname, filename)
+                                            if parent == "block/cube":
+                                                t, _, _ = get_all_data(dirname, filename)
+                                                all_average_colors = []
+                                                processed_textures = set() 
+                                                for value in t.values():
+                                                    if value in processed_textures:
+                                                        continue
+                                                    processed_textures.add(value)
+
+                                                    texture = get_file_path(value, 't')
+                                                    average_color = calculate_average_color(texture)
+                                                    all_average_colors.append(average_color)
+                                                if all_average_colors:
+                                                    overall_average_color = np.mean(all_average_colors, axis=0)
+                                                    overall_average_color = np.round(overall_average_color, 2) 
+                                                    color_cube_dict[tuple(overall_average_color)] = id
+                                            elif parent =="minecraft:block/slab":
+                                                t, _, _ = get_all_data(dirname, filename)
+                                                all_average_colors = []
+                                                processed_textures = set() 
+                                                for value in t.values():
+                                                    if value in processed_textures:
+                                                        continue
+                                                    processed_textures.add(value)
+
+                                                    texture = get_file_path(value, 't')
+                                                    average_color = calculate_average_color(texture)
+                                                    all_average_colors.append(average_color)
+                                                    
+                                                if all_average_colors:
+                                                    overall_average_color = np.mean(all_average_colors, axis=0)
+                                                    overall_average_color = np.round(overall_average_color, 2) 
+                                                    color_slab_dict[tuple(overall_average_color)] = id
+                                            elif parent =="minecraft:block/slab_top":
+                                                t, _, _ = get_all_data(dirname, filename)
+                                                all_average_colors = []
+                                                processed_textures = set() 
+                                                for value in t.values():
+                                                    if value in processed_textures:
+                                                        continue
+                                                    processed_textures.add(value)
+
+                                                    texture = get_file_path(value, 't')
+                                                    average_color = calculate_average_color(texture)
+                                                    all_average_colors.append(average_color)
+                                                if all_average_colors:
+                                                    overall_average_color = np.mean(all_average_colors, axis=0)
+                                                    overall_average_color = np.round(overall_average_color, 2) 
+                                                    color_slab_top_dict[tuple(overall_average_color)] = id
+                                            elif parent =="minecraft:block/stairs":
+                                                t, _, _ = get_all_data(dirname, filename)
+                                                all_average_colors = []
+                                                processed_textures = set() 
+                                                for value in t.values():
+                                                    if value in processed_textures:
+                                                        continue
+                                                    processed_textures.add(value)
+
+                                                    texture = get_file_path(value, 't')
+                                                    average_color = calculate_average_color(texture)
+                                                    all_average_colors.append(average_color)
+                                                if all_average_colors:
+                                                    overall_average_color = np.mean(all_average_colors, axis=0)
+                                                    overall_average_color = np.round(overall_average_color, 2) 
+                                                    color_stairs_dict[tuple(overall_average_color)] = id
+                                            elif parent =="minecraft:block/inner_stairs":
+                                                t, _, _ = get_all_data(dirname, filename)
+                                                all_average_colors = []
+                                                processed_textures = set() 
+                                                for value in t.values():
+                                                    if value in processed_textures:
+                                                        continue
+                                                    processed_textures.add(value)
+
+                                                    texture = get_file_path(value, 't')
+                                                    average_color = calculate_average_color(texture)
+                                                    all_average_colors.append(average_color)
+                                                if all_average_colors:
+                                                    overall_average_color = np.mean(all_average_colors, axis=0)
+                                                    overall_average_color = np.round(overall_average_color, 2) 
+                                                    color_inner_stairs_dict[tuple(overall_average_color)] = id
+                                            elif parent =="minecraft:block/outer_stairs":
+                                                t, _, _ = get_all_data(dirname, filename)
+                                                all_average_colors = []
+                                                processed_textures = set() 
+                                                for value in t.values():
+                                                    if value in processed_textures:
+                                                        continue
+                                                    processed_textures.add(value)
+
+                                                    texture = get_file_path(value, 't')
+                                                    average_color = calculate_average_color(texture)
+                                                    all_average_colors.append(average_color)
+                                                if all_average_colors:
+                                                    overall_average_color = np.mean(all_average_colors, axis=0)
+                                                    overall_average_color = np.round(overall_average_color, 2) 
+                                                    color_outer_stairs_dict[tuple(overall_average_color)] = id
+                                                    
+                                        except Exception as e:
+                                            pass
+    with open("colors.py", 'w') as colors_file:
+        colors_file.write("color_cube_dict = {\n")
+        for color, model in color_cube_dict.items():
+            colors_file.write(f"    {color}: \"{model}\",\n")
+        colors_file.write("}\n")   
+
+        colors_file.write("color_slab_dict = {\n")
+        for color, model in color_slab_dict.items():
+            colors_file.write(f"    {color}: \"{model}\",\n")
+        colors_file.write("}\n")   
+
+        colors_file.write("color_slab_top_dict = {\n")
+        for color, model in color_slab_top_dict.items():
+            colors_file.write(f"    {color}: \"{model}\",\n")
+        colors_file.write("}\n")   
+
+        colors_file.write("color_stairs_dict = {\n")
+        for color, model in color_stairs_dict.items():
+            colors_file.write(f"    {color}: \"{model}\",\n")
+        colors_file.write("}\n")   
+
+        colors_file.write("color_inner_stairs_dict = {\n")
+        for color, model in color_inner_stairs_dict.items():
+            colors_file.write(f"    {color}: \"{model}\",\n")
+        colors_file.write("}\n")   
+
+        colors_file.write("color_outer_stairs_dict = {\n")
+        for color, model in color_outer_stairs_dict.items():
+            colors_file.write(f"    {color}: \"{model}\",\n")
+        colors_file.write("}\n")                                 
     print("finish")
+
+
 classes=[ModInfo,Property,UnzipOperator]
 
 
@@ -183,7 +353,7 @@ def register():
         bpy.utils.register_class(cls)
     bpy.types.Scene.my_properties = bpy.props.PointerProperty(type=Property)
     temp_dir = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")
-    read_blockstate_files(temp_dir)
+    threading.Thread(target=read_blockstate_files, args=(temp_dir,)).start()
     
 def unregister():
     for cls in classes:

@@ -5,7 +5,7 @@ import random
 import pickle
 import threading
 import subprocess
-import json
+import re
 import math
 
 from .block import block
@@ -25,13 +25,33 @@ import amulet_nbt
 import zipfile
 import numpy as np
 from collections import defaultdict
-from ..colors import color_dict
+from ..colors import color_cube_dict,color_inner_stairs_dict,color_outer_stairs_dict,color_slab_dict,color_slab_top_dict,color_stairs_dict
+
+# 全局缓存来存储计算结果
+distance_cache = {}
 
 def distance(color1, color2):
-    return np.linalg.norm(np.array(color1) - np.array(color2))
+    # 检查缓存，如果已计算过，直接返回缓存值
+    if (color1, color2) in distance_cache:
+        return distance_cache[(color1, color2)]
+    elif (color2, color1) in distance_cache:
+        return distance_cache[(color2, color1)]
+
+    value = np.linalg.norm(np.array(color1) - np.array(color2))
+    distance_cache[(color1, color2)] = value
+    return value
 
 def find_closest_color(target_color, color_dict):
-    closest_color = min(color_dict.keys(), key=lambda x: distance(x, target_color))
+    min_distance = float('inf')
+    closest_color = None
+    
+    # 遍历颜色字典，寻找最接近的颜色
+    for color_key in color_dict.keys():
+        dist = distance(color_key, target_color)
+        if dist < min_distance:
+            min_distance = dist
+            closest_color = color_key
+    
     return color_dict[closest_color]
 
 def get_surrounding_colors(coord, colors):
@@ -104,12 +124,12 @@ class ObjToBlocks(bpy.types.Operator):
         for coord, values in coords.items():
             if values == [True, True, True, True, True, True, True, True]:
                 if coord in colors:
-                    closest_block_id = find_closest_color(tuple(colors[coord]), color_dict)
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_cube_dict)
                 else:
                     surrounding_colors = get_surrounding_colors(coord, colors)
                     if surrounding_colors:
                         avg_color = np.mean(surrounding_colors, axis=0)
-                        closest_block_id = find_closest_color(tuple(avg_color), color_dict)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_cube_dict)
                     else:
                         closest_block_id = "minecraft:stone"
 
@@ -117,63 +137,480 @@ class ObjToBlocks(bpy.types.Operator):
                 d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             #4F
             elif values == [False, False, False, True, False, True, True, True]:
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_slab[type=bottom]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_slab_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_slab_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_slab[type=bottom]"
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             elif values == [True, True, True, False, True, False, False, False] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_slab[type=top]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_slab_top_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_slab_top_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_slab[type=top]"
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             #3F
             elif values == [True, True, True, False, True, False, False, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=top,shape=outer_left]"
-            elif values == [True, True, True, True, True, False, False, False] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=east,half=top,shape=outer_left]"
-            elif values == [True, True, True, False, True, False, True, False] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=top,shape=outer_left]"
-            elif values == [True, True, True, False, True, True, False, False] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=top,shape=outer_left]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_outer_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_outer_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=west,half=top,shape=outer_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
 
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=west,half=top,shape=outer_left"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
+            elif values == [True, True, True, True, True, False, False, False] :
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_outer_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_outer_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=east,half=top,shape=outer_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=east,half=top,shape=outer_left"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
+            elif values == [True, True, True, False, True, False, True, False] :
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_outer_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_outer_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=south,half=top,shape=outer_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=south,half=top,shape=outer_left"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
+            elif values == [True, True, True, False, True, True, False, False] :
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_outer_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_outer_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=north,half=top,shape=outer_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=north,half=top,shape=outer_left"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             elif values == [False, False, False, True, True, True, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=bottom,shape=outer_left]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_outer_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_outer_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=west,half=bottom,shape=outer_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=west,half=bottom,shape=outer_left"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             elif values == [True, False, False, True, False, True, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=east,half=bottom,shape=outer_left]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_outer_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_outer_stairs_dict)
+                    else:
+                        closest_block_id ="minecraft:stone_stairs[facing=east,half=bottom,shape=outer_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=east,half=bottom,shape=outer_left"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             elif values == [False, False, True, True, False, True, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=bottom,shape=outer_left]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_outer_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_outer_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=south,half=bottom,shape=outer_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=south,half=bottom,shape=outer_left"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             elif values == [False, True, False, True, False, True, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=bottom,shape=outer_left]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_outer_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_outer_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=north,half=bottom,shape=outer_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=north,half=bottom,shape=outer_left"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             #2F 
             elif values == [True, True, True, False, True, True, False, True] :#3 6
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=top,shape=straight]"
-            elif values == [True, True, True, True, True, False, True, False] :#5 7
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=east,half=top,shape=straight]"
-            elif values == [False, True, False, True, True, True, True, True] :#0 2
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=bottom,shape=straight]"
-            elif values == [True, False, True, True, False, True, True, True] :#1 4
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=east,half=bottom,shape=straight]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=west,half=top,shape=straight]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
 
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=west,half=top,shape=straight"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
+            elif values == [True, True, True, True, True, False, True, False] :#5 7
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=east,half=top,shape=straight]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=east,half=top,shape=straight"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] =closest_block_id
+            elif values == [False, True, False, True, True, True, True, True] :#0 2
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=west,half=bottom,shape=straight]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=west,half=bottom,shape=straight"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] =closest_block_id
+            elif values == [True, False, True, True, False, True, True, True] :#1 4
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_stairs_dict)
+                    else:
+                        closest_block_id ="minecraft:stone_stairs[facing=east,half=bottom,shape=straight]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=east,half=bottom,shape=straight"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] =closest_block_id
             elif values == [True, True, True, True, True, True, False, False] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=top,shape=straight]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=north,half=top,shape=straight]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=north,half=top,shape=straight"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             elif values == [True, True, True, False, True, False, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=top,shape=straight]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=south,half=top,shape=straight]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=south,half=top,shape=straight"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] =closest_block_id
             elif values == [True, True, False, True, False, True, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=bottom,shape=straight]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_stairs_dict)
+                    else:
+                        closest_block_id =  "minecraft:stone_stairs[facing=north,half=bottom,shape=straight]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=north,half=bottom,shape=straight"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             elif values == [False, False, True, True, True, True, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=bottom,shape=straight]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_stairs_dict)
+                    else:
+                        closest_block_id ="minecraft:stone_stairs[facing=south,half=bottom,shape=straight]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=south,half=bottom,shape=straight"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             #1F
             elif values == [True, True, True, True, True, False, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=top,shape=inner_left]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_inner_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_inner_stairs_dict)
+                    else:
+                        closest_block_id ="minecraft:stone_stairs[facing=south,half=top,shape=inner_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=south,half=top,shape=inner_left"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+    
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] =closest_block_id
             elif values == [True, True, True, True, True, True, True, False] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=top,shape=inner_right]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_inner_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_inner_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=north,half=top,shape=inner_right]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=north,half=top,shape=inner_right"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             elif values == [True, True, True, False, True, True, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=top,shape=inner_left]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_inner_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_inner_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=west,half=top,shape=inner_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=west,half=top,shape=inner_left]"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             elif values == [True, True, True, True, True, True, False, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=top,shape=inner_right]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_inner_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_inner_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=west,half=top,shape=inner_right]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=west,half=top,shape=inner_right"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
 
             elif values == [True, False, True, True, True, True, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=south,half=bottom,shape=inner_left]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_inner_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_inner_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=south,half=bottom,shape=inner_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=south,half=bottom,shape=inner_left"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             elif values == [True, True, True, True, False, True, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=north,half=bottom,shape=inner_right]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_inner_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_inner_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=north,half=bottom,shape=inner_right]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=north,half=bottom,shape=inner_right"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] =closest_block_id
             elif values == [False, True, True, True, True, True, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=bottom,shape=inner_left]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_inner_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_inner_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=west,half=bottom,shape=inner_left]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=west,half=bottom,shape=inner_left"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             elif values == [True, True, False, True, True, True, True, True] :
-                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = "minecraft:stone_stairs[facing=west,half=bottom,shape=inner_right]"
+                if coord in colors:
+                    closest_block_id = find_closest_color(tuple(colors[coord]), color_inner_stairs_dict)
+                else:
+                    surrounding_colors = get_surrounding_colors(coord, colors)
+                    if surrounding_colors:
+                        avg_color = np.mean(surrounding_colors, axis=0)
+                        closest_block_id = find_closest_color(tuple(avg_color), color_inner_stairs_dict)
+                    else:
+                        closest_block_id = "minecraft:stone_stairs[facing=west,half=bottom,shape=inner_right]"
+                pattern = r"\[(.*?)\]"
+                matches = re.search(pattern, closest_block_id)
+
+                if matches:
+                    original_content = matches.group(1)
+                    new_content = "facing=west,half=bottom,shape=inner_right"
+                    closest_block_id = closest_block_id.replace(f"[{original_content}]", f"[{new_content}]")
+                d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] = closest_block_id
             
             
 
