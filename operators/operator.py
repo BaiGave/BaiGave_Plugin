@@ -681,21 +681,34 @@ class Read_mods_dir(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         my_properties = scene.my_properties
-        my_properties.mod_list.clear()
-
+        existing_items = [item.name for item in my_properties.mod_list]
         path = scene.mods_dir  # 使用自定义路径
 
-        for path, dirs, files in os.walk(path):
-            for filename in files:
-                if filename.lower().endswith(".jar"):  # 检查文件扩展名
-                    # 将文件名添加到列表属性
-                    item = my_properties.mod_list.add()
-                    item.name = filename.replace(".jar", "")
-        
+        directories = next(os.walk(path))[1]  # 获取路径下的所有文件夹名称
+
+        # 添加不存在于列表属性的文件夹名称，并删除不存在于文件夹中的item
+        for directory in directories:
+            dir_name = directory.capitalize()
+            if dir_name not in existing_items:
+                item = my_properties.mod_list.add()
+                item.name = dir_name
+            else:
+                existing_items.remove(dir_name)
+
+        # 删除不存在于文件夹中的item
+        items_to_remove = []
+        for index, item in enumerate(my_properties.mod_list):
+            if item.name.lower() not in directories:
+
+                items_to_remove.append(index)
+
+        items_to_remove.reverse()  # 从后向前移除，以避免索引错位
+        for index in items_to_remove:
+            my_properties.mod_list.remove(index)
+
         return {'FINISHED'}
 
 
-# 定义 Operator 类 VIEW3D_read_dir
 class Read_resourcepacks_dir(bpy.types.Operator):
     """读取目录"""
     bl_idname = "baigave.read_resourcepacks_dir"
@@ -714,6 +727,48 @@ class Read_resourcepacks_dir(bpy.types.Operator):
                     # 将文件名添加到列表属性
                     item = my_properties.resourcepack_list.add()
                     item.name = filename.replace(".zip", "")
+        return {'FINISHED'}
+    
+class Read_versions_dir(bpy.types.Operator):
+    """读取目录"""
+    bl_idname = "baigave.read_versions_dir"
+    bl_label = "读取目录"
+    
+    def execute(self, context):
+        scene = context.scene
+        version_items = []
+        path = scene.versions_dir  # 使用自定义路径
+
+        directories = next(os.walk(path))[1]  # 获取路径下的所有文件夹名称
+
+        # 添加不存在于列表属性的文件夹名称，并删除不存在于文件夹中的item
+        for filename in directories:
+            version_items.append((filename, filename, ''))
+
+                
+
+        bpy.types.Scene.version_list = bpy.props.EnumProperty(
+            name="版本",
+            description="选择一个版本",
+            items=version_items,
+        )
+        # 获取当前选中的版本
+        selected_version = bpy.context.scene.version_list
+
+        # 读取config.py文件
+        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py") 
+        with open(config_path, 'r') as file:
+            content = file.read()
+
+        # 使用正则表达式找到"version"参数并替换其值
+        pattern = r'("version":\s*")([^"]*)(")'
+        new_content = re.sub(pattern, fr'\g<1>{selected_version}\g<3>', content)
+
+        # 将更改后的内容写回config.py文件
+        with open(config_path, 'w') as file:
+            file.write(new_content)
+
+
         return {'FINISHED'}
     
 
@@ -1228,7 +1283,7 @@ class ImportWorld(bpy.types.Operator):
         generate(x, z, vertices, faces, texture_list, uv_list, direction, uv_rotation_list)
 
 classes=[ImportSchem,MultiprocessSchem,Importjson,ImportWorld,SelectArea, GenerateWorld,
-         Read_resourcepacks_dir,Read_mods_dir, PRINT_SELECTED_ITEM,MoveModItem,ImportNBT,ObjToBlocks]
+         Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,PRINT_SELECTED_ITEM,MoveModItem,ImportNBT,ObjToBlocks]
 
 
 def register():

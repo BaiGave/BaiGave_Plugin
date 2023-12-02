@@ -7,7 +7,8 @@ import numpy as np
 import shutil
 import toml
 import json
-
+from .functions import get_file_path,get_all_data
+from PIL import Image
 class ModInfo(bpy.types.PropertyGroup):
     icon: bpy.props.StringProperty(name="图标")
     name: bpy.props.StringProperty(name="名称")
@@ -17,11 +18,11 @@ class ModInfo(bpy.types.PropertyGroup):
 class Property(bpy.types.PropertyGroup):
     bpy.types.Scene.mods_dir = bpy.props.StringProperty(
         name="模组路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "mods")
+        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")
     )
-    bpy.types.Scene.icons_dir = bpy.props.StringProperty(
-        name="图标路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "icons")
+    bpy.types.Scene.versions_dir = bpy.props.StringProperty(
+        name="版本路径",
+        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp","minecraft")
     )
     bpy.types.Scene.resourcepacks_dir = bpy.props.StringProperty(
         name="资源包路径",
@@ -43,6 +44,7 @@ class Property(bpy.types.PropertyGroup):
         description="选择一个版本",
         items=(),
     )
+    
 def unzip_files():
     # 指定的文件夹路径
     folder_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "mods")
@@ -66,38 +68,40 @@ def unzip_files():
             # 解压文件
             with zipfile.ZipFile(file_path, 'r') as zip_ref:
                 mod_id = None 
-                for member in zip_ref.namelist():
-                    # 判断是否存在fabric.mod.json，若存在则读取其中的modid
-                    if member == 'fabric.mod.json':
-                        with zip_ref.open(member) as mod_json_file:
-                            mod_json_content = mod_json_file.read()
-                            mod_data = json.loads(mod_json_content.decode('utf-8'))
-                            # 读取 "id" 字段的值
-                            mod_id = mod_data.get("id")
-                            icon = mod_data.get("icon").replace("/", "\\")
-                            name = mod_data.get("name")
-                            description = mod_data.get("description")
-                        break  # 找到fabric.mod.json后终止循环
-                    elif member == 'META-INF/mods.toml':
-                        with zip_ref.open('META-INF/mods.toml') as mods_toml_file:
-                            mods_toml_content = mods_toml_file.read()
-                            mods_toml_data = toml.loads(mods_toml_content.decode('utf-8'))
-                            if "mods" in mods_toml_data:
-                                for mod_entry in mods_toml_data["mods"]:
-                                    mod_id = mod_entry["modId"]
-                                    icon = mod_entry.get("logoFile", "").replace("/", "\\")  # 添加默认值，防止没有 "logoFile" 字段时报错
-                                    name = mod_entry.get("displayName", "")  # 添加默认值，防止没有 "displayName" 字段时报错
-                                    description = mod_entry.get("description", "")  # 添加默认值，防止没有 "description" 字段时报错
-                            else:
-                                print(f"在 {file_name} 中找不到 'mods' 条目")
-                        break
-                    elif version and mod_id is not None:
-                        mod_id = "minecraft"
-                        break
-
-                if mod_id:
+                if version:
+                    mod_id = "minecraft"
+                    # 创建新文件夹以modid命名
+                    new_folder_path = os.path.join(temp_dir, mod_id,version)
+                else:
+                    for member in zip_ref.namelist():
+                        # 判断是否存在fabric.mod.json，若存在则读取其中的modid
+                        if member == 'fabric.mod.json':
+                            with zip_ref.open(member) as mod_json_file:
+                                mod_json_content = mod_json_file.read()
+                                mod_data = json.loads(mod_json_content.decode('utf-8'))
+                                # 读取 "id" 字段的值
+                                mod_id = mod_data.get("id")
+                                icon = mod_data.get("icon").replace("/", "\\")
+                                name = mod_data.get("name")
+                                description = mod_data.get("description")
+                            break  # 找到fabric.mod.json后终止循环
+                        elif member == 'META-INF/mods.toml':
+                            with zip_ref.open('META-INF/mods.toml') as mods_toml_file:
+                                mods_toml_content = mods_toml_file.read()
+                                mods_toml_data = toml.loads(mods_toml_content.decode('utf-8'))
+                                if "mods" in mods_toml_data:
+                                    for mod_entry in mods_toml_data["mods"]:
+                                        mod_id = mod_entry["modId"]
+                                        icon = mod_entry.get("logoFile", "").replace("/", "\\")  # 添加默认值，防止没有 "logoFile" 字段时报错
+                                        name = mod_entry.get("displayName", "")  # 添加默认值，防止没有 "displayName" 字段时报错
+                                        description = mod_entry.get("description", "")  # 添加默认值，防止没有 "description" 字段时报错
+                                else:
+                                    print(f"在 {file_name} 中找不到 'mods' 条目")
+                            break
                     # 创建新文件夹以modid命名
                     new_folder_path = os.path.join(temp_dir, mod_id)
+
+                if mod_id:
                     try:
                         if not os.path.exists(new_folder_path):
                             os.makedirs(new_folder_path)
@@ -153,9 +157,7 @@ class UnzipOperator(bpy.types.Operator):
             return {'FINISHED'}
         return {'RUNNING_MODAL'}
 
-from .functions import get_file_path,get_all_data
 
-from PIL import Image
 
 def calculate_average_color(image_path):
     # 打开图片
@@ -172,7 +174,7 @@ def calculate_average_color(image_path):
 
     return normalized_color
 
-def read_blockstate_files(directory):
+def read_blockstate_files(directory,version):
     color_cube_dict = {}
     color_slab_dict = {}
     color_slab_top_dict = {}
@@ -206,7 +208,7 @@ def read_blockstate_files(directory):
                                             continue
                                         processed_models.add(model)
 
-                                        filepath = get_file_path(model, 'm')
+                                        filepath = get_file_path(model, version,'m')
                                         dirname, filename = os.path.split(filepath)
                                         dirname = dirname + '\\'
                                         try:
@@ -220,7 +222,7 @@ def read_blockstate_files(directory):
                                                         continue
                                                     processed_textures.add(value)
 
-                                                    texture = get_file_path(value, 't')
+                                                    texture = get_file_path(value, version,'t')
                                                     average_color = calculate_average_color(texture)
                                                     all_average_colors.append(average_color)
                                                 if all_average_colors:
@@ -228,7 +230,7 @@ def read_blockstate_files(directory):
                                                     overall_average_color = np.round(overall_average_color, 2) 
                                                     color_cube_dict[tuple(overall_average_color)] = id
                                             elif parent =="minecraft:block/slab":
-                                                t, _, _ = get_all_data(dirname, filename)
+                                                t, _, _ = get_all_data(dirname, filename,version)
                                                 all_average_colors = []
                                                 processed_textures = set() 
                                                 for value in t.values():
@@ -236,7 +238,7 @@ def read_blockstate_files(directory):
                                                         continue
                                                     processed_textures.add(value)
 
-                                                    texture = get_file_path(value, 't')
+                                                    texture = get_file_path(value,version, 't')
                                                     average_color = calculate_average_color(texture)
                                                     all_average_colors.append(average_color)
                                                     
@@ -245,7 +247,7 @@ def read_blockstate_files(directory):
                                                     overall_average_color = np.round(overall_average_color, 2) 
                                                     color_slab_dict[tuple(overall_average_color)] = id
                                             elif parent =="minecraft:block/slab_top":
-                                                t, _, _ = get_all_data(dirname, filename)
+                                                t, _, _ = get_all_data(dirname, filename,version)
                                                 all_average_colors = []
                                                 processed_textures = set() 
                                                 for value in t.values():
@@ -253,7 +255,7 @@ def read_blockstate_files(directory):
                                                         continue
                                                     processed_textures.add(value)
 
-                                                    texture = get_file_path(value, 't')
+                                                    texture = get_file_path(value, version,'t')
                                                     average_color = calculate_average_color(texture)
                                                     all_average_colors.append(average_color)
                                                 if all_average_colors:
@@ -261,7 +263,7 @@ def read_blockstate_files(directory):
                                                     overall_average_color = np.round(overall_average_color, 2) 
                                                     color_slab_top_dict[tuple(overall_average_color)] = id
                                             elif parent =="minecraft:block/stairs":
-                                                t, _, _ = get_all_data(dirname, filename)
+                                                t, _, _ = get_all_data(dirname, filename,version)
                                                 all_average_colors = []
                                                 processed_textures = set() 
                                                 for value in t.values():
@@ -269,7 +271,7 @@ def read_blockstate_files(directory):
                                                         continue
                                                     processed_textures.add(value)
 
-                                                    texture = get_file_path(value, 't')
+                                                    texture = get_file_path(value,version, 't')
                                                     average_color = calculate_average_color(texture)
                                                     all_average_colors.append(average_color)
                                                 if all_average_colors:
@@ -277,7 +279,7 @@ def read_blockstate_files(directory):
                                                     overall_average_color = np.round(overall_average_color, 2) 
                                                     color_stairs_dict[tuple(overall_average_color)] = id
                                             elif parent =="minecraft:block/inner_stairs":
-                                                t, _, _ = get_all_data(dirname, filename)
+                                                t, _, _ = get_all_data(dirname, filename,version)
                                                 all_average_colors = []
                                                 processed_textures = set() 
                                                 for value in t.values():
@@ -285,7 +287,7 @@ def read_blockstate_files(directory):
                                                         continue
                                                     processed_textures.add(value)
 
-                                                    texture = get_file_path(value, 't')
+                                                    texture = get_file_path(value,version, 't')
                                                     average_color = calculate_average_color(texture)
                                                     all_average_colors.append(average_color)
                                                 if all_average_colors:
@@ -293,7 +295,7 @@ def read_blockstate_files(directory):
                                                     overall_average_color = np.round(overall_average_color, 2) 
                                                     color_inner_stairs_dict[tuple(overall_average_color)] = id
                                             elif parent =="minecraft:block/outer_stairs":
-                                                t, _, _ = get_all_data(dirname, filename)
+                                                t, _, _ = get_all_data(dirname, filename,version)
                                                 all_average_colors = []
                                                 processed_textures = set() 
                                                 for value in t.values():
@@ -301,7 +303,7 @@ def read_blockstate_files(directory):
                                                         continue
                                                     processed_textures.add(value)
 
-                                                    texture = get_file_path(value, 't')
+                                                    texture = get_file_path(value,version, 't')
                                                     average_color = calculate_average_color(texture)
                                                     all_average_colors.append(average_color)
                                                 if all_average_colors:
@@ -353,7 +355,7 @@ def register():
         bpy.utils.register_class(cls)
     bpy.types.Scene.my_properties = bpy.props.PointerProperty(type=Property)
     temp_dir = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")
-    threading.Thread(target=read_blockstate_files, args=(temp_dir,)).start()
+    #threading.Thread(target=read_blockstate_files, args=(temp_dir,bpy.context.scene.version,)).start()
     
 def unregister():
     for cls in classes:

@@ -12,6 +12,7 @@ class MainPanel(bpy.types.Panel):
     def __init__(self) -> None:
         bpy.ops.baigave.read_mods_dir()
         bpy.ops.baigave.read_resourcepacks_dir()
+        bpy.ops.baigave.read_versions_dir()
         super().__init__()
 
     def draw(self,context):

@@ -1,6 +1,7 @@
 import json
 import bpy
 import os
+from ..config import config
 
 file_data_cache = {}
 global_filepath = bpy.utils.script_path_user()
@@ -55,28 +56,29 @@ def get_all_data(filepath, filename,rot=0):
         file_data_cache[(filepath, filename,rot)] = (textures, elements , parent)
     return textures, elements ,parent
 
-
-def get_file_path(modid, type):
+def get_file_path(modid,type):
     filepath = global_filepath + "\\addons\\BaiGave_Plugin\\temp\\"
     Pos = modid.find(":")
     mod = ""
     id = ""
-
+    version =""
     if Pos != -1:
         mod = modid[0:Pos]
         id = modid[Pos + 1:]
     else:
         mod = "minecraft"
         id = modid
-
+    
+    if mod == "minecraft":
+        version="\\"+config["version"]
     id = id.replace("/", "\\")
 
     if type == 's':
-        return filepath + mod +"\\assets\\"+mod+ "\\blockstates\\" + id + ".json"
+        return filepath + mod +version+"\\assets\\"+mod+ "\\blockstates\\" + id + ".json"
     elif type == 'm':
-        return filepath + mod +"\\assets\\"+mod + "\\models\\" + id + ".json"
+        return filepath + mod +version+"\\assets\\"+mod + "\\models\\" + id + ".json"
     elif type == 't':
-        return filepath + mod +"\\assets\\"+mod + "\\textures\\" + id + ".png"
+        return filepath + mod +version+"\\assets\\"+mod + "\\textures\\" + id + ".png"
 
 def get_frametime(filepath):
     with open(filepath, "r") as f:
