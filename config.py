@@ -1,5 +1,6 @@
 config={
-    "version":"1.20.1"
-    
+    "resourcepack_list": [],
+    "mod_list": [],
+    "version":""
     
     }

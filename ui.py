@@ -126,20 +126,25 @@ class ResourcepacksPanel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = 'BaiGave'
-    bl_parent_id = 'MainPanel'
+    bl_parent_id = 'ModPanel'
     #bl_options = {'DEFAULT_CLOSED'}
 
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(context.scene, "resourcepacks_dir", text="路径")  # 添加路径字段
-
+        row = layout.row()
+        row.prop(context.scene, "resourcepacks_dir", text="路径")  # 添加路径字段
+        row = layout.row()
         scene = context.scene
-        # 使用layout.template_list显示UIList
         my_properties = scene.my_properties 
-        layout.template_list("ResourcepackList", "", my_properties, "resourcepack_list", my_properties, "resourcepack_list_index")
+        row.template_list("ResourcepackList", "", my_properties, "resourcepack_list", my_properties, "resourcepack_list_index")
+        
+        col = row.column(align=True)
+         # 上下移动按钮
+        col.operator("baigave.move_resourcepack_item", text="", icon='TRIA_UP').direction = 'UP'
+        col.operator("baigave.move_resourcepack_item", text="", icon='TRIA_DOWN').direction = 'DOWN'  
         # 添加打印选中项目的按钮
-        layout.operator("view3d.print_selected_item", text="更改资源包")
+        layout.operator("view3d.print_selected_item", text="刷新")
 
 #模组界面
 class ModPanel(bpy.types.Panel):
@@ -149,7 +154,7 @@ class ModPanel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = 'BaiGave'
     bl_parent_id = 'MainPanel'
-    bl_options = {'DEFAULT_CLOSED'}
+    #bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         layout = self.layout
@@ -167,10 +172,10 @@ class ModPanel(bpy.types.Panel):
         row.template_list("ModList", "", my_properties, "mod_list", my_properties, "mod_list_index")
         col = row.column(align=True)
          # 上下移动按钮
-        col.operator("my.move_mod_item", text="", icon='TRIA_UP').direction = 'UP'
-        col.operator("my.move_mod_item", text="", icon='TRIA_DOWN').direction = 'DOWN'    
+        col.operator("baigave.move_mod_item", text="", icon='TRIA_UP').direction = 'UP'
+        col.operator("baigave.move_mod_item", text="", icon='TRIA_DOWN').direction = 'DOWN'    
         # 添加一个按钮
-        layout.operator("baigave.unzip_operator", text="加载")
+        layout.operator("baigave.unzip_operator", text="刷新")
 
 # -----------------------------------------------------------------------------
 # UIList

@@ -688,7 +688,7 @@ class Read_mods_dir(bpy.types.Operator):
 
         # 添加不存在于列表属性的文件夹名称，并删除不存在于文件夹中的item
         for directory in directories:
-            dir_name = directory.capitalize()
+            dir_name = directory
             if dir_name not in existing_items:
                 item = my_properties.mod_list.add()
                 item.name = dir_name
@@ -698,13 +698,39 @@ class Read_mods_dir(bpy.types.Operator):
         # 删除不存在于文件夹中的item
         items_to_remove = []
         for index, item in enumerate(my_properties.mod_list):
-            if item.name.lower() not in directories:
-
+            if item.name not in directories:
                 items_to_remove.append(index)
 
         items_to_remove.reverse()  # 从后向前移除，以避免索引错位
         for index in items_to_remove:
             my_properties.mod_list.remove(index)
+        # 读取并更新 config.py 文件中的 config 字典
+        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py")
+        with open(config_path, 'r') as file:
+            lines = file.readlines()
+
+        config_index = -1
+        mod_list_str = ', '.join([f'"{item.name}"' for item in my_properties.mod_list])
+        mod_list_str = f'    "mod_list": [{mod_list_str}],\n'
+
+        for i, line in enumerate(lines):
+            if "config={" in line:
+                config_index = i
+                break
+
+        if config_index != -1:
+            found_mod_list = False
+            for i in range(config_index, len(lines)):
+                if "mod_list" in lines[i]:
+                    lines[i] = mod_list_str
+                    found_mod_list = True
+                    break
+
+            if not found_mod_list:
+                lines.insert(config_index + 1, mod_list_str)
+
+        with open(config_path, 'w') as file:
+            file.writelines(lines)
 
         return {'FINISHED'}
 
@@ -717,16 +743,56 @@ class Read_resourcepacks_dir(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         my_properties = scene.my_properties
-        my_properties.resourcepack_list.clear()
-
+        existing_items = [item.name for item in my_properties.resourcepack_list]
         path = scene.resourcepacks_dir  # 使用自定义路径
 
-        for path, dirs, files in os.walk(path):
-            for filename in files:
-                if filename.lower().endswith(".zip"):  # 检查文件扩展名
-                    # 将文件名添加到列表属性
-                    item = my_properties.resourcepack_list.add()
-                    item.name = filename.replace(".zip", "")
+        directories = next(os.walk(path))[1]  # 获取路径下的所有文件夹名称
+
+        # 添加不存在于列表属性的文件夹名称，并删除不存在于文件夹中的item
+        for directory in directories:
+            dir_name = directory
+            if dir_name not in existing_items:
+                item = my_properties.resourcepack_list.add()
+                item.name = dir_name
+            else:
+                existing_items.remove(dir_name)
+
+        # 删除不存在于文件夹中的item
+        items_to_remove = []
+        for index, item in enumerate(my_properties.resourcepack_list):
+            if item.name not in directories:
+                items_to_remove.append(index)
+
+        items_to_remove.reverse()  # 从后向前移除，以避免索引错位
+        for index in items_to_remove:
+            my_properties.resourcepack_list.remove(index)
+        # 读取并更新 config.py 文件中的 config 字典
+        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py")
+        with open(config_path, 'r') as file:
+            lines = file.readlines()
+
+        config_index = -1
+        resourcepack_list_str = ', '.join([f'"{item.name}"' for item in my_properties.resourcepack_list])
+        resourcepack_list_str = f'    "resourcepack_list": [{resourcepack_list_str}],\n'
+
+        for i, line in enumerate(lines):
+            if "config={" in line:
+                config_index = i
+                break
+
+        if config_index != -1:
+            found_resourcepack_list = False
+            for i in range(config_index, len(lines)):
+                if "resourcepack_list" in lines[i]:
+                    lines[i] = resourcepack_list_str
+                    found_resourcepack_list = True
+                    break
+
+            if not found_resourcepack_list:
+                lines.insert(config_index + 1, resourcepack_list_str)
+
+        with open(config_path, 'w') as file:
+            file.writelines(lines)
         return {'FINISHED'}
     
 class Read_versions_dir(bpy.types.Operator):
@@ -774,9 +840,9 @@ class Read_versions_dir(bpy.types.Operator):
 
 # 添加一个操作类来处理上下移动和删除模组
 class MoveModItem(bpy.types.Operator):
-    bl_idname = "my.move_mod_item"
-    bl_label = "Move Mod Item"
-    direction: bpy.props.StringProperty()  # 'UP' or 'DOWN'
+    bl_idname = "baigave.move_mod_item"
+    bl_label = "移动"
+    direction: bpy.props.StringProperty()  
 
     def execute(self, context):
         scene = context.scene
@@ -792,7 +858,26 @@ class MoveModItem(bpy.types.Operator):
             my_properties.mod_list_index += 1
 
         return {'FINISHED'}
+# 添加一个操作类来处理上下移动和删除资源包
+class MoveResourcepackItem(bpy.types.Operator):
+    bl_idname = "baigave.move_resourcepack_item"
+    bl_label = "移动"
+    direction: bpy.props.StringProperty()  
 
+    def execute(self, context):
+        scene = context.scene
+        my_properties = scene.my_properties
+        resourcepack_list = my_properties.resourcepack_list
+        index = my_properties.resourcepack_list_index
+
+        if self.direction == 'UP' and index > 0:
+            resourcepack_list.move(index, index - 1)
+            my_properties.resourcepack_list_index -= 1
+        elif self.direction == 'DOWN' and index < len(resourcepack_list) - 1:
+            resourcepack_list.move(index, index + 1)
+            my_properties.resourcepack_list_index += 1
+
+        return {'FINISHED'}
 class PRINT_SELECTED_ITEM(bpy.types.Operator):
     """打印选中的项目"""
     bl_idname = "view3d.print_selected_item"
@@ -1283,7 +1368,7 @@ class ImportWorld(bpy.types.Operator):
         generate(x, z, vertices, faces, texture_list, uv_list, direction, uv_rotation_list)
 
 classes=[ImportSchem,MultiprocessSchem,Importjson,ImportWorld,SelectArea, GenerateWorld,
-         Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,PRINT_SELECTED_ITEM,MoveModItem,ImportNBT,ObjToBlocks]
+         Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,PRINT_SELECTED_ITEM,MoveModItem,MoveResourcepackItem,ImportNBT,ObjToBlocks]
 
 
 def register():

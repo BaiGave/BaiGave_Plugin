@@ -67,7 +67,7 @@ def create_node_material(texture_paths, mat_name,filename):
                     node.image = bpy.data.images.get(filename+"_colormap")
                 elif node.name == "默认图片":
                     node.image = bpy.data.images.load(texture_paths[0])
-        elif mat_name not in Type3:
+        elif mat_name in Type3:
             image=bpy.data.images.load(texture_paths[0])
             # 获取图像的边长大小
             width = image.size[0]  # 宽度
@@ -115,6 +115,101 @@ def create_node_material(texture_paths, mat_name,filename):
                 for node in mat.node_tree.nodes:
                     if node.name == "默认图片":
                         node.image = image
+        elif is_file_path_exists(texture_paths[0].replace(".png","")+"_n.png") and is_file_path_exists(texture_paths[0].replace(".png","")+"_s.png"):
+            image=bpy.data.images.load(texture_paths[0])
+            image_n=bpy.data.images.load(texture_paths[0].replace(".png","")+"_n.png")
+            image_s=bpy.data.images.load(texture_paths[0].replace(".png","")+"_s.png")
+            shader_name = "PBR着色器"
+            # 导入shader
+            shader = bpy.data.materials.get(shader_name)
+            if shader is None:
+                path = __file__.rsplit(
+                    "\\", 1)[0]+"\\Material.blend"
+                with bpy.data.libraries.load(path) as (data_from, data_to):
+                    if shader_name in data_from.materials:
+                        data_to.materials = [shader_name]
+                # 获取shader
+                shader = bpy.data.materials.get(shader_name)
+            # 复制 shader，并将其重命名为 mat_name
+            mat = shader.copy()
+            mat.name = mat_name
+            # 设置图像纹理节点的图片路径
+            for node in mat.node_tree.nodes:
+                if node.name == "默认图片":
+                    node.image = image
+                elif node.name == "默认图片_s":
+                    node.image = image_s
+                elif node.name == "默认图片_n":
+                    node.image = image_n
+        elif not is_file_path_exists(texture_paths[0].replace(".png","")+"_n.png") and is_file_path_exists(texture_paths[0].replace(".png","")+"_s.png"):
+            image=bpy.data.images.load(texture_paths[0])
+            image_s=bpy.data.images.load(texture_paths[0].replace(".png","")+"_s.png")
+            shader_name = "PBR着色器(仅s)"
+            # 导入shader
+            shader = bpy.data.materials.get(shader_name)
+            if shader is None:
+                path = __file__.rsplit(
+                    "\\", 1)[0]+"\\Material.blend"
+                with bpy.data.libraries.load(path) as (data_from, data_to):
+                    if shader_name in data_from.materials:
+                        data_to.materials = [shader_name]
+                # 获取shader
+                shader = bpy.data.materials.get(shader_name)
+            # 复制 shader，并将其重命名为 mat_name
+            mat = shader.copy()
+            mat.name = mat_name
+            # 设置图像纹理节点的图片路径
+            for node in mat.node_tree.nodes:
+                if node.name == "默认图片":
+                    node.image = image
+                elif node.name == "默认图片_s":
+                    node.image = image_s
+        elif is_file_path_exists(texture_paths[0].replace(".png","")+"_n.png") and not is_file_path_exists(texture_paths[0].replace(".png","")+"_s.png"):
+            image=bpy.data.images.load(texture_paths[0])
+            image_n=bpy.data.images.load(texture_paths[0].replace(".png","")+"_n.png")
+            shader_name = "PBR着色器(仅n)"
+            # 导入shader
+            shader = bpy.data.materials.get(shader_name)
+            if shader is None:
+                path = __file__.rsplit(
+                    "\\", 1)[0]+"\\Material.blend"
+                with bpy.data.libraries.load(path) as (data_from, data_to):
+                    if shader_name in data_from.materials:
+                        data_to.materials = [shader_name]
+                # 获取shader
+                shader = bpy.data.materials.get(shader_name)
+            # 复制 shader，并将其重命名为 mat_name
+            mat = shader.copy()
+            mat.name = mat_name
+            # 设置图像纹理节点的图片路径
+            for node in mat.node_tree.nodes:
+                if node.name == "默认图片":
+                    node.image = image
+                elif node.name == "默认图片_n":
+                    node.image = image_n
+        elif is_file_path_exists(texture_paths[0].replace(".png","")+"_e.png"):
+            image=bpy.data.images.load(texture_paths[0])
+            image_e=bpy.data.images.load(texture_paths[0].replace(".png","")+"_e.png")
+            shader_name = "自发光着色器"
+            # 导入shader
+            shader = bpy.data.materials.get(shader_name)
+            if shader is None:
+                path = __file__.rsplit(
+                    "\\", 1)[0]+"\\Material.blend"
+                with bpy.data.libraries.load(path) as (data_from, data_to):
+                    if shader_name in data_from.materials:
+                        data_to.materials = [shader_name]
+                # 获取shader
+                shader = bpy.data.materials.get(shader_name)
+            # 复制 shader，并将其重命名为 mat_name
+            mat = shader.copy()
+            mat.name = mat_name
+            # 设置图像纹理节点的图片路径
+            for node in mat.node_tree.nodes:
+                if node.name == "默认图片":
+                    node.image = image
+                elif node.name == "默认图片_e":
+                    node.image = image_e
         else:
             image=bpy.data.images.load(texture_paths[0])
             # 获取图像的边长大小
@@ -389,7 +484,10 @@ def extract_vertices_from_elements(textures, elements, has_air, position=None,Ro
                             if texture == "missing":
                                 pass
                             else:
-                                texture = textures[texture]
+                                try:
+                                    texture = textures[texture]
+                                except:
+                                    texture = "missing"
                         else:
                             texture = f"block/{texture}"
                         texture_list.append(texture)

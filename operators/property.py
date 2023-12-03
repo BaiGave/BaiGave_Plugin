@@ -26,7 +26,7 @@ class Property(bpy.types.PropertyGroup):
     )
     bpy.types.Scene.resourcepacks_dir = bpy.props.StringProperty(
         name="资源包路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "resourcepacks")
+        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp", "资源包")
     )
     bpy.types.Scene.is_weld = bpy.props.BoolProperty(name="合并重叠顶点", default=True)
 
@@ -45,7 +45,7 @@ class Property(bpy.types.PropertyGroup):
         items=(),
     )
     
-def unzip_files():
+def unzip_mods_files():
     # 指定的文件夹路径
     folder_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "mods")
 
@@ -61,10 +61,9 @@ def unzip_files():
             version = None
             file_name_parts = file_name.replace('.jar', '').split('_')
             for part in file_name_parts:
-                if all(char.isdigit() or char == '.' for char in part) and part.count('.') <= 2:
+                if all(char.isdigit() or char == '.' for char in part) and part.count('.') <= 2 and all(char.isdigit() or char == '.' for char in ''.join(file_name_parts)):
                     version = part
                     break
-
             # 解压文件
             with zipfile.ZipFile(file_path, 'r') as zip_ref:
                 mod_id = None 
@@ -80,10 +79,10 @@ def unzip_files():
                                 mod_json_content = mod_json_file.read()
                                 mod_data = json.loads(mod_json_content.decode('utf-8'))
                                 # 读取 "id" 字段的值
-                                mod_id = mod_data.get("id")
-                                icon = mod_data.get("icon").replace("/", "\\")
-                                name = mod_data.get("name")
-                                description = mod_data.get("description")
+                                mod_id = mod_data.get("id","")
+                                icon = mod_data.get("icon","").replace("/", "\\")
+                                name = mod_data.get("name","")
+                                description = mod_data.get("description","")
                             break  # 找到fabric.mod.json后终止循环
                         elif member == 'META-INF/mods.toml':
                             with zip_ref.open('META-INF/mods.toml') as mods_toml_file:
@@ -138,14 +137,63 @@ def unzip_files():
                             pass
         
 
+def unzip_resourcepacks_files():
+    # 指定的文件夹路径
+    folder_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "resourcepacks")
 
+    # 临时文件夹路径
+    temp_dir = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp","资源包")
+
+    # 遍历文件夹中的所有文件
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith('.zip'):
+            # 构造完整的文件路径
+            file_path = os.path.join(folder_path, file_name)
+
+            # 解压文件
+            with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                new_folder_path=os.path.join(temp_dir,file_name.replace('.zip', ''))
+                try:
+                    if not os.path.exists(new_folder_path):
+                        os.makedirs(new_folder_path)
+                    elif os.path.exists(new_folder_path):
+                        continue
+                except:
+                    pass
+
+                # 将文件解压到新文件夹中
+                for member in zip_ref.namelist():
+                    try:
+                        # 提取第一层目录下的 assets 和 data 文件夹以及第一层文件夹下的 .json 和 .png 文件
+                        if member.startswith('assets/') or member.startswith('data/'):
+                            # 构造解压路径
+                            extract_path = os.path.join(new_folder_path, member)
+                            dir_extract_path = os.path.dirname(extract_path)+"/"
+                            # 如果目标文件夹不存在，则创建
+                            try:
+                                if not os.path.exists(dir_extract_path):
+                                    os.makedirs(dir_extract_path)
+                            except:
+                                pass
+                            if not os.path.exists(extract_path):
+                                with zip_ref.open(member) as file_in_zip, open(extract_path, 'wb') as output_file:
+                                    shutil.copyfileobj(file_in_zip, output_file)
+
+                        elif not '/' in member:  # 第一级目录下的文件
+                            if member.endswith('.json') or member.endswith('.png'):
+                                extract_path = os.path.join(new_folder_path, member)
+                                with zip_ref.open(member) as file_in_zip, open(extract_path, 'wb') as output_file:
+                                    shutil.copyfileobj(file_in_zip, output_file)
+                    except Exception as e:
+                        print(f"An error occurred: {e}")
+                        pass
 
 class UnzipOperator(bpy.types.Operator):
     bl_idname = "baigave.unzip_operator"
     bl_label = "加载模组包"
 
     def execute(self, context):
-        thread = threading.Thread(target=unzip_files)
+        thread = threading.Thread(target=unzip_mods_files)
         thread.start()
 
         bpy.app.timers.register(functools.partial(self.check_thread, thread), first_interval=1.0)
@@ -350,7 +398,8 @@ classes=[ModInfo,Property,UnzipOperator]
 
 
 def register():
-    threading.Thread(target=unzip_files).start()
+    threading.Thread(target=unzip_mods_files).start()
+    threading.Thread(target=unzip_resourcepacks_files).start()
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.Scene.my_properties = bpy.props.PointerProperty(type=Property)

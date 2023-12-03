@@ -1,8 +1,8 @@
 import json
 import bpy
 import os
-from ..config import config
-
+from importlib import reload
+from .. import config
 file_data_cache = {}
 global_filepath = bpy.utils.script_path_user()
 json_file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "icons", "modid.json")
@@ -55,8 +55,8 @@ def get_all_data(filepath, filename,rot=0):
 
         file_data_cache[(filepath, filename,rot)] = (textures, elements , parent)
     return textures, elements ,parent
-
 def get_file_path(modid,type):
+    reload(config)
     filepath = global_filepath + "\\addons\\BaiGave_Plugin\\temp\\"
     Pos = modid.find(":")
     mod = ""
@@ -70,15 +70,77 @@ def get_file_path(modid,type):
         id = modid
     
     if mod == "minecraft":
-        version="\\"+config["version"]
+        version="\\"+config.config["version"]
     id = id.replace("/", "\\")
 
-    if type == 's':
-        return filepath + mod +version+"\\assets\\"+mod+ "\\blockstates\\" + id + ".json"
-    elif type == 'm':
-        return filepath + mod +version+"\\assets\\"+mod + "\\models\\" + id + ".json"
-    elif type == 't':
-        return filepath + mod +version+"\\assets\\"+mod + "\\textures\\" + id + ".png"
+
+    directories = config.config["mod_list"]
+    for directory in directories:
+        if directory == "minecraft":
+            path = filepath+directory+version+"\\assets\\"+mod
+            if type == 's':
+                temp_path=path + "\\blockstates\\" + id + ".json"
+                if os.path.exists(temp_path):
+                    return temp_path
+                else:
+                    continue
+            elif type == 'm':
+                temp_path =path + "\\models\\" + id + ".json"
+                if os.path.exists(temp_path):
+                    return temp_path
+                else:
+                    continue
+            elif type == 't':
+                temp_path = path + "\\textures\\" + id + ".png"
+                if os.path.exists(temp_path):
+                    return temp_path
+                else:
+                    continue
+        elif directory =="资源包":
+            path = filepath+directory
+            directories_r = config.config["resourcepack_list"]
+            for d in directories_r:
+                path =path+"\\"+d+"\\assets\\"+mod
+                if type == 's':
+                    temp_path=path + "\\blockstates\\" + id + ".json"
+                    if os.path.exists(temp_path):
+                        return temp_path
+                    else:
+                        continue
+                elif type == 'm':
+                    temp_path=path + "\\models\\" + id + ".json"
+                    if os.path.exists(temp_path):
+                        return temp_path
+                    else:
+                        continue
+                elif type == 't':
+                    temp_path=path + "\\textures\\" + id + ".png"
+                    if os.path.exists(temp_path):
+                        return temp_path
+                    else:
+                        continue
+            
+        else:
+            path = filepath+directory+"\\assets\\"+mod
+            if type == 's':
+                temp_path=path + "\\blockstates\\" + id + ".json"
+                if os.path.exists(temp_path):
+                    return temp_path
+                else:
+                    continue
+            elif type == 'm':
+                temp_path=path + "\\models\\" + id + ".json"
+                if os.path.exists(temp_path):
+                    return temp_path
+                else:
+                    continue
+            elif type == 't':
+                temp_path=path + "\\textures\\" + id + ".png"
+                if os.path.exists(temp_path):
+                    return temp_path
+                else:
+                    continue
+    
 
 def get_frametime(filepath):
     with open(filepath, "r") as f:
