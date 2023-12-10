@@ -1,9 +1,62 @@
 import json
 import os
+import amulet
 from .model import extract_vertices_from_elements
 from .functions import get_file_path, get_all_data
 
-def blockstates(coord, d, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict):
+def blockstates(coord,chunks, level, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict):
+    id = level.get_block(coord[0], coord[1], coord[2], "main")
+    id =str(level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(id)[0]).replace('"', '')
+    # 定义一个元组，存储六个方向的偏移量，按照 上下北南东西 的顺序排序
+    offsets = ((0, 0, -1),  # 东
+                (0, 0, 1),  # 西
+                (-1, 0, 0),  # 北
+                (1, 0, 0),  # 南
+                (0, -1, 0),  # 下
+                (0, 1, 0))  # 上
+    # 使用列表推导式生成相邻坐标
+    adjacent_coords = [(coord[0] + offset[0], coord[1] + offset[1], coord[2] + offset[2]) for offset in offsets]
+    # 判断是否有空气方块
+    has_air = [True] * 6  # 默认为 True
+    for i, adj_coord in enumerate(adjacent_coords):
+        name = level.get_block(adj_coord[0], adj_coord[1], adj_coord[2], "main")
+        if isinstance(name,amulet.api.block.Block):
+            name =str(level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(name)[0]).replace('"', '')
+            parent = get_parent(name)
+            # 如果 parent 是 "block/cube"，将 has_air 设为 False
+            if parent == "block/cube":
+                has_air[i] = False
+            if parent =="yuushya:block/template_column":
+                has_air[i] = False
+            
+    
+    if any(has_air):
+        textures,elements,rotation,uvlock =get_model(id)
+        has_air =  [has_air[2], has_air[3], has_air[0], has_air[1], has_air[5], has_air[4]]
+        #旋转后判断生成面
+        if rotation[0] == 0 and rotation[2]==0:
+            has_air = [has_air[0], has_air[1], has_air[2], has_air[3], has_air[4], has_air[5]]
+        elif rotation[0] == 0 and rotation[2]==270:
+            has_air = [has_air[2], has_air[3], has_air[1], has_air[0], has_air[4], has_air[5]]
+        elif rotation[0] == 0 and rotation[2]==180:
+            has_air = [has_air[1], has_air[0], has_air[3], has_air[2], has_air[4], has_air[5]]
+        elif rotation[0] == 0 and rotation[2]==90:
+            has_air = [has_air[3], has_air[2], has_air[0], has_air[1], has_air[4], has_air[5]]
+        elif rotation[0] == 180 and rotation[2]==0:
+            has_air = [has_air[0], has_air[1], has_air[3], has_air[2], has_air[5], has_air[4]]
+        elif rotation[0] == 180 and rotation[2]==270:
+            has_air = [has_air[0], has_air[1], has_air[2], has_air[3], has_air[5], has_air[4]]
+        elif rotation[0] == 180 and rotation[2]==180:
+            has_air = [has_air[1], has_air[0], has_air[2], has_air[3], has_air[5], has_air[4]]
+        elif rotation[0] == 180 and rotation[2]==90:
+            has_air = [has_air[3], has_air[2], has_air[1], has_air[0], has_air[5], has_air[4]]
+        
+    else:
+        return vertices,faces,direction,texture_list,uv_list,uv_rotation_list
+
+    return extract_vertices_from_elements(textures, elements, has_air, (coord[0]-chunks[0][0], coord[2]-chunks[0][2], coord[1]-chunks[0][1]), rotation, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
+
+def d_blockstates(coord, d, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict):
     # 如果坐标在字典中，获取对应的方块 ID
     if coord in d:
         id = d[coord]
@@ -26,9 +79,10 @@ def blockstates(coord, d, vertices, faces, direction, texture_list, uv_list, uv_
                     has_air[i] = False
                 if parent =="yuushya:block/template_column":
                     has_air[i] = False
+                
         
         if any(has_air):
-            textures,elements,rotation =get_model(id)
+            textures,elements,rotation,uvlock =get_model(id)
             has_air = [has_air[2], has_air[3], has_air[0], has_air[1], has_air[5], has_air[4]]
             #旋转后判断生成面
             if rotation[0] == 0 and rotation[2]==0:
@@ -47,10 +101,12 @@ def blockstates(coord, d, vertices, faces, direction, texture_list, uv_list, uv_
                 has_air = [has_air[1], has_air[0], has_air[2], has_air[3], has_air[5], has_air[4]]
             elif rotation[0] == 180 and rotation[2]==90:
                 has_air = [has_air[3], has_air[2], has_air[1], has_air[0], has_air[5], has_air[4]]
+                
         else:
             return vertices,faces,direction,texture_list,uv_list,uv_rotation_list
 
     return extract_vertices_from_elements(textures, elements, has_air, coord, rotation, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
+
 
 
 # 使用字典来缓存已经计算过的方块ID与其对应的父方块ID，避免重复计算
@@ -106,7 +162,7 @@ def get_parent(id):
                             apply = part["apply"]
                             filepath = apply["model"] if "model" in apply else ""
                             break
-
+            
             if filepath == "":
                 return None
                 print("No matching model found")
@@ -138,6 +194,7 @@ def get_model(id):
     block_name = id.split('[')[0]
     filepath = get_file_path(block_name, 's')
     rotation = [0, 0, 0]
+    uvlock=False
     properties_dict = {}
 
     start_index = id.find('[')
@@ -172,9 +229,11 @@ def get_model(id):
                     if flag:
                         filepath = value[0]["model"] if isinstance(value, list) else value["model"]
                         if "y" in value:
-                            rotation[2] = 360 - value["y"]
+                            rotation[2] = 360-value["y"]
                         if "x" in value:
                             rotation[0] = value["x"]
+                        if "uvlock" in value:
+                            uvlock =value["uvlock"]
                         filepath = get_file_path(filepath, 'm')
                         dirname, filename = os.path.split(filepath)
                         dirname = dirname + '\\'
@@ -202,6 +261,8 @@ def get_model(id):
                                     item["rotation"] = {"angle": 360 - apply["y"],"axis": "y","origin": [8, 8, 8]}
                             else:
                                 t, e, _ = get_all_data(dirname, filename)
+                            if "uvlock" in apply:
+                                uvlock =value["uvlock"]
                             textures.update(t)
                             elements.extend(e)
                         
@@ -225,12 +286,11 @@ def get_model(id):
         # textures, elements, _ = get_all_data(dirname, filename)
 
         # 将模型数据缓存起来
-        cached_models[id] = (textures, elements, rotation)
-        #print(elements)
-        return textures, elements, rotation
+        cached_models[id] = (textures, elements, rotation,uvlock)
+        return textures, elements, rotation , uvlock
 
     except Exception as e:
         print(f"An error occurred: {e}")
         textures = {}
         elements = []
-        return textures, elements, rotation
+        return textures, elements, rotation , uvlock

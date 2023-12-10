@@ -24,6 +24,15 @@ def create_node_material(texture_paths, mat_name,filename):
         shader_node = mat.node_tree.nodes.new('ShaderNodeBsdfTransparent')
         output_node = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
         mat.node_tree.links.new(shader_node.outputs['BSDF'], output_node.inputs['Surface'])
+    elif texture_paths[0] is None:
+        #透明材质
+        mat = bpy.data.materials.new(mat_name)
+        mat.use_nodes = True
+        for node in mat.node_tree.nodes:
+            mat.node_tree.nodes.remove(node)
+        shader_node = mat.node_tree.nodes.new('ShaderNodeBsdfTransparent')
+        output_node = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
+        mat.node_tree.links.new(shader_node.outputs['BSDF'], output_node.inputs['Surface'])
     else:
         if mat_name in Type1:
             shader_name = "树叶/草+灰度图着色器"

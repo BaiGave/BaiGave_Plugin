@@ -94,7 +94,7 @@ class WorldPanel(bpy.types.Panel):
         
         row = layout.row()
         row.operator("baigave.import_schem", text="导入.schem文件")
-
+        
         row = layout.row()
         row.operator("baigave.import_nbt", text="导入.nbt文件")
 

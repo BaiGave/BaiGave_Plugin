@@ -6,7 +6,7 @@ import pickle
 import threading
 import subprocess
 import re
-import math
+from .structure import nbt
 
 from .block import block
 from .level import create_level
@@ -917,6 +917,7 @@ class ImportNBT(bpy.types.Operator):
     def execute(self, context):
         # 获取文件路径
         filepath = self.filepath
+        filename = os.path.basename(filepath)
         start_time = time.time()
         data = amulet_nbt.load(filepath)
         
@@ -925,7 +926,7 @@ class ImportNBT(bpy.types.Operator):
         if "palette" in data:
             palette = data["palette"]
         elif "palettes" in data:
-            palette = data["palettes"][3]
+            palette = data["palettes"][0]
            
 
         size = data["size"]
@@ -951,7 +952,7 @@ class ImportNBT(bpy.types.Operator):
                 d[(pos[0],pos[2],pos[1])] = block_name
         end_time = time.time()
         print("代码块执行时间：", end_time - start_time, "秒")
-        schem_all(d)
+        nbt(d,filename)
         
         return {'FINISHED'}
     def invoke(self, context, event):
@@ -979,13 +980,10 @@ class ImportSchem(bpy.types.Operator):
             os.remove(file_path)
         
         
-        # 遍历字典的键值对
-        d = {}
-        a = amulet.load_level(self.filepath)
-        a.translation_manager.platforms()
-        bounds =a.bounds("main").bounds
-        chunks = [list(point) for point in bounds]
-
+        level = amulet.load_level(self.filepath)
+        level.translation_manager.platforms()
+        all_chunks=level.all_chunk_coords("main")
+        chunks = [list(point) for point in level.bounds("main").bounds]
         nbt_data = amulet_nbt._load_nbt.load(self.filepath)
         size = {
             "x":int(nbt_data["Width"]),
@@ -993,6 +991,98 @@ class ImportSchem(bpy.types.Operator):
             "z":int(nbt_data["Length"])
         }
 
+
+        #小模型，直接导入
+        # if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2])<10000:
+        #     print(chunks)
+        # 遍历的每个区块
+        for i in all_chunks:
+            for j in range(chunks[0][1]//16, (chunks[1][1]//16)+1):
+                i_list = list(i)  # 将元组转换为列表
+                if len(i_list) == 2:
+                    # 在索引为 1 的位置插入数值 -2
+                    i_list.insert(1, j)
+                elif len(i_list) == 3:
+                    # 将第二个元素替换为数值 -2
+                    i_list[1] = j
+
+                # 将列表转换回元组
+                chunk_coord = tuple(i_list)
+                
+                schem_all(level,chunks,chunk_coord,str(chunk_coord))
+        schem_liquid(level,chunks)
+            #测试 单独导出自定义方块
+            #schem(d)
+        materials = bpy.data.materials
+        for material in materials:
+            try:
+                node_tree = material.node_tree
+                nodes = node_tree.nodes
+                for node in nodes:
+                    if node.type == 'TEX_IMAGE':
+                        if node.name == '色图':
+                            node.image = bpy.data.images.get("colormap")
+            except:
+                pass
+        end_time = time.time()
+        print("预处理时间：", end_time - start_time, "秒")
+
+        #大模型，多进程
+        # else:
+        #     n = (os.cpu_count())/2 #cpu核心数
+        #     prime_factor = 2
+        #     factors = []
+        #     while prime_factor**2 <= n:
+        #         if n % prime_factor:
+        #             prime_factor += 1
+        #         else:
+        #             n //= prime_factor
+        #             factors.append(prime_factor)
+        #     if n > 1:
+        #         factors.append(n)
+
+        #     factors.sort(reverse=True)  # 分解素因数，从大到小排序
+        #     chunks.append(factors)  # 切割n个区块
+        #     chunks=[chunks]
+        #     while chunks[0][2] != []:
+        #         i = 0
+        #         while i < len(chunks):
+        #             subchunk = chunks[i]
+        #             dimensions = [subchunk[1][i] - subchunk[0][i] for i in range(3)]
+        #             max_dimension_index = dimensions.index(max(dimensions))
+        #             factor = subchunk[2].pop(0)
+        #             segment_length = dimensions[max_dimension_index] / factor
+        #             new_chunks = []
+        #             for j in range(int(factor)):
+        #                 new_chunk = [list(subchunk[0]), list(subchunk[1]), list(subchunk[2])]
+        #                 new_chunk[0][max_dimension_index] = math.floor(subchunk[0][max_dimension_index] + j * segment_length)
+        #                 if j == factor - 1:  
+        #                     new_chunk[1][max_dimension_index] = subchunk[1][max_dimension_index]
+        #                 else:
+        #                     new_chunk[1][max_dimension_index] = math.floor(new_chunk[0][max_dimension_index] + segment_length)
+        #                 new_chunks.append(new_chunk)
+        #             chunks.pop(i)
+        #             chunks[i:i] = new_chunks
+        #             i += len(new_chunks)
+
+        #     VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
+        #     with open(VarCachePath, 'wb') as file:
+        #         pickle.dump((chunks,self.filepath,bounds[0],filename),file)
+        #     with open(VarCachePath, 'rb') as file:
+        #         chunks,schempath,origin,filename = pickle.load(file)
+        
+
+        #     #多进程导入模型
+        #     bpy.data.window_managers["WinMan"].bcp_max_connections = 64
+        #     bpy.ops.wm.open_command_port()
+        #     blender_path = bpy.app.binary_path
+        #     ImportPath = bpy.utils.script_path_user()
+        #     MultiprocessPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_mp.py"
+
+        #     #多进程实现方法：后台启动headless blender(-b)，只运行python代码(-P)，不显示界面
+        #     for num in range(len(chunks)):
+        #         ChunkIndex="import bpy;bpy.context.scene.frame_current = {}".format(num)
+        #         subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
         # 设置图片的大小和颜色
         image_width = int(size["z"])
         image_height = int(size["x"])
@@ -1008,97 +1098,6 @@ class ImportSchem(bpy.types.Operator):
             for x in range(image_width):
                 pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
                 image.pixels[pixel_index : pixel_index + 4] = default_color
-
-        #小模型，直接导入
-        if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2])<10000:
-            #print(chunks)
-            # 遍历边界内的每个坐标
-            for x in range(chunks[0][0], chunks[1][0]):
-                for y in range(chunks[0][1], chunks[1][1]):
-                    for z in range(chunks[0][2], chunks[1][2]):
-                        # 获取坐标处的方块
-                        id = a.get_block(x, y, z, "main")
-                        id =str(a.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(id)[0])
-                        #block = convert_block_state(block)
-                        # 将方块和坐标添加到字典中
-                        d[(x-chunks[0][0], z-chunks[0][2], y-chunks[0][1])] = id.replace('"', '')
-            
-            #测试，把每个方块都单独作为一个物体生成出来
-            schem_all(d)
-            schem_liquid(d)
-            #测试 单独导出自定义方块
-            #schem(d)
-            materials = bpy.data.materials
-            for material in materials:
-                try:
-                    node_tree = material.node_tree
-                    nodes = node_tree.nodes
-                    for node in nodes:
-                        if node.type == 'TEX_IMAGE':
-                            if node.name == '色图':
-                                node.image = bpy.data.images.get("colormap")
-                except:
-                    pass
-            end_time = time.time()
-            print("预处理时间：", end_time - start_time, "秒")
-
-        #大模型，多进程
-        else:
-            n = (os.cpu_count())/2 #cpu核心数
-            prime_factor = 2
-            factors = []
-            while prime_factor**2 <= n:
-                if n % prime_factor:
-                    prime_factor += 1
-                else:
-                    n //= prime_factor
-                    factors.append(prime_factor)
-            if n > 1:
-                factors.append(n)
-
-            factors.sort(reverse=True)  # 分解素因数，从大到小排序
-            chunks.append(factors)  # 切割n个区块
-            chunks=[chunks]
-            while chunks[0][2] != []:
-                i = 0
-                while i < len(chunks):
-                    subchunk = chunks[i]
-                    dimensions = [subchunk[1][i] - subchunk[0][i] for i in range(3)]
-                    max_dimension_index = dimensions.index(max(dimensions))
-                    factor = subchunk[2].pop(0)
-                    segment_length = dimensions[max_dimension_index] / factor
-                    new_chunks = []
-                    for j in range(int(factor)):
-                        new_chunk = [list(subchunk[0]), list(subchunk[1]), list(subchunk[2])]
-                        new_chunk[0][max_dimension_index] = math.floor(subchunk[0][max_dimension_index] + j * segment_length)
-                        if j == factor - 1:  
-                            new_chunk[1][max_dimension_index] = subchunk[1][max_dimension_index]
-                        else:
-                            new_chunk[1][max_dimension_index] = math.floor(new_chunk[0][max_dimension_index] + segment_length)
-                        new_chunks.append(new_chunk)
-                    chunks.pop(i)
-                    chunks[i:i] = new_chunks
-                    i += len(new_chunks)
-
-            VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-            with open(VarCachePath, 'wb') as file:
-                pickle.dump((chunks,self.filepath,bounds[0],filename),file)
-            with open(VarCachePath, 'rb') as file:
-                chunks,schempath,origin,filename = pickle.load(file)
-        
-
-            #多进程导入模型
-            bpy.data.window_managers["WinMan"].bcp_max_connections = 64
-            bpy.ops.wm.open_command_port()
-            blender_path = bpy.app.binary_path
-            ImportPath = bpy.utils.script_path_user()
-            MultiprocessPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_mp.py"
-
-            #多进程实现方法：后台启动headless blender(-b)，只运行python代码(-P)，不显示界面
-            for num in range(len(chunks)):
-                ChunkIndex="import bpy;bpy.context.scene.frame_current = {}".format(num)
-                subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
-
         return {'FINISHED'}
     
     def invoke(self, context, event):
