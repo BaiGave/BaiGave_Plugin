@@ -11,6 +11,11 @@ if "operator" in locals():
 else:
 	from .operators import operator
 
+if "mesh_to_mc" in locals():
+	importlib.reload(mesh_to_mc)
+else:
+	from .operators import mesh_to_mc
+
 if "property" in locals():
 	importlib.reload(property)
 else:
@@ -43,6 +48,7 @@ module_list = (
 	surface_optimization,
 	map,
 	operator,
+	mesh_to_mc,
 	ui
 )
 

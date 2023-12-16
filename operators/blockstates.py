@@ -5,7 +5,10 @@ from .model import extract_vertices_from_elements
 from .functions import get_file_path, get_all_data
 
 def blockstates(coord,chunks, level, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict):
-    id = level.get_block(coord[0], coord[1], coord[2], "main")
+    try:
+        id = level.get_block(coord[0], coord[1], coord[2], "main")
+    except:
+        return vertices,faces,direction,texture_list,uv_list,uv_rotation_list
     id =str(level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(id)[0]).replace('"', '')
     # 定义一个元组，存储六个方向的偏移量，按照 上下北南东西 的顺序排序
     offsets = ((0, 0, -1),  # 东
@@ -19,15 +22,18 @@ def blockstates(coord,chunks, level, vertices, faces, direction, texture_list, u
     # 判断是否有空气方块
     has_air = [True] * 6  # 默认为 True
     for i, adj_coord in enumerate(adjacent_coords):
-        name = level.get_block(adj_coord[0], adj_coord[1], adj_coord[2], "main")
-        if isinstance(name,amulet.api.block.Block):
-            name =str(level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(name)[0]).replace('"', '')
-            parent = get_parent(name)
-            # 如果 parent 是 "block/cube"，将 has_air 设为 False
-            if parent == "block/cube":
-                has_air[i] = False
-            if parent =="yuushya:block/template_column":
-                has_air[i] = False
+        try:
+            name = level.get_block(adj_coord[0], adj_coord[1], adj_coord[2], "main")
+            if isinstance(name,amulet.api.block.Block):
+                name =str(level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(name)[0]).replace('"', '')
+                parent = get_parent(name)
+                # 如果 parent 是 "block/cube"，将 has_air 设为 False
+                if parent == "block/cube":
+                    has_air[i] = False
+                if parent =="yuushya:block/template_column":
+                    has_air[i] = False
+        except:
+            pass
             
     
     if any(has_air):
@@ -228,16 +234,17 @@ def get_model(id):
 
                     if flag:
                         filepath = value[0]["model"] if isinstance(value, list) else value["model"]
+                        filepath = get_file_path(filepath, 'm')
+                        dirname, filename = os.path.split(filepath)
+                        dirname = dirname + '\\'
+                        t, e, _ = get_all_data(dirname, filename)
                         if "y" in value:
                             rotation[2] = 360-value["y"]
                         if "x" in value:
                             rotation[0] = value["x"]
                         if "uvlock" in value:
                             uvlock =value["uvlock"]
-                        filepath = get_file_path(filepath, 'm')
-                        dirname, filename = os.path.split(filepath)
-                        dirname = dirname + '\\'
-                        t, e, _ = get_all_data(dirname, filename)
+                        
                         textures.update(t)
                         elements.extend(e)
             #这里有问题
@@ -258,7 +265,7 @@ def get_model(id):
                             if "y" in apply:
                                 t, e, _ = get_all_data(dirname, filename,apply["y"])
                                 for item in e:
-                                    item["rotation"] = {"angle": 360 - apply["y"],"axis": "y","origin": [8, 8, 8]}
+                                    item["rotation"] = {"angle": 360-apply["y"],"axis": "y","origin": [8, 8, 8]}
                             else:
                                 t, e, _ = get_all_data(dirname, filename)
                             if "uvlock" in apply:

@@ -3,8 +3,9 @@ import bmesh
 from .model import create_mesh,add_mesh_to_collection,extract_vertices_from_elements,get_or_create_material,set_uv
 import math
 
-def block(textures,elements,position,rot,filename,has_air):
-    collection = bpy.context.collection
+def block(textures,elements,position,rot,filename,has_air,collection=None):
+    if collection == None:
+        collection = bpy.context.collection
     mesh_name = filename
     mesh = create_mesh(mesh_name)
     obj = add_mesh_to_collection(collection, mesh)
@@ -16,7 +17,7 @@ def block(textures,elements,position,rot,filename,has_air):
     uv_rotation_list = []
     vertices_dict ={}
 
-    vertices,faces,direction,texture_list,uv_list,uv_rotation_list = extract_vertices_from_elements(textures, elements, has_air, None,[0,0,0], vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
+    vertices,faces,direction,texture_list,uv_list,uv_rotation_list = extract_vertices_from_elements(textures, elements, has_air, None,rot, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
     
     bm = bmesh.new()
     for v in vertices:
@@ -59,16 +60,20 @@ def block(textures,elements,position,rot,filename,has_air):
     bm.free()
 
     # 设置3D游标位置
-    bpy.context.scene.cursor.location = (0.5, -0.5, 0.5)
+    bpy.context.scene.cursor.location = (0, 0, 0)
+    
     # 设置物体的原点中心位置为3D游标位置
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
     bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
-    # 将对象的变换矩阵设置为单位矩阵
-    obj.select_set(False)
-    obj.location = position
     # 设置旋转（以弧度为单位）
-    obj.rotation_euler = (math.radians(rot[0]), math.radians(rot[1]), math.radians(rot[2]))
+    # obj.rotation_euler = (math.radians(rot[0]), math.radians(rot[1]), math.radians(rot[2]))
+    # bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+    # 将对象的变换矩阵设置为单位矩阵
+    obj.location = position
+    
+    obj.select_set(False)
+
 
     
 

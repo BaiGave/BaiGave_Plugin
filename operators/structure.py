@@ -33,7 +33,7 @@ def nbt(d,filename="nbt",position=(0,0,0)):
         if result not in exclude:  
             vertices,faces,direction,texture_list,uv_list,uv_rotation_list = d_blockstates(key, d, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
             
-    collection = bpy.context.collection
+    collection =bpy.context.scene.collection
     mesh_name = filename
     mesh = create_mesh(mesh_name)
     obj = add_mesh_to_collection(collection, mesh)

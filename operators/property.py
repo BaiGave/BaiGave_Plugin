@@ -348,7 +348,7 @@ def register():
     bpy.types.Scene.my_properties = bpy.props.PointerProperty(type=Property)
     temp_dir = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")
     importlib.reload(config)
-    threading.Thread(target=read_blockstate_files, args=(temp_dir,config.config["version"])).start()
+    #threading.Thread(target=read_blockstate_files, args=(temp_dir,config.config["version"])).start()
     
 def unregister():
     for cls in classes:
