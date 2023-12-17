@@ -12,4 +12,3 @@ sea_plants = ["minecraft:seagrass","minecraft:tall_seagrass","minecraft:kelp_pla
 
 exclude = ["minecraft:water","minecraft:lava", "minecraft:air"]
 
-mod_list = []

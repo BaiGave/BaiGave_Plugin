@@ -1,7 +1,6 @@
 import bpy
 import bmesh
 from .model import create_mesh,add_mesh_to_collection,extract_vertices_from_elements,get_or_create_material,set_uv
-import math
 
 def block(textures,elements,position,rot,filename,has_air,collection=None):
     if collection == None:
@@ -26,11 +25,18 @@ def block(textures,elements,position,rot,filename,has_air,collection=None):
 
     uv_layer = bm.loops.layers.uv.new()  # 添加UV图层
     for face_index, f in enumerate(faces):
-        existing_face = bm.faces.get([bm.verts[i] for i in f])
+        verts_list=[]
+        for i in f:
+            vert =bm.verts[i]
+            if vert not in verts_list:
+                verts_list.append(vert)
+        existing_face = bm.faces.get(verts_list)
         if existing_face is not None:
             face = existing_face
+        elif len(verts_list)>2:
+            face = bm.faces.new(verts_list)
         else:
-            face = bm.faces.new([bm.verts[i] for i in f])
+            continue
 
         if texture_list[face_index] == "None":
             continue
@@ -66,12 +72,7 @@ def block(textures,elements,position,rot,filename,has_air,collection=None):
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
     bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
-    # 设置旋转（以弧度为单位）
-    # obj.rotation_euler = (math.radians(rot[0]), math.radians(rot[1]), math.radians(rot[2]))
-    # bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-    # 将对象的变换矩阵设置为单位矩阵
     obj.location = position
-    
     obj.select_set(False)
 
 

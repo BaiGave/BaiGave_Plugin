@@ -138,21 +138,25 @@ def create_or_clear_collection(collection_name):
         new_collection.hide_render = True
         new_collection.hide_viewport = True
 
-def create_mesh_from_dictionary(d):
+def create_mesh_from_dictionary(d,name):
     # 创建一个新的网格对象
-    mesh = bpy.data.meshes.new(name="CustomMesh")
+    mesh = bpy.data.meshes.new(name=name)
     mesh.attributes.new(name='blockid', type="INT", domain="POINT")
-    obj = bpy.data.objects.new("CustomObject", mesh)
+    obj = bpy.data.objects.new(name, mesh)
 
     # 将对象添加到场景中
     scene = bpy.context.scene
     scene.collection.objects.link(obj)
+    # 创建一个新的集合
+    collection_name=name+"_Blocks"
+    create_or_clear_collection(collection_name)
+    collection =bpy.data.collections.get(collection_name)
 
     nodetree_target = "SchemToBlocks"
 
     #导入几何节点
     try:
-        nodes_modifier.node_group = bpy.data.node_groups[nodetree_target]
+        nodes_modifier.node_group = bpy.data.node_groups[collection_name]
     except:
         file_path = __file__.rsplit(
             "\\", 1)[0]+"\\GeometryNodes.blend"
@@ -168,10 +172,7 @@ def create_mesh_from_dictionary(d):
     ids = []  # 存储顶点id
     id_map = {}  # 用于将字符串id映射到数字的字典
     next_id = 0  # 下一个可用的数字id
-    # 创建一个新的集合
-    collection_name="Blocks"
-    create_or_clear_collection(collection_name)
-    collection =bpy.data.collections.get(collection_name)
+
     for coord, id_str in d.items():
         # 将字符串id映射到数字，如果id_str已经有对应的数字id，则使用现有的数字id
         if id_str not in id_map:
@@ -203,9 +204,16 @@ def create_mesh_from_dictionary(d):
         obj.modifiers.new(name="SchemToBlocks",type="NODES")
     nodes_modifier=obj.modifiers[0]
     
+    # 复制 SchemToBlocks 节点组并重命名为 CollectionName
+    try:
+        original_node_group = bpy.data.node_groups['SchemToBlocks']
+        new_node_group = original_node_group.copy()
+        new_node_group.name = collection_name
+    except KeyError:
+        print("error")
     #设置几何节点        
-    nodes_modifier.node_group = bpy.data.node_groups[nodetree_target]
-    bpy.data.node_groups["SchemToBlocks"].nodes["集合信息"].inputs[0].default_value = collection
+    nodes_modifier.node_group = bpy.data.node_groups[collection_name]
+    bpy.data.node_groups[collection_name].nodes["集合信息"].inputs[0].default_value = collection
     nodes_modifier.show_viewport = True
 
 #将普通网格体转换成mc
@@ -761,7 +769,7 @@ class ObjToBlocks(bpy.types.Operator):
         print("代码块执行时间：", end_time - start_time, "秒")
 
         start_time = time.time()
-        create_mesh_from_dictionary(d)
+        create_mesh_from_dictionary(d,filename)
         end_time = time.time()
         print("代码块执行时间：", end_time - start_time, "秒")
         threading.Thread(target=export_schem, args=(d,filename,)).start()

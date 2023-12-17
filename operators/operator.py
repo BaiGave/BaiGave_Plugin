@@ -13,11 +13,9 @@ from .level import create_level
 from .tip import button_callback
 
 from .functions import get_all_data
-#from .schem import schem,schem_p,schem_leaves,schem_liquid,schem_dirtgrass,schem_snow,schem_deepstone,schem_sandgravel
-from .schem import schem_all,schem_liquid
+from .schem import schem_chunk,schem_liquid,schem
 from .generate import generate
 from .chunk  import chunk as create_chunk
-from .schem import schem_all
 from .mesh_to_mc import create_mesh_from_dictionary
 
 import gzip
@@ -314,7 +312,7 @@ class ImportNBT(bpy.types.Operator):
 
         #py+几何节点做法，无面剔除，但速度快。
         start_time = time.time()
-        create_mesh_from_dictionary(d)
+        create_mesh_from_dictionary(d,filename.replace(".nbt",""))
         end_time = time.time()
         print("代码块执行时间：", end_time - start_time, "秒")
         return {'FINISHED'}
@@ -334,6 +332,7 @@ class ImportSchem(bpy.types.Operator):
 
     # 定义操作的执行函数
     def execute(self, context):
+        name=os.path.basename(self.filepath)
         #清空缓存文件夹
         start_time = time.time()
         folder_path = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache"
@@ -351,25 +350,27 @@ class ImportSchem(bpy.types.Operator):
             "y":int(nbt_data["Height"]),
             "z":int(nbt_data["Length"])
         }
-
+        
         #小模型，直接导入
-        # if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2])<10000:
-        #     print(chunks)
-        # 遍历的每个区块
-        for i in all_chunks:
-            for j in range(chunks[0][1]//16, (chunks[1][1]//16)+1):
-                i_list = list(i)  # 将元组转换为列表
-                if len(i_list) == 2:
-                    # 在索引为 1 的位置插入数值 -2
-                    i_list.insert(1, j)
-                elif len(i_list) == 3:
-                    # 将第二个元素替换为数值 -2
-                    i_list[1] = j
+        if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2])<100000:
+            #几何节点+py方法
+            schem(level,chunks,name)
+        else:
+            # 遍历的每个区块
+            for i in all_chunks:
+                for j in range(chunks[0][1]//16, (chunks[1][1]//16)+1):
+                    i_list = list(i)  # 将元组转换为列表
+                    if len(i_list) == 2:
+                        # 在索引为 1 的位置插入数值 -2
+                        i_list.insert(1, j)
+                    elif len(i_list) == 3:
+                        # 将第二个元素替换为数值 -2
+                        i_list[1] = j
 
-                # 将列表转换回元组
-                chunk_coord = tuple(i_list)
-                
-                schem_all(level,chunks,chunk_coord,str(chunk_coord))
+                    # 将列表转换回元组
+                    chunk_coord = tuple(i_list)
+                    
+                    schem_chunk(level,chunks,chunk_coord,str(chunk_coord))
         schem_liquid(level,chunks)
             #测试 单独导出自定义方块
             #schem(d)
@@ -514,7 +515,7 @@ class MultiprocessSchem(bpy.types.Operator):
                 pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
                 image.pixels[pixel_index : pixel_index + 4] = default_color
 
-        schem_all(d)
+        schem_chunk(d)
         end_time = time.time()
         print("预处理时间：", end_time - start_time, "秒")
 

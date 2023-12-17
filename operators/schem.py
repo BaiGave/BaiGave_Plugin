@@ -5,7 +5,10 @@ from .blockstates import blockstates
 import amulet
 from .classification import liquid,exclude,sea_plants
 import numpy as np
-
+import os
+from .block import block
+from .blockstates import get_model
+from .mesh_to_mc import create_or_clear_collection
 #用于删除[]的部分 
 def remove_brackets(input_string):
     output_string = ""
@@ -109,7 +112,103 @@ def remove_brackets(input_string):
 #                     pass
 #                 block(textures,elements,(pos[0],-pos[1]-1,pos[2]),rotation,filename,has_air)
 
-def schem_all(level,chunks,i,filename="Schemetics",position=(0,0,0)):
+
+def schem(level,chunks,filename="schem",position=(0,0,0)):
+    # 获取最小和最大坐标
+    min_coords = chunks[0]
+    max_coords = chunks[1]
+
+    # 创建一个新的网格对象
+    mesh = bpy.data.meshes.new(name=filename)
+    mesh.attributes.new(name='blockid', type="INT", domain="POINT")
+    obj = bpy.data.objects.new(filename, mesh)
+
+    # 将对象添加到场景中
+    scene = bpy.context.scene
+    scene.collection.objects.link(obj)
+    # 创建一个新的集合
+    collection_name=filename+"_Blocks"
+    create_or_clear_collection(collection_name)
+    collection =bpy.data.collections.get(collection_name)
+
+    nodetree_target = "SchemToBlocks"
+
+    #导入几何节点
+    try:
+        nodes_modifier.node_group = bpy.data.node_groups[collection_name]
+    except:
+        file_path = __file__.rsplit(
+            "\\", 1)[0]+"\\GeometryNodes.blend"
+        inner_path = 'NodeTree'
+        object_name = nodetree_target
+        bpy.ops.wm.append(
+            filepath=os.path.join(file_path, inner_path, object_name),
+            directory=os.path.join(file_path, inner_path),
+            filename=object_name
+        )
+    # 创建顶点和顶点索引
+    vertices = []
+    ids = []  # 存储顶点id
+    id_map = {}  # 用于将字符串id映射到数字的字典
+    next_id = 0  # 下一个可用的数字id
+
+    # 遍历范围内所有的坐标
+    for x in range(min_coords[0], max_coords[0] + 1):
+        for y in range(min_coords[1], max_coords[1] + 1):
+            for z in range(min_coords[2], max_coords[2] + 1):
+                # 获取坐标处的方块
+                id = level.get_block(x, y, z, "main")
+                if isinstance(id,amulet.api.block.Block):
+                    id =str(level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(id)[0]).replace('"', '')
+                    result = remove_brackets(id) 
+                    if result not in exclude:  
+                        # 将字符串id映射到数字，如果id_str已经有对应的数字id，则使用现有的数字id
+                        if id not in id_map:
+                            filename=str(next_id)
+                            textures,elements,rotation,_ =get_model(id)
+                            position = [0, 0, 0]
+                            has_air = [True, True, True, True, True, True]
+                            block(textures, elements, position,rotation, filename, has_air,collection)
+                            id_map[id] = next_id
+                            next_id += 1
+
+                        vertices.append((x-min_coords[0],-(z-min_coords[2]),y-min_coords[1]))
+                        # 将字符串id转换为相应的数字id
+                        ids.append(id_map[id])
+
+        
+    # 将顶点和顶点索引添加到网格中
+    mesh.from_pydata(vertices, [], [])
+    for i, item in enumerate(obj.data.attributes['blockid'].data):
+        item.value=ids[i]
+    # 设置顶点索引
+    mesh.update()
+    
+    # 检查是否有节点修改器，如果没有则添加一个
+    has_nodes_modifier = False
+    for modifier in obj.modifiers:
+        if modifier.type == 'NODES':
+            has_nodes_modifier = True
+            break
+    if not has_nodes_modifier:
+        obj.modifiers.new(name="SchemToBlocks",type="NODES")
+    nodes_modifier=obj.modifiers[0]
+    
+    # 复制 SchemToBlocks 节点组并重命名为 CollectionName
+    try:
+        original_node_group = bpy.data.node_groups['SchemToBlocks']
+        new_node_group = original_node_group.copy()
+        new_node_group.name = collection_name
+    except KeyError:
+        print("error")
+    #设置几何节点        
+    nodes_modifier.node_group = bpy.data.node_groups[collection_name]
+    bpy.data.node_groups[collection_name].nodes["集合信息"].inputs[0].default_value = collection
+    nodes_modifier.show_viewport = True    
+
+    
+
+def schem_chunk(level,chunks,i,filename="Schemetics",position=(0,0,0)):
     vertices = []
     faces = []
     direction = []
