@@ -328,7 +328,7 @@ class ImportSchem(bpy.types.Operator):
     # 定义一个属性来存储文件路径
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
     # 定义一个属性来过滤文件类型，只显示.schem文件
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
+    #filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
 
     # 定义操作的执行函数
     def execute(self, context):
@@ -341,18 +341,19 @@ class ImportSchem(bpy.types.Operator):
             file_path = os.path.join(folder_path, file_name)
             os.remove(file_path)
         level = amulet.load_level(self.filepath)
-        level.translation_manager.platforms()
         all_chunks=level.all_chunk_coords("main")
         chunks = [list(point) for point in level.bounds("main").bounds]
         nbt_data = amulet_nbt._load_nbt.load(self.filepath)
+        #print(nbt_data["BlockEntities"])
         size = {
             "x":int(nbt_data["Width"]),
             "y":int(nbt_data["Height"]),
             "z":int(nbt_data["Length"])
         }
         
+        
         #小模型，直接导入
-        if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2])<100000:
+        if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2])<1000000:
             #几何节点+py方法
             schem(level,chunks,name)
         else:

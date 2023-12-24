@@ -176,7 +176,7 @@ def create_mesh_from_dictionary(d,name):
     for coord, id_str in d.items():
         # 将字符串id映射到数字，如果id_str已经有对应的数字id，则使用现有的数字id
         if id_str not in id_map:
-            filename=str(next_id)
+            filename=str(next_id)+str(id_str)
             textures,elements,rotation,_ =get_model(id_str)
             position = [0, 0, 0]
             has_air = [True, True, True, True, True, True]

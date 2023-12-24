@@ -156,15 +156,16 @@ def schem(level,chunks,filename="schem",position=(0,0,0)):
     for x in range(min_coords[0], max_coords[0] + 1):
         for y in range(min_coords[1], max_coords[1] + 1):
             for z in range(min_coords[2], max_coords[2] + 1):
-                # 获取坐标处的方块
-                id = level.get_block(x, y, z, "main")
+                # 获取坐标处的方块       
+                blc =level.get_version_block(x, y, z, "main",("java", (1, 20, 0)))
+                id =blc[0]
                 if isinstance(id,amulet.api.block.Block):
-                    id =str(level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(id)[0]).replace('"', '')
+                    id = str(id).replace('"', '')
                     result = remove_brackets(id) 
                     if result not in exclude:  
-                        # 将字符串id映射到数字，如果id_str已经有对应的数字id，则使用现有的数字id
+                        # 将字符串id映射到数字，如果id已经有对应的数字id，则使用现有的数字id
                         if id not in id_map:
-                            filename=str(next_id)
+                            filename=str(next_id)+str(id)
                             textures,elements,rotation,_ =get_model(id)
                             position = [0, 0, 0]
                             has_air = [True, True, True, True, True, True]
