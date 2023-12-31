@@ -6,6 +6,7 @@ import pickle
 import threading
 import subprocess
 import re
+from itertools import groupby
 from .structure import nbt
 
 from .block import block
@@ -341,7 +342,7 @@ class ImportSchem(bpy.types.Operator):
             file_path = os.path.join(folder_path, file_name)
             os.remove(file_path)
         level = amulet.load_level(self.filepath)
-        all_chunks=level.all_chunk_coords("main")
+        all_chunks=sorted(level.all_chunk_coords("main"))
         chunks = [list(point) for point in level.bounds("main").bounds]
         nbt_data = amulet_nbt._load_nbt.load(self.filepath)
         #print(nbt_data["BlockEntities"])
@@ -351,100 +352,6 @@ class ImportSchem(bpy.types.Operator):
             "z":int(nbt_data["Length"])
         }
         
-        
-        #小模型，直接导入
-        if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2])<1000000:
-            #几何节点+py方法
-            schem(level,chunks,name)
-        else:
-            # 遍历的每个区块
-            for i in all_chunks:
-                for j in range(chunks[0][1]//16, (chunks[1][1]//16)+1):
-                    i_list = list(i)  # 将元组转换为列表
-                    if len(i_list) == 2:
-                        # 在索引为 1 的位置插入数值 -2
-                        i_list.insert(1, j)
-                    elif len(i_list) == 3:
-                        # 将第二个元素替换为数值 -2
-                        i_list[1] = j
-
-                    # 将列表转换回元组
-                    chunk_coord = tuple(i_list)
-                    
-                    schem_chunk(level,chunks,chunk_coord,str(chunk_coord))
-        schem_liquid(level,chunks)
-            #测试 单独导出自定义方块
-            #schem(d)
-        materials = bpy.data.materials
-        for material in materials:
-            try:
-                node_tree = material.node_tree
-                nodes = node_tree.nodes
-                for node in nodes:
-                    if node.type == 'TEX_IMAGE':
-                        if node.name == '色图':
-                            node.image = bpy.data.images.get("colormap")
-            except:
-                pass
-        end_time = time.time()
-        print("预处理时间：", end_time - start_time, "秒")
-
-        #大模型，多进程
-        # else:
-        #     n = (os.cpu_count())/2 #cpu核心数
-        #     prime_factor = 2
-        #     factors = []
-        #     while prime_factor**2 <= n:
-        #         if n % prime_factor:
-        #             prime_factor += 1
-        #         else:
-        #             n //= prime_factor
-        #             factors.append(prime_factor)
-        #     if n > 1:
-        #         factors.append(n)
-
-        #     factors.sort(reverse=True)  # 分解素因数，从大到小排序
-        #     chunks.append(factors)  # 切割n个区块
-        #     chunks=[chunks]
-        #     while chunks[0][2] != []:
-        #         i = 0
-        #         while i < len(chunks):
-        #             subchunk = chunks[i]
-        #             dimensions = [subchunk[1][i] - subchunk[0][i] for i in range(3)]
-        #             max_dimension_index = dimensions.index(max(dimensions))
-        #             factor = subchunk[2].pop(0)
-        #             segment_length = dimensions[max_dimension_index] / factor
-        #             new_chunks = []
-        #             for j in range(int(factor)):
-        #                 new_chunk = [list(subchunk[0]), list(subchunk[1]), list(subchunk[2])]
-        #                 new_chunk[0][max_dimension_index] = math.floor(subchunk[0][max_dimension_index] + j * segment_length)
-        #                 if j == factor - 1:  
-        #                     new_chunk[1][max_dimension_index] = subchunk[1][max_dimension_index]
-        #                 else:
-        #                     new_chunk[1][max_dimension_index] = math.floor(new_chunk[0][max_dimension_index] + segment_length)
-        #                 new_chunks.append(new_chunk)
-        #             chunks.pop(i)
-        #             chunks[i:i] = new_chunks
-        #             i += len(new_chunks)
-
-        #     VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-        #     with open(VarCachePath, 'wb') as file:
-        #         pickle.dump((chunks,self.filepath,bounds[0],filename),file)
-        #     with open(VarCachePath, 'rb') as file:
-        #         chunks,schempath,origin,filename = pickle.load(file)
-        
-
-        #     #多进程导入模型
-        #     bpy.data.window_managers["WinMan"].bcp_max_connections = 64
-        #     bpy.ops.wm.open_command_port()
-        #     blender_path = bpy.app.binary_path
-        #     ImportPath = bpy.utils.script_path_user()
-        #     MultiprocessPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_mp.py"
-
-        #     #多进程实现方法：后台启动headless blender(-b)，只运行python代码(-P)，不显示界面
-        #     for num in range(len(chunks)):
-        #         ChunkIndex="import bpy;bpy.context.scene.frame_current = {}".format(num)
-        #         subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
         # 设置图片的大小和颜色
         image_width = int(size["z"])
         image_height = int(size["x"])
@@ -460,6 +367,56 @@ class ImportSchem(bpy.types.Operator):
             for x in range(image_width):
                 pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
                 image.pixels[pixel_index : pixel_index + 4] = default_color
+
+        #小模型，直接导入
+        if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2]) < bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_minsize:
+            #几何节点+py方法
+            schem(level,chunks,name)
+
+            materials = bpy.data.materials
+            for material in materials:
+                try:
+                    node_tree = material.node_tree
+                    nodes = node_tree.nodes
+                    for node in nodes:
+                        if node.type == 'TEX_IMAGE':
+                            if node.name == '色图':
+                                node.image = bpy.data.images.get("colormap")
+                except Exception as e:
+                    print("材质出错了:", e)
+
+        #大模型，分块导入
+        else:
+            groups = groupby(sorted(all_chunks), key=lambda x: x[0])
+            # 合并区块，减少导入次数
+            mp_chunks = []
+            for k, g in groups:
+                group_list = list(g)
+                mp_chunks.append((group_list[0][0], group_list[0][1], group_list[-1][0], group_list[-1][1]))
+
+            # for i in mp_chunks:
+            #     schem_chunk(level,chunks,i)
+            VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
+            with open(VarCachePath, 'wb') as file:
+                pickle.dump((chunks,mp_chunks,self.filepath,bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_intervaltime),file)
+
+            #多进程导入模型
+            bpy.data.window_managers["WinMan"].bcp_max_connections = 32
+            bpy.data.window_managers['WinMan'].bcp_port = 5001
+            bpy.ops.wm.open_command_port()
+            blender_path = bpy.app.binary_path
+            ImportPath = bpy.utils.script_path_user()
+            MultiprocessPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_mp.py"
+
+            #多进程实现方法：后台启动headless blender(-b)，只运行python代码(-P)，不显示界面
+            for num in range(len(mp_chunks)):
+                ChunkIndex = f"import bpy;bpy.context.scene.frame_current = {num}"
+                subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
+
+            schem_liquid(level,chunks)
+        end_time = time.time()
+        print("预处理时间：", end_time - start_time, "秒")
+
         return {'FINISHED'}
     
     def invoke(self, context, event):
@@ -478,28 +435,17 @@ class MultiprocessSchem(bpy.types.Operator):
         start_time = time.time()
         VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
         with open(VarCachePath, 'rb') as file:
-            chunks,schempath,origin,filename = pickle.load(file)
+            chunks,mp_chunks,schempath,interval = pickle.load(file)
 
-        d={}
-        a = amulet.load_level(schempath)
-        current_frame = bpy.context.scene.frame_current
-        subchunks=chunks[current_frame]
-        for x in range(subchunks[0][0], subchunks[1][0]):
-            for y in range(subchunks[0][1], subchunks[1][1]):
-                for z in range(subchunks[0][2], subchunks[1][2]):
-                    # 获取坐标处的方块
-                    id = a.get_block(x, y, z, "main")
-                    id =str(a.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(id)[0])
-                    #block = convert_block_state(block)
-                    # 将方块和坐标添加到字典中
-                    d[(x-subchunks[0][0], z-subchunks[0][2], y-subchunks[0][1])] = id.replace('"', '')
-        
+        level = amulet.load_level(self.filepath)
+        current_frame = int(bpy.context.scene.frame_current)
+        nbt_data = amulet_nbt._load_nbt.load(self.filepath)
+        #print(nbt_data["BlockEntities"])
         size = {
-            "x":int(subchunks[1][0]-subchunks[0][0]),
-            "y":int(subchunks[1][1]-subchunks[0][1]),
-            "z":int(subchunks[1][2]-subchunks[0][2])
+            "x":int(nbt_data["Width"]),
+            "y":int(nbt_data["Height"]),
+            "z":int(nbt_data["Length"])
         }
-        #print(size)
 
         # 设置图片的大小和颜色
         image_width = int(size["z"])
@@ -516,12 +462,12 @@ class MultiprocessSchem(bpy.types.Operator):
                 pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
                 image.pixels[pixel_index : pixel_index + 4] = default_color
 
-        schem_chunk(d)
+        schem_chunk(level,chunks,mp_chunks[current_frame])
         end_time = time.time()
         print("预处理时间：", end_time - start_time, "秒")
 
-        obj = bpy.data.objects['Schemetics']
-        obj.location = (subchunks[0][0]-origin[0],-(subchunks[0][2]-origin[2]),subchunks[0][1]-origin[1])
+        # obj = bpy.data.objects['Schemetics']
+        # obj.location = (subchunks[0][0]-origin[0],-(subchunks[0][2]-origin[2]),subchunks[0][1]-origin[1])
         ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/chunk{}.blend".format(current_frame)
         bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
         return {'FINISHED'}
@@ -728,8 +674,43 @@ class ImportWorld(bpy.types.Operator):
         vertices,faces,texture_list,uv_list,direction,uv_rotation_list = create_chunk(chunk, level)
         generate(x, z, vertices, faces, texture_list, uv_list, direction, uv_rotation_list)
 
+class SNA_AddonPreferences_F35F8(bpy.types.AddonPreferences):
+    bl_idname = 'BaiGave_Plugin'
+    sna_processnumber: bpy.props.IntProperty(name='ProcessNumber', description='目前自动组合区块，无需设置', default=6, subtype='NONE', min=1, max=64)
+    sna_intervaltime: bpy.props.FloatProperty(name='IntervalTime', description='处理完每个区块，间隔一段时间再导入进来', default=1.0, subtype='NONE', unit='NONE', min=0.0, max=10.0, step=3, precision=1)
+    sna_minsize: bpy.props.IntProperty(name='MinSize', description='超过这个数就会启用多进程分区块导入', default=1000000, subtype='NONE', min=1000, max=99999999)
+
+    def draw(self, context):
+        if not (False):
+            layout = self.layout 
+
+
+class SNA_OT_My_Generic_Operator_A38B8(bpy.types.Operator):
+    bl_idname = "sna.my_generic_operator_a38b8"
+    bl_label = "刷新"
+    bl_description = "自动设置以下参数"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        if bpy.app.version >= (3, 0, 0) and True:
+            cls.poll_message_set('')
+        return not False
+
+    def execute(self, context):
+        Variable = None
+        Variable=int(os.cpu_count()/2)
+        bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_processnumber = Variable
+        bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_intervaltime = 1
+        bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_minsize = 1000000
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return self.execute(context)
+
 classes=[ImportSchem,MultiprocessSchem,Importjson,ImportWorld,SelectArea, GenerateWorld,
-         Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,PRINT_SELECTED_ITEM,MoveModItem,MoveResourcepackItem,ImportNBT]
+         Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,PRINT_SELECTED_ITEM,MoveModItem,MoveResourcepackItem,ImportNBT,
+         SNA_AddonPreferences_F35F8,SNA_OT_My_Generic_Operator_A38B8]
 
 
 def register():
