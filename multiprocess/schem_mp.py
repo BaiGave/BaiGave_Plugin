@@ -4,18 +4,17 @@ import pickle
 import socket
 import time
 
-
 loaded_default, loaded_state = addon_utils.check("BaiGave_Plugin")
 if not loaded_state:
     addon_utils.enable("BaiGave_Plugin")
 VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
 with open(VarCachePath, 'rb') as file:
-    chunks,schempath,origin,filename = pickle.load(file)
+    chunks,mp_chunks,schempath,interval = pickle.load(file)
 bpy.ops.baigave.import_schem_mp(filepath=schempath)
 
 def send_command(command):
     clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    clientsocket.connect(('localhost', 5000))
+    clientsocket.connect(('localhost', 5001))
     clientsocket.sendall(command.encode())
     while True:
         res = clientsocket.recv(4096)
@@ -24,7 +23,7 @@ def send_command(command):
     clientsocket.close()
 
 current_frame = bpy.context.scene.frame_current
-time.sleep(current_frame*3)
+time.sleep(current_frame*interval)
 send_command("""
 import bpy
 import os
@@ -51,7 +50,7 @@ for material in materials:
                                 obj.data.materials[i] = material_variants[base_name]
 bpy.ops.outliner.orphans_purge(do_local_ids=True, do_linked_ids=True, do_recursive=True)
 objects_to_join = [obj for obj in bpy.data.objects if "Schemetics" in obj.name]
-if len(objects_to_join) == (os.cpu_count())/2:
+if len(objects_to_join) == {}:
     material_variants = {{}}
     for material in materials:
         try:
@@ -61,7 +60,7 @@ if len(objects_to_join) == (os.cpu_count())/2:
                 if node.type == 'TEX_IMAGE':
                     if node.name == '色图':
                         node.image = bpy.data.images.get("colormap")
-        except:
-            pass
+        except Exception as e:
+            print("材质出错了:", e)
     
-""".format(current_frame))
+""".format(current_frame, len(mp_chunks)))
