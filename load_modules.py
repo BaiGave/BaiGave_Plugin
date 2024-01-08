@@ -4,37 +4,42 @@ import importlib
 if "sway_animation" in locals():
 	importlib.reload(sway_animation)
 else:
-	from .operators import sway_animation
+	from .codes.functions import sway_animation
 	
 if "operator" in locals():
-	importlib.reload(operator)
+	importlib.reload(importfile)
 else:
-	from .operators import operator
+	from .codes import importfile
+
+if "search_file" in locals():
+	importlib.reload(search_file)
+else:
+	from .codes.functions import search_file
 
 if "mesh_to_mc" in locals():
 	importlib.reload(mesh_to_mc)
 else:
-	from .operators import mesh_to_mc
+	from .codes.functions import mesh_to_mc
 
 if "property" in locals():
 	importlib.reload(property)
 else:
-	from .operators import property
+	from .codes import property
 
 if "BaiGave_Rig" in locals():
 	importlib.reload(BaiGave_Rig)
 else:
-	from .operators import BaiGave_Rig
+	from .codes.unuse import BaiGave_Rig
 	
 if "surface_optimization" in locals():
 	importlib.reload(surface_optimization)
 else:
-	from .operators import surface_optimization
+	from .codes.functions import surface_optimization
 
-if "map" in locals():
-	importlib.reload(map)
-else:
-	from .operators import map
+# if "map" in locals():
+# 	importlib.reload(map)
+# else:
+# 	from .codes.unuse import map
 	
 if "ui" in locals():
 	importlib.reload(ui)
@@ -46,8 +51,9 @@ module_list = (
 	sway_animation,
 	BaiGave_Rig,
 	surface_optimization,
-	map,
-	operator,
+	#map,
+	search_file,
+	importfile,
 	mesh_to_mc,
 	ui
 )
