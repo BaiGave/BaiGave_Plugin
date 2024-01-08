@@ -75,10 +75,10 @@ class BlockPanel(bpy.types.Panel):
         row = layout.row()
         #layout.prop(BaiGave,"JsonImportSpeed")
         row.operator("baigave.import_json", text="导入.json文件")
-#世界面板     
-class WorldPanel(bpy.types.Panel):
-    bl_label ="世界"
-    bl_idname ="WorldPanel"
+#导入面板     
+class ImportPanel(bpy.types.Panel):
+    bl_label ="导入"
+    bl_idname ="ImportPanel"
     bl_space_type ='VIEW_3D'
     bl_region_type ='UI'
     bl_category ='BaiGave'
@@ -90,11 +90,27 @@ class WorldPanel(bpy.types.Panel):
         scene = context.scene
         
         row = layout.row()    
-        row.label(text = "世界",icon='ERROR')
-        
-        row = layout.row()
-        row.operator("baigave.import_schem", text="导入.schem文件")
-        
+        row.label(text = "导入",icon='ERROR')
+        # 创建一个框
+        box = layout.box()
+        box.label(text="导入.schem文件")
+        box.operator("baigave.import_schem", text="导入.schem文件")
+
+        split_8D70F = box.split(factor=0.15, align=True)
+        split_8D70F.enabled = True
+        split_8D70F.active = True
+        split_8D70F.alignment = 'Expand'.upper()
+        if not True: split_8D70F.operator_context = "EXEC_DEFAULT"
+        op = split_8D70F.operator('sna.my_generic_operator_a38b8', text='', icon_value=692, emboss=True, depress=False)
+        split_8D70F.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_minsize', text='方块数分界线', icon_value=0, emboss=True)
+        split_3E557 = box.split(factor=0.47, align=True)
+        split_3E557.enabled = True
+        split_3E557.active = True
+        split_3E557.alignment = 'Expand'.upper()
+        if not True: split_3E557.operator_context = "EXEC_DEFAULT"
+        split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_processnumber', text='进程数', icon_value=0, emboss=False)
+        split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_intervaltime', text='间隔(秒)', icon_value=0, emboss=True)
+        layout.split()
         row = layout.row()
         row.operator("baigave.import_nbt", text="导入.nbt文件")
 
@@ -119,6 +135,23 @@ class WorldPanel(bpy.types.Panel):
         # row = layout.row()
         # row.operator("baigave.create_save", text="创建存档")
 
+#导出面板     
+class ExportPanel(bpy.types.Panel):
+    bl_label ="导出"
+    bl_idname ="ExportPanel"
+    bl_space_type ='VIEW_3D'
+    bl_region_type ='UI'
+    bl_category ='BaiGave'
+    bl_parent_id ='MainPanel'
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene
+        
+        row = layout.row()    
+        row.label(text = "导出",icon='ERROR')
+
 # 资源包面板
 class ResourcepacksPanel(bpy.types.Panel):
     bl_label = "资源包"
@@ -127,7 +160,7 @@ class ResourcepacksPanel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = 'BaiGave'
     bl_parent_id = 'ModPanel'
-    #bl_options = {'DEFAULT_CLOSED'}
+    bl_options = {'DEFAULT_CLOSED'}
 
 
     def draw(self, context):
@@ -143,18 +176,20 @@ class ResourcepacksPanel(bpy.types.Panel):
          # 上下移动按钮
         col.operator("baigave.move_resourcepack_item", text="", icon='TRIA_UP').direction = 'UP'
         col.operator("baigave.move_resourcepack_item", text="", icon='TRIA_DOWN').direction = 'DOWN'  
+        col.operator("baigave.add_resourcepack_operator",text="", icon='ADD')
+        col.operator("baigave.delete_resourcepack_operator",text="", icon='REMOVE')
         # 添加打印选中项目的按钮
-        layout.operator("view3d.print_selected_item", text="刷新")
+        layout.operator("baigave.unzip_resourcepacks_operator", text="刷新")
 
 #模组界面
 class ModPanel(bpy.types.Panel):
-    bl_label = "Mod 面板"
+    bl_label = "Mod 设置"
     bl_idname = "ModPanel"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = 'BaiGave'
     bl_parent_id = 'MainPanel'
-    #bl_options = {'DEFAULT_CLOSED'}
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         layout = self.layout
@@ -174,8 +209,10 @@ class ModPanel(bpy.types.Panel):
          # 上下移动按钮
         col.operator("baigave.move_mod_item", text="", icon='TRIA_UP').direction = 'UP'
         col.operator("baigave.move_mod_item", text="", icon='TRIA_DOWN').direction = 'DOWN'    
+        col.operator("baigave.add_mod_operator",text="", icon='ADD')
+        col.operator("baigave.delete_mod_operator",text="", icon='REMOVE')
         # 添加一个按钮
-        layout.operator("baigave.unzip_operator", text="刷新")
+        layout.operator("baigave.unzip_mods_operator", text="刷新")
 
 # -----------------------------------------------------------------------------
 # UIList
@@ -196,7 +233,7 @@ class ModList(bpy.types.UIList):
             row.label(text=item.name)
             row.label(text=item.description)
 
-classes=[ResourcepackList,ModList,MainPanel,RigPanel,BlockPanel,WorldPanel,ModPanel,ResourcepacksPanel]
+classes=[ResourcepackList,ModList,MainPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,ModPanel,ResourcepacksPanel]
 
 
 def register():
