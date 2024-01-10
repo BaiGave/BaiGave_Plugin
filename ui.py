@@ -111,8 +111,16 @@ class ImportPanel(bpy.types.Panel):
         split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_processnumber', text='进程数', icon_value=0, emboss=False)
         split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_intervaltime', text='间隔(秒)', icon_value=0, emboss=True)
         layout.split()
-        row = layout.row()
-        row.operator("baigave.import_nbt", text="导入.nbt文件")
+        box = layout.box()
+        box.label(text="导入.nbt文件")
+        box.operator("baigave.import_nbt", text="导入.nbt文件")
+
+        box = layout.box()
+        row=box.row()
+        col=box.column()
+        row.label(text="导入MC地图")
+        row.operator("baigave.spawn_map", text="2D预览")
+        col.operator("baigave.import_world", text="导入世界")
 
         row = layout.row()
         row.operator("object.add_sway_animation", text="草摇摆")
@@ -126,8 +134,7 @@ class ImportPanel(bpy.types.Panel):
         
         row = layout.row()
         row.operator("baigave.objtoblocks", text="转换网格体")
-        # row = layout.row()
-        # row.operator("baigave.spawn_map", text="生成地图")
+        
         # row = layout.row()
         # row.operator("baigave.select", text="选择区域")
         # row = layout.row()

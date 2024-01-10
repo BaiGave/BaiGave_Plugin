@@ -41,10 +41,10 @@ if "surface_optimization" in locals():
 else:
 	from .codes.functions import surface_optimization
 
-# if "map" in locals():
-# 	importlib.reload(map)
-# else:
-# 	from .codes.unuse import map
+if "map" in locals():
+	importlib.reload(map)
+else:
+	from .codes.unuse import map
 	
 if "ui" in locals():
 	importlib.reload(ui)
@@ -56,7 +56,7 @@ module_list = (
 	sway_animation,
 	BaiGave_Rig,
 	surface_optimization,
-	#map,
+	map,
 	search_file,
 	importfile,
 	exportfile,

@@ -22,8 +22,6 @@ import amulet
 import amulet_nbt
 
 
-
-
 class ImportNBT(bpy.types.Operator):
     bl_idname = "baigave.import_nbt"
     bl_label = "导入.nbt文件"
@@ -421,79 +419,80 @@ class SNA_OT_My_Generic_Operator_A38B8(bpy.types.Operator):
 #                 bpy.context.scene.collection.children.link(coll)
 #         return {'FINISHED'}
 
-# class ImportWorld(bpy.types.Operator):
-#     """导入世界(性能有问题)"""
-#     bl_label = "导入世界"
-#     bl_idname = 'baigave.import_world'
+class ImportWorld(bpy.types.Operator):
+    """导入世界(性能有问题)"""
+    bl_label = "导入世界"
+    bl_idname = 'baigave.import_world'
 
-#     current_chunk_index = 0  # 当前处理的区块索引
+    current_chunk_index = 0  # 当前处理的区块索引
 
-#     def modal(self, context, event):
-#         if event.type == 'ESC':
-#             # 如果用户按下ESC键，停止模态操作
-#             return {'CANCELLED'}
+    # def modal(self, context, event):
+    #     if event.type == 'ESC':
+    #         # 如果用户按下ESC键，停止模态操作
+    #         return {'CANCELLED'}
 
-#         if self.current_chunk_index < len(self.processed_chunks):
-#             # 处理下一个区块
-#             chunk = self.processed_chunks[self.current_chunk_index]
-#             x = chunk.cx
-#             z = chunk.cz
-#             self.process_chunk(self.level,chunk, x, z)
+    #     if self.current_chunk_index < len(self.processed_chunks):
+    #         # 处理下一个区块
+    #         chunk = self.processed_chunks[self.current_chunk_index]
+    #         x = chunk.cx
+    #         z = chunk.cz
+    #         self.process_chunk(self.level,chunk, x, z)
 
-#             self.current_chunk_index += 1
-#         else:
-#             # 完成所有区块的处理
-#              # 获取当前时间
-#             end_time = time.time()
+    #         self.current_chunk_index += 1
+    #     else:
+    #         # 完成所有区块的处理
+    #          # 获取当前时间
+    #         end_time = time.time()
 
-#             # 计算代码块执行时间
-#             execution_time = end_time - self.start_time
+    #         # 计算代码块执行时间
+    #         execution_time = end_time - self.start_time
 
-#             # 打印执行时间
-#             print("代码块执行时间：", execution_time, "秒")
-#             return {'FINISHED'}
-#         # 继续模态操作
-#         return {'RUNNING_MODAL'}
+    #         # 打印执行时间
+    #         print("代码块执行时间：", execution_time, "秒")
+    #         return {'FINISHED'}
+    #     # 继续模态操作
+    #     return {'RUNNING_MODAL'}
 
-#     def execute(self, context):
-#         # 获取当前时间
-#         self.start_time = time.time()
-#         from .map import processed_chunks
-#         from .map import level
-#         self.level = level
-#         self.processed_chunks = []  # 重置处理过的区块列表
+    def execute(self, context):
+        pass
+        # # 获取当前时间
+        # self.start_time = time.time()
+        # from .map import processed_chunks
+        # from .map import level
+        # self.level = level
+        # self.processed_chunks = []  # 重置处理过的区块列表
 
-#         # 获取选择区域的位置
-#         object_names = ["pos1", "pos2"]
-#         positions = {name: bpy.data.objects[name].matrix_world.translation * 1024 for name in object_names if name in bpy.data.objects}
+        # # 获取选择区域的位置
+        # object_names = ["pos1", "pos2"]
+        # positions = {name: bpy.data.objects[name].matrix_world.translation * 1024 for name in object_names if name in bpy.data.objects}
 
-#         # 计算选择区域的范围
-#         x_values = [int(position.x) for position in positions.values()]
-#         z_values = [int(position.y) for position in positions.values()]
-#         min_x = min(x_values) // 16
-#         max_x = max(x_values) // 16
-#         min_z = min(z_values) // 16
-#         max_z = max(z_values) // 16
+        # # 计算选择区域的范围
+        # x_values = [int(position.x) for position in positions.values()]
+        # z_values = [int(position.y) for position in positions.values()]
+        # min_x = min(x_values) // 16
+        # max_x = max(x_values) // 16
+        # min_z = min(z_values) // 16
+        # max_z = max(z_values) // 16
 
-#         # 获取需要处理的区块
-#         for chunk in processed_chunks:
-#             x = chunk.cx
-#             z = chunk.cz
+        # # 获取需要处理的区块
+        # for chunk in processed_chunks:
+        #     x = chunk.cx
+        #     z = chunk.cz
 
-#             if min_x <= x <= max_x and min_z <= z <= max_z:
-#                 self.processed_chunks.append(chunk)
+        #     if min_x <= x <= max_x and min_z <= z <= max_z:
+        #         self.processed_chunks.append(chunk)
 
-#         # 设置模态操作属性
-#         context.window_manager.modal_handler_add(self)
+        # # 设置模态操作属性
+        # context.window_manager.modal_handler_add(self)
 
-#         # 启动模态操作
-#         return {'RUNNING_MODAL'}
+        # # 启动模态操作
+        # return {'RUNNING_MODAL'}
 
-#     def process_chunk(self, level,chunk, x, z):
-#         vertices,faces,texture_list,uv_list,direction,uv_rotation_list = create_chunk(chunk, level)
-#         generate(x, z, vertices, faces, texture_list, uv_list, direction, uv_rotation_list)
+    # def process_chunk(self, level,chunk, x, z):
+    #     vertices,faces,texture_list,uv_list,direction,uv_rotation_list = create_chunk(chunk, level)
+    #     generate(x, z, vertices, faces, texture_list, uv_list, direction, uv_rotation_list)
 
-classes=[ImportSchem,MultiprocessSchem,Importjson,#ImportWorld,SelectArea, GenerateWorld,
+classes=[ImportSchem,MultiprocessSchem,Importjson,ImportWorld,#SelectArea, GenerateWorld,
          ImportNBT,SNA_AddonPreferences_F35F8,SNA_OT_My_Generic_Operator_A38B8]
 
 def register():

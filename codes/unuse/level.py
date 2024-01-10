@@ -1,4 +1,4 @@
-from ..dependencies import nbtlib
+from ...dependencies import nbtlib
 def create_level(World_Name,SpawnX,SpawnY,SpawnZ,hardcore,Difficulty,allowCommands,LastPlayed,DayTime,Seed):    
 # 创建一个名为"Data"的标记，并添加一些基本的数据到其中
     data = nbtlib.Compound()
