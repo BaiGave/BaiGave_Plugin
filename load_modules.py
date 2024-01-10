@@ -6,10 +6,15 @@ if "sway_animation" in locals():
 else:
 	from .codes.functions import sway_animation
 	
-if "operator" in locals():
+if "importfile" in locals():
 	importlib.reload(importfile)
 else:
 	from .codes import importfile
+
+if "exportfile" in locals():
+	importlib.reload(exportfile)
+else:
+	from .codes import exportfile
 
 if "search_file" in locals():
 	importlib.reload(search_file)
@@ -54,6 +59,7 @@ module_list = (
 	#map,
 	search_file,
 	importfile,
+	exportfile,
 	mesh_to_mc,
 	ui
 )

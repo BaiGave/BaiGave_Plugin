@@ -151,6 +151,8 @@ class ExportPanel(bpy.types.Panel):
         
         row = layout.row()    
         row.label(text = "导出",icon='ERROR')
+        row = layout.row()
+        row.operator("baigave.export_schem", text="导出.schem文件")
 
 # 资源包面板
 class ResourcepacksPanel(bpy.types.Panel):

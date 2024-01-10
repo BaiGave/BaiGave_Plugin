@@ -124,8 +124,8 @@ def create_or_clear_collection(collection_name):
         except:
             pass
         # 删除集合中的所有物体
-        for obj in existing_collection.objects:
-            bpy.data.objects.remove(obj)
+        # for obj in existing_collection.objects:
+        #     bpy.data.objects.remove(obj)
         # 隐藏集合
         existing_collection.hide_render = True
         existing_collection.hide_viewport = True
@@ -147,10 +147,35 @@ def create_mesh_from_dictionary(d,name):
     scene = bpy.context.scene
     scene.collection.objects.link(obj)
     # 创建一个新的集合
-    collection_name=name+"_Blocks"
+    collection_name="Blocks"
     create_or_clear_collection(collection_name)
     collection =bpy.data.collections.get(collection_name)
-
+    id_map = {}  # 用于将字符串id映射到数字的字典
+    next_id = 0  # 初始化 next_id
+    if collection.objects:
+        # 遍历集合中的每个物体
+        for ob in collection.objects:
+            # 假设属性名称为 'blockname'，如果属性存在
+            if 'blockname' in ob.data.attributes:
+                # 获取属性值
+                try:
+                    attr_value = ob.data.attributes['blockname'].data[0].value
+                except:
+                    attr_value = "minecraft:air"
+                # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
+                obj_id = ob.name.split('#')[0]
+                # 将字符串类型的ID转换为整数
+                try:
+                    obj_id_int = int(obj_id)
+                    # 找到最大ID
+                    if obj_id_int > next_id:
+                        next_id = obj_id_int
+                except ValueError:
+                    pass
+                # 将 ID 与属性值关联起来并存储到字典中
+                id_map[attr_value] = int(obj_id)
+            
+        next_id =next_id+1
     nodetree_target = "SchemToBlocks"
 
     #导入几何节点
@@ -168,17 +193,17 @@ def create_mesh_from_dictionary(d,name):
     # 创建顶点和顶点索引
     vertices = []
     ids = []  # 存储顶点id
-    id_map = {}  # 用于将字符串id映射到数字的字典
-    next_id = 0  # 下一个可用的数字id
-
     for coord, id_str in d.items():
         # 将字符串id映射到数字，如果id_str已经有对应的数字id，则使用现有的数字id
         if id_str not in id_map:
-            filename=str(next_id)+str(id_str)
+            filename=str(next_id)+"#"+str(id_str)
             textures,elements,rotation,_ =get_model(id_str)
             position = [0, 0, 0]
             has_air = [True, True, True, True, True, True]
-            block(textures, elements, position,rotation, filename, has_air,collection)
+            bloc=block(textures, elements, position,rotation, filename, has_air,collection)
+            bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
+            for i, item in enumerate(bloc.data.attributes['blockname'].data):
+                item.value=id_str
             id_map[id_str] = next_id
             next_id += 1
 
@@ -189,6 +214,8 @@ def create_mesh_from_dictionary(d,name):
     mesh.from_pydata(vertices, [], [])
     for i, item in enumerate(obj.data.attributes['blockid'].data):
         item.value=ids[i]
+    
+
     # 设置顶点索引
     mesh.update()
     
@@ -769,7 +796,7 @@ class ObjToBlocks(bpy.types.Operator):
         create_mesh_from_dictionary(d,filename)
         end_time = time.time()
         print("代码块执行时间：", end_time - start_time, "秒")
-        threading.Thread(target=export_schem, args=(d,filename,)).start()
+        # threading.Thread(target=export_schem, args=(d,filename,)).start()
         # 启动线程
         #nbt(d)
         #export_schem(d)

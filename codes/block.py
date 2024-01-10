@@ -75,6 +75,8 @@ def block(textures,elements,position,rot,filename,has_air,collection=None):
     obj.location = position
     obj.select_set(False)
 
+    return obj
+
 
     
 
