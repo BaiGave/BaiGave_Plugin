@@ -72,10 +72,10 @@ class ImportNBT(bpy.types.Operator):
         print("代码块执行时间：", end_time - start_time, "秒")
 
         #普通方法，有面剔除，速度较慢。
-        start_time = time.time()
-        nbt(d,filename)
-        end_time = time.time()
-        print("代码块执行时间：", end_time - start_time, "秒")
+        # start_time = time.time()
+        # nbt(d,filename)
+        # end_time = time.time()
+        #print("代码块执行时间：", end_time - start_time, "秒")
 
         #py+几何节点做法，无面剔除，但速度快。
         start_time = time.time()

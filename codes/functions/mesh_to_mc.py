@@ -4,7 +4,6 @@ import bpy
 from ..block import block
 import numpy as np
 import time
-import threading
 from .tip import ShowMessageBox
 from ...colors import color_cube_dict,color_inner_stairs_dict,color_outer_stairs_dict,color_slab_dict,color_slab_top_dict,color_stairs_dict
 from collections import defaultdict
@@ -141,6 +140,7 @@ def create_mesh_from_dictionary(d,name):
     # 创建一个新的网格对象
     mesh = bpy.data.meshes.new(name=name)
     mesh.attributes.new(name='blockid', type="INT", domain="POINT")
+    mesh.attributes.new(name='biome', type="FLOAT_COLOR", domain="POINT")
     obj = bpy.data.objects.new(name, mesh)
 
     # 将对象添加到场景中
@@ -214,6 +214,9 @@ def create_mesh_from_dictionary(d,name):
     mesh.from_pydata(vertices, [], [])
     for i, item in enumerate(obj.data.attributes['blockid'].data):
         item.value=ids[i]
+    #群系上色
+    for i, item in enumerate(obj.data.attributes['biome'].data):
+        item.color[:]=(0.149,0.660,0.10,0.00)
     
 
     # 设置顶点索引
