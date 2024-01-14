@@ -59,7 +59,9 @@ class Property(bpy.types.PropertyGroup):
     # 定义 mod_list 属性并附加到 my_properties
     mod_list: bpy.props.CollectionProperty(type=ModInfo)
     mod_list_index: bpy.props.IntProperty()
-    
+    bpy.types.Scene.min_coordinates = bpy.props.IntVectorProperty(name="最小坐标", size=3)
+    bpy.types.Scene.max_coordinates = bpy.props.IntVectorProperty(name="最大坐标", size=3)
+
     # 定义一个 EnumProperty 作为下拉列表的选项
     bpy.types.Scene.version_list = bpy.props.EnumProperty(
         name="版本",
@@ -99,7 +101,7 @@ def unzip_mods_files():
                         if member == 'fabric.mod.json':
                             with zip_ref.open(member) as mod_json_file:
                                 mod_json_content = mod_json_file.read()
-                                mod_data = json.loads(mod_json_content.decode('utf-8'))
+                                mod_data = json.loads(mod_json_content,strict=False)
                                 # 读取 "id" 字段的值
                                 mod_id = mod_data.get("id","")
                                 icon = mod_data.get("icon","").replace("/", "\\")

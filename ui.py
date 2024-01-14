@@ -112,6 +112,10 @@ class ImportPanel(bpy.types.Panel):
         split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_intervaltime', text='间隔(秒)', icon_value=0, emboss=True)
         layout.split()
         box = layout.box()
+        box.label(text="导入方块")
+        box.operator("baigave.import_block", text="导入方块")
+
+        box = layout.box()
         box.label(text="导入.nbt文件")
         box.operator("baigave.import_nbt", text="导入.nbt文件")
 
@@ -120,6 +124,15 @@ class ImportPanel(bpy.types.Panel):
         col=box.column()
         row.label(text="导入MC地图")
         row.operator("baigave.spawn_map", text="2D预览")
+        # 添加min [x, y, z]输入框
+        row = box.row()
+        row.label(text="最小坐标")
+        row.prop(context.scene, "min_coordinates", text="")
+
+        # 添加max [x, y, z]输入框
+        row = box.row()
+        row.label(text="最大坐标")
+        row.prop(context.scene, "max_coordinates", text="")
         col.operator("baigave.import_world", text="导入世界")
 
         row = layout.row()

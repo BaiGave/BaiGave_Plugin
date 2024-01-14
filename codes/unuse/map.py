@@ -48,7 +48,7 @@ class Map(bpy.types.Operator):
         self.pixel_data_list = [np.zeros((self.image_size, self.image_size, 4), dtype=np.float32)
                                 for _ in range(self.num_images_z * self.num_images_x)]
 
-        scene()
+        #scene()
         create_images(self.images, self.pixel_data_list)
 
         # 启动多线程任务

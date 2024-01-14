@@ -1,7 +1,6 @@
 import bpy
 import os
 import time
-import random
 import pickle
 import subprocess
 from .structure import nbt
@@ -12,15 +11,125 @@ from .block import block
 from .functions.tip import button_callback
 
 from .functions.get_data import get_all_data
-from .schem import schem_chunk,schem_liquid,schem
+from .classification_files.block_type import exclude
+from .schem import schem_chunk,schem_liquid,schem,remove_brackets
+from .blockstates import get_model
 # from .unuse.generate import generate
 # from .unuse.chunk  import chunk as create_chunk
-from .functions.mesh_to_mc import create_mesh_from_dictionary
+from .functions.mesh_to_mc import create_mesh_from_dictionary,create_or_clear_collection
 
-import gzip
+import json
 import amulet
 import amulet_nbt
 
+
+class ImportBlock(bpy.types.Operator):
+    """导入方块"""
+    bl_label = "导入方块"
+    bl_idname = 'baigave.import_block'
+
+    # 定义一个属性来存储文件路径
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    # 定义一个属性来过滤文件类型，只显示.json文件
+    filter_glob: bpy.props.StringProperty(default="*.json", options={'HIDDEN'})
+    def execute(self, context):
+        namespace=os.path.basename(os.path.dirname(os.path.dirname(self.filepath)))+":"
+        # 读取JSON文件
+        with open(self.filepath, 'r') as file:
+            data = json.load(file)
+        
+        # 提取所需内容
+        variants = data.get("variants", {})
+        # 提取所需内容
+        multipart = data.get("multipart", [])
+
+        # 创建一个新的集合
+        collection_name="Blocks"
+        create_or_clear_collection(collection_name)
+        collection =bpy.data.collections.get(collection_name)
+        id_map = {}  # 用于将字符串id映射到数字的字典
+        next_id = -1  # 初始化 next_id
+        if collection.objects:
+            # 遍历集合中的每个物体
+            for ob in collection.objects:
+                # 假设属性名称为 'blockname'，如果属性存在
+                if 'blockname' in ob.data.attributes:
+                    # 获取属性值
+                    try:
+                        attr_value = ob.data.attributes['blockname'].data[0].value
+                    except:
+                        attr_value = "minecraft:air"
+                    # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
+                    obj_id = ob.name.split('#')[0]
+                    # 将字符串类型的ID转换为整数
+                    try:
+                        obj_id_int = int(obj_id)
+                        # 找到最大ID
+                        if obj_id_int > next_id:
+                            next_id = obj_id_int
+                    except ValueError:
+                        pass
+                    # 将 ID 与属性值关联起来并存储到字典中
+                    id_map[attr_value] = int(obj_id)
+                
+        next_id =next_id+1
+        
+        id_list = []
+        if variants != {}:
+            for key, value in variants.items():
+                if key !="":
+                    id_list.append(namespace+os.path.basename(self.filepath).replace(".json","") + "[" + key + "]")
+                else:
+                    id_list.append(namespace+os.path.basename(self.filepath).replace(".json",""))
+        if multipart !=[]:
+            # 获取所有when可能的属性
+            all_when_keys = set()
+            for entry in multipart:
+                when_data = entry.get("when", {})
+                all_when_keys.update(when_data.keys())
+
+            # 遍历multipart数组
+            for i, entry in enumerate(multipart):
+                when_data = entry.get("when", {})
+
+                # 补充默认为False的属性
+                for key in all_when_keys:
+                    if key not in when_data:
+                        when_data[key] = "false"
+
+                # 将when数据按字母顺序排序
+                sorted_when_data = dict(sorted(when_data.items()))
+
+                # 生成[]内的字符串
+                when_string = ','.join([f'{key}={value}' for key, value in sorted_when_data.items()])
+
+                # 构建文件名
+                filename = os.path.basename(self.filepath).replace(".json","") + "[" + when_string + "]"
+
+                # 添加到结果列表
+                id_list.append(namespace+filename)
+
+        # 输出结果
+        for id in id_list:
+            # 将字符串id映射到数字，如果id已经有对应的数字id，则使用现有的数字id
+            if id not in id_map:
+                filename=str(next_id)+"#"+str(id)
+                textures,elements,rotation,_ =get_model(id)
+                position = [0, 0, 0]
+                has_air = [True, True, True, True, True, True]
+                bloc=block(textures, elements, position,rotation, filename, has_air,collection)
+                bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
+                for i, item in enumerate(bloc.data.attributes['blockname'].data):
+                    item.value=id
+                id_map[id] = next_id
+                next_id += 1
+
+            
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
 class ImportNBT(bpy.types.Operator):
     bl_idname = "baigave.import_nbt"
@@ -426,73 +535,141 @@ class ImportWorld(bpy.types.Operator):
 
     current_chunk_index = 0  # 当前处理的区块索引
 
-    # def modal(self, context, event):
-    #     if event.type == 'ESC':
-    #         # 如果用户按下ESC键，停止模态操作
-    #         return {'CANCELLED'}
+    # 定义一个属性来存储文件路径
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
 
-    #     if self.current_chunk_index < len(self.processed_chunks):
-    #         # 处理下一个区块
-    #         chunk = self.processed_chunks[self.current_chunk_index]
-    #         x = chunk.cx
-    #         z = chunk.cz
-    #         self.process_chunk(self.level,chunk, x, z)
-
-    #         self.current_chunk_index += 1
-    #     else:
-    #         # 完成所有区块的处理
-    #          # 获取当前时间
-    #         end_time = time.time()
-
-    #         # 计算代码块执行时间
-    #         execution_time = end_time - self.start_time
-
-    #         # 打印执行时间
-    #         print("代码块执行时间：", execution_time, "秒")
-    #         return {'FINISHED'}
-    #     # 继续模态操作
-    #     return {'RUNNING_MODAL'}
 
     def execute(self, context):
-        pass
-        # # 获取当前时间
-        # self.start_time = time.time()
-        # from .map import processed_chunks
-        # from .map import level
-        # self.level = level
-        # self.processed_chunks = []  # 重置处理过的区块列表
+        filename="world"
+        level = amulet.load_level(self.filepath)
+        min_coords=context.scene.min_coordinates
+        max_coords=context.scene.max_coordinates
+        # 创建一个新的网格对象
+        mesh = bpy.data.meshes.new(name=filename)
+        mesh.attributes.new(name='blockid', type="INT", domain="POINT")
+        mesh.attributes.new(name='biome', type="FLOAT_COLOR", domain="POINT")
+        obj = bpy.data.objects.new(filename, mesh)
 
-        # # 获取选择区域的位置
-        # object_names = ["pos1", "pos2"]
-        # positions = {name: bpy.data.objects[name].matrix_world.translation * 1024 for name in object_names if name in bpy.data.objects}
+        # 将对象添加到场景中
+        scene = bpy.context.scene
+        scene.collection.objects.link(obj)
+        # 创建一个新的集合
+        collection_name="Blocks"
+        create_or_clear_collection(collection_name)
+        collection =bpy.data.collections.get(collection_name)
+        id_map = {}  # 用于将字符串id映射到数字的字典
+        next_id = 0  # 初始化 next_id
+        if collection.objects:
+            # 遍历集合中的每个物体
+            for ob in collection.objects:
+                # 假设属性名称为 'blockname'，如果属性存在
+                if 'blockname' in ob.data.attributes:
+                    # 获取属性值
+                    try:
+                        attr_value = ob.data.attributes['blockname'].data[0].value
+                    except:
+                        attr_value = "minecraft:air"
+                    # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
+                    obj_id = ob.name.split('#')[0]
+                    # 将字符串类型的ID转换为整数
+                    try:
+                        obj_id_int = int(obj_id)
+                        # 找到最大ID
+                        if obj_id_int > next_id:
+                            next_id = obj_id_int
+                    except ValueError:
+                        pass
+                    # 将 ID 与属性值关联起来并存储到字典中
+                    id_map[attr_value] = int(obj_id)
+                
+            next_id =next_id+1
+        nodetree_target = "SchemToBlocks"
 
-        # # 计算选择区域的范围
-        # x_values = [int(position.x) for position in positions.values()]
-        # z_values = [int(position.y) for position in positions.values()]
-        # min_x = min(x_values) // 16
-        # max_x = max(x_values) // 16
-        # min_z = min(z_values) // 16
-        # max_z = max(z_values) // 16
+        #导入几何节点
+        try:
+            nodes_modifier.node_group = bpy.data.node_groups[collection_name]
+        except:
+            file_path =bpy.context.scene.geometrynodes_blend_path
+            inner_path = 'NodeTree'
+            object_name = nodetree_target
+            bpy.ops.wm.append(
+                filepath=os.path.join(file_path, inner_path, object_name),
+                directory=os.path.join(file_path, inner_path),
+                filename=object_name
+            )
+        # 创建顶点和顶点索引
+        vertices = []
+        ids = []  # 存储顶点id
 
-        # # 获取需要处理的区块
-        # for chunk in processed_chunks:
-        #     x = chunk.cx
-        #     z = chunk.cz
+        # 遍历范围内所有的坐标
+        for x in range(min_coords[0], max_coords[0] + 1):
+            for y in range(min_coords[1], max_coords[1] + 1):
+                for z in range(min_coords[2], max_coords[2] + 1):
+                    # 获取坐标处的方块       
+                    blc =level.get_version_block(x, y, z, "minecraft:overworld",("java", (1, 20, 0)))
+                    id =blc[0]
+                    if isinstance(id,amulet.api.block.Block):
+                        id = str(id).replace('"', '')
+                        result = remove_brackets(id) 
+                        if result not in exclude:  
+                            # 将字符串id映射到数字，如果id已经有对应的数字id，则使用现有的数字id
+                            if id not in id_map:
+                                filename=str(next_id)+"#"+str(id)
+                                textures,elements,rotation,_ =get_model(id)
+                                position = [0, 0, 0]
+                                has_air = [True, True, True, True, True, True]
+                                bloc=block(textures, elements, position,rotation, filename, has_air,collection)
+                                bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
+                                for i, item in enumerate(bloc.data.attributes['blockname'].data):
+                                    item.value=id
+                                id_map[id] = next_id
+                                next_id += 1
 
-        #     if min_x <= x <= max_x and min_z <= z <= max_z:
-        #         self.processed_chunks.append(chunk)
+                            vertices.append((x-min_coords[0],-(z-min_coords[2]),y-min_coords[1]))
+                            # 将字符串id转换为相应的数字id
+                            ids.append(id_map[id])
 
-        # # 设置模态操作属性
-        # context.window_manager.modal_handler_add(self)
+            
+        # 将顶点和顶点索引添加到网格中
+        mesh.from_pydata(vertices, [], [])
+        for i, item in enumerate(obj.data.attributes['blockid'].data):
+            item.value=ids[i]
+        #群系上色
+        for i, item in enumerate(obj.data.attributes['biome'].data):
+            item.color[:]=(0.149,0.660,0.10,0.00)
+        # 设置顶点索引
+        mesh.update()
+        
+        # 检查是否有节点修改器，如果没有则添加一个
+        has_nodes_modifier = False
+        for modifier in obj.modifiers:
+            if modifier.type == 'NODES':
+                has_nodes_modifier = True
+                break
+        if not has_nodes_modifier:
+            obj.modifiers.new(name="SchemToBlocks",type="NODES")
+        nodes_modifier=obj.modifiers[0]
+        
+        # 复制 SchemToBlocks 节点组并重命名为 CollectionName
+        try:
+            original_node_group = bpy.data.node_groups['SchemToBlocks']
+            new_node_group = original_node_group.copy()
+            new_node_group.name = collection_name
+        except KeyError:
+            print("error")
+        #设置几何节点        
+        nodes_modifier.node_group = bpy.data.node_groups[collection_name]
+        bpy.data.node_groups[collection_name].nodes["集合信息"].inputs[0].default_value = collection
+        nodes_modifier.show_viewport = True    
+        level.close()
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
-        # # 启动模态操作
-        # return {'RUNNING_MODAL'}
 
-    # def process_chunk(self, level,chunk, x, z):
-    #     vertices,faces,texture_list,uv_list,direction,uv_rotation_list = create_chunk(chunk, level)
-    #     generate(x, z, vertices, faces, texture_list, uv_list, direction, uv_rotation_list)
-
-classes=[ImportSchem,MultiprocessSchem,Importjson,ImportWorld,#SelectArea, GenerateWorld,
+classes=[ImportBlock,ImportSchem,MultiprocessSchem,Importjson,ImportWorld,#SelectArea, GenerateWorld,
          ImportNBT,SNA_AddonPreferences_F35F8,SNA_OT_My_Generic_Operator_A38B8]
 
 def register():

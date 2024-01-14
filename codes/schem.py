@@ -34,16 +34,42 @@ def schem(level,chunks,filename="schem",position=(0,0,0)):
     # 创建一个新的网格对象
     mesh = bpy.data.meshes.new(name=filename)
     mesh.attributes.new(name='blockid', type="INT", domain="POINT")
+    mesh.attributes.new(name='biome', type="FLOAT_COLOR", domain="POINT")
     obj = bpy.data.objects.new(filename, mesh)
 
     # 将对象添加到场景中
     scene = bpy.context.scene
     scene.collection.objects.link(obj)
     # 创建一个新的集合
-    collection_name=filename+"_Blocks"
+    collection_name="Blocks"
     create_or_clear_collection(collection_name)
     collection =bpy.data.collections.get(collection_name)
-
+    id_map = {}  # 用于将字符串id映射到数字的字典
+    next_id = 0  # 初始化 next_id
+    if collection.objects:
+        # 遍历集合中的每个物体
+        for ob in collection.objects:
+            # 假设属性名称为 'blockname'，如果属性存在
+            if 'blockname' in ob.data.attributes:
+                # 获取属性值
+                try:
+                    attr_value = ob.data.attributes['blockname'].data[0].value
+                except:
+                    attr_value = "minecraft:air"
+                # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
+                obj_id = ob.name.split('#')[0]
+                # 将字符串类型的ID转换为整数
+                try:
+                    obj_id_int = int(obj_id)
+                    # 找到最大ID
+                    if obj_id_int > next_id:
+                        next_id = obj_id_int
+                except ValueError:
+                    pass
+                # 将 ID 与属性值关联起来并存储到字典中
+                id_map[attr_value] = int(obj_id)
+            
+        next_id =next_id+1
     nodetree_target = "SchemToBlocks"
 
     #导入几何节点
@@ -61,8 +87,6 @@ def schem(level,chunks,filename="schem",position=(0,0,0)):
     # 创建顶点和顶点索引
     vertices = []
     ids = []  # 存储顶点id
-    id_map = {}  # 用于将字符串id映射到数字的字典
-    next_id = 0  # 下一个可用的数字id
 
     # 遍历范围内所有的坐标
     for x in range(min_coords[0], max_coords[0] + 1):
@@ -77,11 +101,14 @@ def schem(level,chunks,filename="schem",position=(0,0,0)):
                     if result not in exclude:  
                         # 将字符串id映射到数字，如果id已经有对应的数字id，则使用现有的数字id
                         if id not in id_map:
-                            filename=str(next_id)+str(id)
+                            filename=str(next_id)+"#"+str(id)
                             textures,elements,rotation,_ =get_model(id)
                             position = [0, 0, 0]
                             has_air = [True, True, True, True, True, True]
-                            block(textures, elements, position,rotation, filename, has_air,collection)
+                            bloc=block(textures, elements, position,rotation, filename, has_air,collection)
+                            bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
+                            for i, item in enumerate(bloc.data.attributes['blockname'].data):
+                                item.value=id
                             id_map[id] = next_id
                             next_id += 1
 
@@ -94,6 +121,9 @@ def schem(level,chunks,filename="schem",position=(0,0,0)):
     mesh.from_pydata(vertices, [], [])
     for i, item in enumerate(obj.data.attributes['blockid'].data):
         item.value=ids[i]
+    #群系上色
+    for i, item in enumerate(obj.data.attributes['biome'].data):
+        item.color[:]=(0.149,0.660,0.10,0.00)
     # 设置顶点索引
     mesh.update()
     
@@ -243,7 +273,7 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                 id = level.get_block(x, y, z, "main")
                 if isinstance(id,amulet.api.block.Block):
                     if id.extra_blocks !=():
-                        id=str(level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(id.extra_blocks[0])[0]).replace('"', '')
+                        id=str(level.translation_manager.get_("java", (1, 20, 0)).block.from_universal(id.extra_blocks[0])[0]).replace('"', '')
                     else:
                         id =str(level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(id)[0]).replace('"', '')
                     
