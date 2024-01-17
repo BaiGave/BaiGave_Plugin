@@ -9,7 +9,7 @@ def blockstates(coord,chunks, level, vertices, faces, direction, texture_list, u
         id = level.get_block(coord[0], coord[1], coord[2], "main")
     except:
         return vertices,faces,direction,texture_list,uv_list,uv_rotation_list
-    id =str(level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(id)[0]).replace('"', '')
+    id =str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(id)[0]).replace('"', '')
     # 定义一个元组，存储六个方向的偏移量，按照 上下北南东西 的顺序排序
     offsets = ((0, 0, -1),  # 东
                 (0, 0, 1),  # 西
@@ -25,7 +25,7 @@ def blockstates(coord,chunks, level, vertices, faces, direction, texture_list, u
         try:
             name = level.get_block(adj_coord[0], adj_coord[1], adj_coord[2], "main")
             if isinstance(name,amulet.api.block.Block):
-                name =str(level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(name)[0]).replace('"', '')
+                name =str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(name)[0]).replace('"', '')
                 parent = get_parent(name)
                 # 如果 parent 是 "block/cube"，将 has_air 设为 False
                 if parent == "block/cube":

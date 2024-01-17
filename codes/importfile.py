@@ -606,7 +606,7 @@ class ImportWorld(bpy.types.Operator):
             for y in range(min_coords[1], max_coords[1] + 1):
                 for z in range(min_coords[2], max_coords[2] + 1):
                     # 获取坐标处的方块       
-                    blc =level.get_version_block(x, y, z, "minecraft:overworld",("java", (1, 20, 0)))
+                    blc =level.get_version_block(x, y, z, "minecraft:overworld",("java", (1, 20, 4)))
                     id =blc[0]
                     if isinstance(id,amulet.api.block.Block):
                         id = str(id).replace('"', '')

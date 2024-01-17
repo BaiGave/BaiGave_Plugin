@@ -19,7 +19,7 @@ def process_chunk(chunk_coord, chunk_size, scale, min_x, min_z, image_size, num_
             y = chunk.misc['height_mapC'].get('WORLD_SURFACE', None)[temp_z][temp_x] - 1
             block = chunk.get_block(temp_x, y, temp_z)
             if str(block).startswith("universal_minecraft"):
-                block = level.translation_manager.get_version("java", (1, 20, 0)).block.from_universal(block)[0]
+                block = level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(block)[0]
 
             block = str(block).split('[')[0]
             color = color_dict.get(block, (1, 1, 1))
