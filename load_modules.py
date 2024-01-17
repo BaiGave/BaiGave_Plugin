@@ -21,6 +21,11 @@ if "search_file" in locals():
 else:
 	from .codes.functions import search_file
 
+if "merge_images" in locals():
+	importlib.reload(merge_images)
+else:
+	from .codes.functions import merge_images
+
 if "mesh_to_mc" in locals():
 	importlib.reload(mesh_to_mc)
 else:
@@ -58,6 +63,7 @@ module_list = (
 	surface_optimization,
 	map,
 	search_file,
+	merge_images,
 	importfile,
 	exportfile,
 	mesh_to_mc,

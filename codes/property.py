@@ -392,6 +392,7 @@ def read_blockstate_files(directory,version):
 
 classes=[ModInfo,Property,UnzipModOperator,UnzipResourcepacksOperator]
 import importlib
+
 def register():
     threading.Thread(target=unzip_mods_files).start()
     threading.Thread(target=unzip_resourcepacks_files).start()

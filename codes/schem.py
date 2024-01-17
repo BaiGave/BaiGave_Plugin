@@ -46,7 +46,18 @@ def schem(level,chunks,filename="schem",position=(0,0,0)):
     collection =bpy.data.collections.get(collection_name)
     id_map = {}  # 用于将字符串id映射到数字的字典
     next_id = 0  # 初始化 next_id
-    if collection.objects:
+    if not collection.objects:
+        filename=str(next_id)+"#"+str("minecraft:air")
+        textures,elements,rotation,_ =get_model("minecraft:air")
+        position = [0, 0, 0]
+        has_air = [True, True, True, True, True, True]
+        bloc=block(textures, elements, position,rotation, filename, has_air,collection)
+        bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
+        for i, item in enumerate(bloc.data.attributes['blockname'].data):
+            item.value="minecraft:air"
+        id_map["minecraft:air"] = next_id
+        next_id += 1
+    elif collection.objects:
         # 遍历集合中的每个物体
         for ob in collection.objects:
             # 假设属性名称为 'blockname'，如果属性存在
@@ -70,6 +81,7 @@ def schem(level,chunks,filename="schem",position=(0,0,0)):
                 id_map[attr_value] = int(obj_id)
             
         next_id =next_id+1
+    
     nodetree_target = "SchemToBlocks"
 
     #导入几何节点

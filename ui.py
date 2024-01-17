@@ -147,6 +147,10 @@ class ImportPanel(bpy.types.Panel):
         
         row = layout.row()
         row.operator("baigave.objtoblocks", text="转换网格体")
+
+        row = layout.row()
+        row.operator("baigave.image_merger", text="合并图片")
+        
         
         # row = layout.row()
         # row.operator("baigave.select", text="选择区域")
