@@ -2,6 +2,7 @@ import json
 import bpy
 import os
 from importlib import reload
+from .merge_images import merger
 from ... import config
 file_data_cache = {}
 global_filepath = bpy.utils.script_path_user()
@@ -15,6 +16,35 @@ def load_modid_list():
         return []
 
 mod_list = load_modid_list()
+
+def search_ctm_properties(folder_path,id):
+    for root, dirs, files in os.walk(folder_path):
+        for filename in files:
+            if filename.endswith(".properties"):
+                file_path = os.path.join(root, filename)
+                with open(file_path, 'r') as file:
+                    lines = file.readlines()
+                    path = None
+                    ctm = None
+                    for line in lines:
+                        if line.startswith("matchTiles="):
+                            _, match_tiles_value = line.split("=")
+                            match_tiles_value = match_tiles_value.strip()
+                            if match_tiles_value == id.split("\\")[-1]:  # 修改为需要匹配的值
+                                path =root
+                        elif line.startswith("method="):
+                            _, match_tiles_value = line.split("=")
+                            match_tiles_value = match_tiles_value.strip()
+                            if match_tiles_value == "ctm":  # 修改为需要匹配的值
+                                ctm=1
+                            elif match_tiles_value == "vertial":  # 修改为需要匹配的值
+                                ctm=2
+                            elif match_tiles_value == "horizonal":  # 修改为需要匹配的值
+                                ctm=3
+                            elif match_tiles_value == "ctm_compact":  # 修改为需要匹配的值
+                                ctm=4
+                    if path is not None and ctm is not None:
+                        return path, ctm
 
 def get_all_data(filepath, filename,rot=0):
     parent =None
@@ -114,11 +144,31 @@ def get_file_path(modid,type):
                     else:
                         continue
                 elif type == 't':
-                    temp_path=path + "\\textures\\" + id + ".png"
-                    if os.path.exists(temp_path):
-                        return temp_path
+                    ctm_path=path + "\\optifine\\ctm\\"
+                    
+                    if os.path.exists(ctm_path):
+                        result =search_ctm_properties(ctm_path,id)
+                        if result:
+                            pngs_path, ctm_value = result
+                            merger(pngs_path+"\\")
+                            
+                            temp_path=pngs_path +"\\"+  id.split("\\")[-1] + ".png"
+                            if os.path.exists(temp_path):
+                                return temp_path
+                            else:
+                                continue
+                        else:
+                            temp_path=path + "\\textures\\" + id + ".png"
+                            if os.path.exists(temp_path):
+                                return temp_path
+                            else:
+                                continue
                     else:
-                        continue
+                        temp_path=path + "\\textures\\" + id + ".png"
+                        if os.path.exists(temp_path):
+                            return temp_path
+                        else:
+                            continue
             
         else:
             path = filepath+directory+"\\assets\\"+mod
