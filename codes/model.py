@@ -503,6 +503,7 @@ def create_mesh(mesh_name):
     mesh = bpy.data.meshes.new(mesh_name)
     # 向网格添加一个名为“UVMap”的UV图层
     mesh.uv_layers.new(name="UVMap")
+    
     # 向网格添加一个名为“UVMap”的UV图层
     #mesh.uv_layers.new(name="UVMap_1")
     # 返回新创建的网格

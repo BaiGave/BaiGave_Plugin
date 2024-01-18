@@ -192,12 +192,15 @@ def schem_chunk(level,chunks,i,filename="Schemetics",position=(0,0,0)):
     obj = add_mesh_to_collection(collection, mesh)
     obj.location = position
 
-
+    
     bm = bmesh.new()
+    vert_layer = bm.verts.layers.float_color.new('biome')
     for v in vertices:
-        bm.verts.new(v)
+        vert=bm.verts.new(v)
+        vert[vert_layer] =(0.149,0.660,0.10,0.00)
+        
     bm.verts.ensure_lookup_table()
-
+    
     uv_layer = bm.loops.layers.uv.new()  # 添加UV图层
     
     for face_index, f in enumerate(faces):
@@ -235,11 +238,12 @@ def schem_chunk(level,chunks,i,filename="Schemetics",position=(0,0,0)):
             for i, loop in enumerate(face.loops):
                 #set_uv这个方法有问题 在使用stripped_oak_wood 方块时出错
                 loop[uv_layer].uv = set_uv(uv_coords, i, rotation)
-
     bm.faces.ensure_lookup_table()
     bm.to_mesh(mesh)
     bm.free()
-
+    
+    
+    
 
 #流体
 def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
