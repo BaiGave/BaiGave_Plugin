@@ -177,7 +177,7 @@ def schem_chunk(level,chunks,i,filename="Schemetics",position=(0,0,0)):
 
     for x in range(i[0]*16, i[0]*16+16):
         for y in range(chunks[0][1], chunks[1][1]):
-            for z in range(i[1]*16, i[3]*16+16):
+            for z in range(i[1]*16, i[1]*16+16):
                 # 获取坐标处的方块
                 id = level.get_block(x, y, z, "main")
                 if isinstance(id,amulet.api.block.Block):
