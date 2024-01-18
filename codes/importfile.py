@@ -275,7 +275,7 @@ class ImportSchem(bpy.types.Operator):
         if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2]) < bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_minsize:
             #几何节点+py方法
             schem(level,chunks,name)
-
+            schem_liquid(level,chunks)
             materials = bpy.data.materials
             for material in materials:
                 try:
@@ -290,33 +290,17 @@ class ImportSchem(bpy.types.Operator):
 
         #大模型，分块导入
         else:
-            groups = groupby(sorted(all_chunks), key=lambda x: x[0])
-            # 合并区块，减少导入次数
-            mp_chunks = []
-            for k, g in groups:
-                group_list = list(g)
-                mp_chunks.append((group_list[0][0], group_list[0][1], group_list[-1][0], group_list[-1][1]))
-
-            # for i in mp_chunks:
-            #     schem_chunk(level,chunks,i)
+            mp_chunks = all_chunks
             VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
             with open(VarCachePath, 'wb') as file:
-                pickle.dump((chunks,mp_chunks,self.filepath,bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_intervaltime),file)
-
-            #多进程导入模型
+                pickle.dump((chunks,mp_chunks,self.filepath,bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_intervaltime,bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_processnumber),file)
             bpy.data.window_managers["WinMan"].bcp_max_connections = 32
             bpy.data.window_managers['WinMan'].bcp_port = 5001
             bpy.ops.wm.open_command_port()
             blender_path = bpy.app.binary_path
-            ImportPath = bpy.utils.script_path_user()
-            MultiprocessPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_mp.py"
+            pool_path = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/multiprocess/multiprocess_pool.py"
+            subprocess.Popen([blender_path,"-P",pool_path,"-p","9","9","9","9","--no-window-focus"])
 
-            #多进程实现方法：后台启动headless blender(-b)，只运行python代码(-P)，不显示界面
-            for num in range(len(mp_chunks)):
-                ChunkIndex = f"import bpy;bpy.context.scene.frame_current = {num}"
-                subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
-
-            schem_liquid(level,chunks)
         end_time = time.time()
         print("预处理时间：", end_time - start_time, "秒")
         return {'FINISHED'}
@@ -325,6 +309,32 @@ class ImportSchem(bpy.types.Operator):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
+#进程池管理器
+class MultiprocessPool(bpy.types.Operator):
+    bl_idname = "baigave.multiprocess_pool"
+    bl_label = "导入.schem文件"
+
+    def execute(self, context):
+        VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
+        with open(VarCachePath, 'rb') as file:
+            chunks,mp_chunks,schempath,interval,processnum = pickle.load(file)
+        #多进程导入模型
+        bpy.data.window_managers["WinMan"].bcp_max_connections = 32
+        bpy.data.window_managers['WinMan'].bcp_port = 5002
+        bpy.ops.wm.open_command_port()
+        blender_path = bpy.app.binary_path
+        ImportPath = bpy.utils.script_path_user()
+        MultiprocessPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_mp.py"
+        MPliquidPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_liquid_mp.py"
+        #多进程实现方法：后台启动headless blender(-b)，只运行python代码(-P)，不显示界面
+        for num in range(len(mp_chunks)):
+            if num < processnum:
+                ChunkIndex = f"import bpy;bpy.context.scene.frame_current = {num}"
+                subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
+                bpy.context.scene.frame_current = num
+                time.sleep(interval)
+        subprocess.Popen([blender_path,"-b","-P",MPliquidPath])
+        return {'FINISHED'}
 
 #每个进程调用一类功能，导入特定方块
 class MultiprocessSchem(bpy.types.Operator):
@@ -337,7 +347,7 @@ class MultiprocessSchem(bpy.types.Operator):
         start_time = time.time()
         VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
         with open(VarCachePath, 'rb') as file:
-            chunks,mp_chunks,schempath,interval = pickle.load(file)
+            chunks,mp_chunks,schempath,interval,processnum = pickle.load(file)
 
         level = amulet.load_level(self.filepath)
         current_frame = int(bpy.context.scene.frame_current)
@@ -366,12 +376,11 @@ class MultiprocessSchem(bpy.types.Operator):
                 pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
                 image.pixels[pixel_index : pixel_index + 4] = default_color
 
-        schem_chunk(level,chunks,mp_chunks[current_frame])
+        if current_frame < len(mp_chunks):
+            schem_chunk(level,chunks,mp_chunks[current_frame])
         end_time = time.time()
         print("预处理时间：", end_time - start_time, "秒")
 
-        # obj = bpy.data.objects['Schemetics']
-        # obj.location = (subchunks[0][0]-origin[0],-(subchunks[0][2]-origin[2]),subchunks[0][1]-origin[1])
         ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/chunk{}.blend".format(current_frame)
         bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
         return {'FINISHED'}
@@ -389,8 +398,9 @@ class ImportSchemLiquid(bpy.types.Operator):
     def execute(self, context):
         VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
         with open(VarCachePath, 'rb') as file:
-            d,schempath = pickle.load(file)
-        schem_liquid(d,"liquid")
+            chunks,mp_chunks,schempath,interval,processnum = pickle.load(file)
+        level = amulet.load_level(schempath)
+        schem_liquid(level,chunks)
         ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/liquid.blend"
         bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
         return {'FINISHED'}
@@ -428,8 +438,8 @@ class Importjson(bpy.types.Operator):
 
 class SNA_AddonPreferences_F35F8(bpy.types.AddonPreferences):
     bl_idname = 'BaiGave_Plugin'
-    sna_processnumber: bpy.props.IntProperty(name='ProcessNumber', description='目前自动组合区块，无需设置', default=6, subtype='NONE', min=1, max=64)
-    sna_intervaltime: bpy.props.FloatProperty(name='IntervalTime', description='处理完每个区块，间隔一段时间再导入进来', default=1.0, subtype='NONE', unit='NONE', min=0.0, max=10.0, step=3, precision=1)
+    sna_processnumber: bpy.props.IntProperty(name='ProcessNumber', description='最大进程数，同时处理这么多个区块', default=6, subtype='NONE', min=1, max=64)
+    sna_intervaltime: bpy.props.FloatProperty(name='IntervalTime', description='处理完每个区块，间隔一段时间再导入进来。较小值减少总时间；较大值能避免blender卡住，边导边用', default=1.0, subtype='NONE', unit='NONE', min=0.0, max=10.0, step=3, precision=1)
     sna_minsize: bpy.props.IntProperty(name='MinSize', description='超过这个数就会启用多进程分区块导入', default=1000000, subtype='NONE', min=1000, max=99999999)
 
     def draw(self, context):
@@ -693,7 +703,7 @@ class ImportWorld(bpy.types.Operator):
 
 
 classes=[ImportBlock,ImportSchem,MultiprocessSchem,Importjson,ImportWorld,#SelectArea, GenerateWorld,
-         ImportNBT,SNA_AddonPreferences_F35F8,SNA_OT_My_Generic_Operator_A38B8]
+         ImportNBT,SNA_AddonPreferences_F35F8,SNA_OT_My_Generic_Operator_A38B8,ImportSchemLiquid,MultiprocessPool]
 
 def register():
     for cls in classes:

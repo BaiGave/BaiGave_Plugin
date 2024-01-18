@@ -108,7 +108,7 @@ class ImportPanel(bpy.types.Panel):
         split_3E557.active = True
         split_3E557.alignment = 'Expand'.upper()
         if not True: split_3E557.operator_context = "EXEC_DEFAULT"
-        split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_processnumber', text='进程数', icon_value=0, emboss=False)
+        split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_processnumber', text='进程数', icon_value=0, emboss=True)
         split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_intervaltime', text='间隔(秒)', icon_value=0, emboss=True)
         layout.split()
         box = layout.box()
