@@ -54,22 +54,12 @@ with open(VarCachePath, 'rb') as file:
 #多进程实现方法:后台启动headless blender(-b),只运行python代码(-P),不显示界面
 bpy.context.scene.frame_current += 1
 num = bpy.context.scene.frame_current
-if num > len(mp_chunks):
-    for i in range(1,10000000):
-        j=0
-        j+=i**0.5
-    CacheFolder = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/"
-    for filename in os.listdir(CacheFolder):
-        if any(char.isdigit() for char in filename):
-            os.remove(os.path.join(CacheFolder, filename))
-    print("所有区块导入完成")
-    bpy.ops.wm.close_command_port()
-    bpy.ops.wm.quit_blender()
-ChunkIndex = f"import bpy;bpy.context.scene.frame_current = {num}"
-subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
-time.sleep(interval)
-if num%16 == 0:
-    time.sleep(5)
+if num <= len(mp_chunks):
+    ChunkIndex = f"import bpy;bpy.context.scene.frame_current = {num}"
+    subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
+    time.sleep(interval)
+    if num%16 == 0:
+        time.sleep(5)
 """)
 
 def thread2():
@@ -120,7 +110,19 @@ if {0} % 16 == 0 or len(objects_to_join) == {1}:
                 bpy.context.scene.collection.objects.link(obj)
         except Exception as e:
             print("流体出错了:", e)
-        bpy.ops.wm.close_command_port()
+
+        CacheFolder = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/"
+        for filename in os.listdir(CacheFolder):
+            if any(char.isdigit() for char in filename):
+                os.remove(os.path.join(CacheFolder, filename))
+        print("所有区块导入完成")
+
+        import socket
+        command = "bpy.ops.wm.quit_blender()"
+        clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        clientsocket.connect(('localhost', 5002))
+        clientsocket.sendall(command.encode())
+        clientsocket.close()
 """.format(current_frame, len(mp_chunks)))
     
 t1=threading.Thread(target=thread1)
