@@ -17,7 +17,10 @@ class Read_mods_dir(bpy.types.Operator):
         existing_items = [item.name for item in my_properties.mod_list]
         path = scene.mods_dir  # 使用自定义路径
 
-        directories = next(os.walk(path))[1]  # 获取路径下的所有文件夹名称
+        try:
+            directories = next(os.walk(path))[1]  # 获取路径下的所有文件夹名称
+        except StopIteration:
+            directories = []
 
         # 添加不存在于列表属性的文件夹名称，并删除不存在于文件夹中的item
         for directory in directories:
@@ -78,7 +81,10 @@ class Read_resourcepacks_dir(bpy.types.Operator):
         existing_items = [item.name for item in my_properties.resourcepack_list]
         path = scene.resourcepacks_dir  # 使用自定义路径
 
-        directories = next(os.walk(path))[1]  # 获取路径下的所有文件夹名称
+        try:
+            directories = next(os.walk(path))[1]  # 获取路径下的所有文件夹名称
+        except StopIteration:
+            directories = []
 
         # 添加不存在于列表属性的文件夹名称，并删除不存在于文件夹中的item
         for directory in directories:
@@ -137,19 +143,21 @@ class Read_versions_dir(bpy.types.Operator):
         version_items = []
         path = scene.versions_dir  # 使用自定义路径
 
-        directories = next(os.walk(path))[1]  # 获取路径下的所有文件夹名称
+        try:
+            directories = next(os.walk(path))[1]  # 获取路径下的所有文件夹名称
+        except StopIteration:
+            directories = []
 
         # 添加不存在于列表属性的文件夹名称，并删除不存在于文件夹中的item
         for filename in directories:
             version_items.append((filename, filename, ''))
-
-                
 
         bpy.types.Scene.version_list = bpy.props.EnumProperty(
             name="版本",
             description="选择一个版本",
             items=version_items,
         )
+        
         # 获取当前选中的版本
         selected_version = bpy.context.scene.version_list
 
@@ -165,7 +173,6 @@ class Read_versions_dir(bpy.types.Operator):
         # 将更改后的内容写回config.py文件
         with open(config_path, 'w') as file:
             file.write(new_content)
-
 
         return {'FINISHED'}
     
