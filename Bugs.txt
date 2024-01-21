@@ -1,4 +1,4 @@
-1.测试stripped_oak_wood时发生错误，疑似set_uve方法出错，错误一：剔除面不正确 错误二：面UV不正确
+1.测试stripped_oak_wood时发生错误，疑似set_uv方法出错，错误一：剔除面不正确 错误二：面UV不正确
 2.uv_lock功能未添加 blockstates.py 235行 ,其作用是决定旋转的方块的uv是否跟着一起旋转
 3.inner_stairs 模型出错，其一面错误地到了相反的一面，疑似两个element贴在一起导致
 4.流体模型UV+材质+流动模型问题待解决

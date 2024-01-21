@@ -48,9 +48,9 @@ class ImportBlock(bpy.types.Operator):
         create_or_clear_collection(collection_name)
         collection =bpy.data.collections.get(collection_name)
         id_map = {}  # 用于将字符串id映射到数字的字典
-        next_id = -1  # 初始化 next_id
+        next_id = 0  # 初始化 next_id
         if not collection.objects:
-            next_id=0
+            #next_id=0
             filename=str(next_id)+"#"+str("minecraft:air")
             textures,elements,rotation,_ =get_model("minecraft:air")
             position = [0, 0, 0]
@@ -60,7 +60,6 @@ class ImportBlock(bpy.types.Operator):
             for i, item in enumerate(bloc.data.attributes['blockname'].data):
                 item.value="minecraft:air"
             id_map["minecraft:air"] = next_id
-            next_id += 1
         elif collection.objects:
             # 遍历集合中的每个物体
             for ob in collection.objects:
@@ -470,54 +469,54 @@ class SNA_OT_My_Generic_Operator_A38B8(bpy.types.Operator):
     def invoke(self, context, event):
         return self.execute(context)
 
+import random
+class GenerateWorld(bpy.types.Operator):
+    """创建世界(未完成)"""
+    bl_idname = "baigave.create_save"
+    bl_label = "创建存档"
 
-# class GenerateWorld(bpy.types.Operator):
-#     """创建世界(未完成)"""
-#     bl_idname = "baigave.create_save"
-#     bl_label = "创建存档"
-
-#     # 定义操作的执行函数
-#     def execute(self, context):
-#         World_Name = "World1"
-#         SpawnX=0
-#         SpawnY=64
-#         SpawnZ=0
-#         hardcore=0
-#         Difficulty=0
-#         allowCommands=1
-#         LastPlayed = int(round(time.time() * 1000))
-#         DayTime=16000
-#         Seed = random.randint(0, 10000)
+    # 定义操作的执行函数
+    def execute(self, context):
+        World_Name = "World1"
+        SpawnX=0
+        SpawnY=64
+        SpawnZ=0
+        hardcore=0
+        Difficulty=0
+        allowCommands=1
+        LastPlayed = int(round(time.time() * 1000))
+        DayTime=16000
+        Seed = random.randint(0, 10000)
 
 
-#         folderpath = 'C:\\Users\\user\\Desktop\\白给的人模\\BaiGave_Plugin\\saves\\'+World_Name
+        folderpath = 'C:\\Users\\user\\Desktop\\白给的人模\\BaiGave_Plugin\\saves\\'+World_Name
 
-#         # 创建存档文件夹
-#         if not os.path.exists(folderpath):
-#             os.makedirs(folderpath)
-#         level_dat = create_level(World_Name,SpawnX,SpawnY,SpawnZ,hardcore,Difficulty,allowCommands,LastPlayed,DayTime,Seed)
-#         # 将NBT数据写入文件
-#         filepath = 'C:\\Users\\user\\Desktop\\白给的人模\\BaiGave_Plugin\\saves\\'+World_Name+'\\level.dat'
-#         with gzip.open(filepath, 'wb') as file:
-#             level_dat.write(file)
-
-        
-#         from amulet.api.chunk import Chunk
-#         from amulet.api.block import Block
-
-#         level = amulet.load_level("C:\\Users\\user\\Desktop\\白给的人模\\BaiGave_Plugin\\saves\\"+World_Name)
-#         new_chunk = Chunk(0, 0)
-#         stone = Block("minecraft", "stone")
-#         new_chunk.set_block(10,171,10,stone)
-#         new_chunk.changed = True
-#         level.put_chunk(new_chunk, "minecraft:overworld")
-
-#         level.save()
-
-#         level.close()
+        # # 创建存档文件夹
+        # if not os.path.exists(folderpath):
+        #     os.makedirs(folderpath)
+        # level_dat = create_level(World_Name,SpawnX,SpawnY,SpawnZ,hardcore,Difficulty,allowCommands,LastPlayed,DayTime,Seed)
+        # # 将NBT数据写入文件
+        # filepath = 'C:\\Users\\user\\Desktop\\白给的人模\\BaiGave_Plugin\\saves\\'+World_Name+'\\level.dat'
+        # with gzip.open(filepath, 'wb') as file:
+        #     level_dat.write(file)
 
         
-#         return {'FINISHED'}
+        from amulet.api.chunk import Chunk
+        from amulet.api.block import Block
+
+        level = amulet.load_level(os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves",World_Name))
+        new_chunk = Chunk(0, 0)
+        stone = Block("minecraft", "stone")
+        new_chunk.set_block(10,171,10,stone)
+        new_chunk.changed = True
+        level.put_chunk(new_chunk, "minecraft:overworld")
+
+        level.save()
+
+        level.close()
+
+        
+        return {'FINISHED'}
     
 # class SelectArea(bpy.types.Operator):
 #     """选择区域（性能有问题）"""
@@ -702,7 +701,7 @@ class ImportWorld(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 
-classes=[ImportBlock,ImportSchem,MultiprocessSchem,Importjson,ImportWorld,#SelectArea, GenerateWorld,
+classes=[ImportBlock,ImportSchem,MultiprocessSchem,Importjson,ImportWorld,GenerateWorld,#SelectArea, GenerateWorld,
          ImportNBT,SNA_AddonPreferences_F35F8,SNA_OT_My_Generic_Operator_A38B8,ImportSchemLiquid,MultiprocessPool]
 
 def register():

@@ -163,7 +163,7 @@ def create_mesh_from_dictionary(d,name):
         for i, item in enumerate(bloc.data.attributes['blockname'].data):
             item.value="minecraft:air"
         id_map["minecraft:air"] = next_id
-        next_id += 1
+        next_id =next_id+1
     elif collection.objects:
         # 遍历集合中的每个物体
         for ob in collection.objects:
@@ -186,8 +186,8 @@ def create_mesh_from_dictionary(d,name):
                     pass
                 # 将 ID 与属性值关联起来并存储到字典中
                 id_map[attr_value] = int(obj_id)
-            
         next_id =next_id+1
+    
     nodetree_target = "SchemToBlocks"
 
     #导入几何节点
