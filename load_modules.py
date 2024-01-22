@@ -16,6 +16,11 @@ if "exportfile" in locals():
 else:
 	from .codes import exportfile
 
+if "create_world" in locals():
+	importlib.reload(create_world)
+else:
+	from .codes import create_world
+
 if "search_file" in locals():
 	importlib.reload(search_file)
 else:
@@ -66,6 +71,7 @@ module_list = (
 	merge_images,
 	importfile,
 	exportfile,
+	create_world,
 	mesh_to_mc,
 	ui
 )

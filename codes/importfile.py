@@ -3,13 +3,9 @@ import os
 import time
 import pickle
 import subprocess
-from .structure import nbt
-from itertools import groupby
+
 
 from .block import block
-#from .level import create_level
-from .functions.tip import button_callback
-
 from .functions.get_data import get_all_data
 from .classification_files.block_type import exclude
 from .schem import schem_chunk,schem_liquid,schem,remove_brackets
@@ -470,53 +466,7 @@ class SNA_OT_My_Generic_Operator_A38B8(bpy.types.Operator):
         return self.execute(context)
 
 import random
-class GenerateWorld(bpy.types.Operator):
-    """创建世界(未完成)"""
-    bl_idname = "baigave.create_save"
-    bl_label = "创建存档"
 
-    # 定义操作的执行函数
-    def execute(self, context):
-        World_Name = "World1"
-        SpawnX=0
-        SpawnY=64
-        SpawnZ=0
-        hardcore=0
-        Difficulty=0
-        allowCommands=1
-        LastPlayed = int(round(time.time() * 1000))
-        DayTime=16000
-        Seed = random.randint(0, 10000)
-
-
-        folderpath = 'C:\\Users\\user\\Desktop\\白给的人模\\BaiGave_Plugin\\saves\\'+World_Name
-
-        # # 创建存档文件夹
-        # if not os.path.exists(folderpath):
-        #     os.makedirs(folderpath)
-        # level_dat = create_level(World_Name,SpawnX,SpawnY,SpawnZ,hardcore,Difficulty,allowCommands,LastPlayed,DayTime,Seed)
-        # # 将NBT数据写入文件
-        # filepath = 'C:\\Users\\user\\Desktop\\白给的人模\\BaiGave_Plugin\\saves\\'+World_Name+'\\level.dat'
-        # with gzip.open(filepath, 'wb') as file:
-        #     level_dat.write(file)
-
-        
-        from amulet.api.chunk import Chunk
-        from amulet.api.block import Block
-
-        level = amulet.load_level(os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves",World_Name))
-        new_chunk = Chunk(0, 0)
-        stone = Block("minecraft", "stone")
-        new_chunk.set_block(10,171,10,stone)
-        new_chunk.changed = True
-        level.put_chunk(new_chunk, "minecraft:overworld")
-
-        level.save()
-
-        level.close()
-
-        
-        return {'FINISHED'}
     
 # class SelectArea(bpy.types.Operator):
 #     """选择区域（性能有问题）"""
@@ -701,7 +651,7 @@ class ImportWorld(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 
-classes=[ImportBlock,ImportSchem,MultiprocessSchem,Importjson,ImportWorld,GenerateWorld,#SelectArea, GenerateWorld,
+classes=[ImportBlock,ImportSchem,MultiprocessSchem,Importjson,ImportWorld,#SelectArea,
          ImportNBT,SNA_AddonPreferences_F35F8,SNA_OT_My_Generic_Operator_A38B8,ImportSchemLiquid,MultiprocessPool]
 
 def register():

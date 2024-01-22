@@ -13,6 +13,8 @@ class MainPanel(bpy.types.Panel):
         bpy.ops.baigave.read_mods_dir()
         bpy.ops.baigave.read_resourcepacks_dir()
         bpy.ops.baigave.read_versions_dir()
+        bpy.ops.baigave.read_saves_dir()
+        bpy.ops.baigave.read_schems_dir()
         super().__init__()
 
     def draw(self,context):
@@ -83,7 +85,7 @@ class ImportPanel(bpy.types.Panel):
     bl_region_type ='UI'
     bl_category ='BaiGave'
     bl_parent_id ='MainPanel'
-    #bl_options = {'DEFAULT_CLOSED'}
+    bl_options = {'DEFAULT_CLOSED'}
     
     def draw(self,context):
         layout = self.layout
@@ -108,7 +110,7 @@ class ImportPanel(bpy.types.Panel):
         split_3E557.active = True
         split_3E557.alignment = 'Expand'.upper()
         if not True: split_3E557.operator_context = "EXEC_DEFAULT"
-        split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_processnumber', text='进程数', icon_value=0, emboss=True)
+        split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_processnumber', text='进程数', icon_value=0, emboss=False)
         split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_intervaltime', text='间隔(秒)', icon_value=0, emboss=True)
         layout.split()
         box = layout.box()
@@ -156,8 +158,6 @@ class ImportPanel(bpy.types.Panel):
         # row.operator("baigave.select", text="选择区域")
         # row = layout.row()
         # row.operator("baigave.import_world", text="导入世界")
-        # row = layout.row()
-        # row.operator("baigave.create_save", text="创建存档")
 
 #导出面板     
 class ExportPanel(bpy.types.Panel):
@@ -174,10 +174,217 @@ class ExportPanel(bpy.types.Panel):
         scene = context.scene
         
         row = layout.row()    
-        row.label(text = "导出",icon='ERROR')
-        row = layout.row()
-        row.operator("baigave.export_schem", text="导出.schem文件")
+        row.label(text = "导出选中的结构",icon='ERROR')
+        box = layout.box()
+        row = box.row()
+        box.prop(scene, "schem_filename", text="文件名")
+        row = box.row()
+        box.operator("baigave.export_schem", text="导出.schem文件")
+        row =layout.row()
+        row.label(text = "导出结构到选中的世界",icon='ERROR')
+        box = layout.box()
+        row = box.row()
+        box.prop(scene, "save_list",text="选择世界")
+        row = box.row()
+        box.prop(scene, "schem_list",text="选择.schem文件")
+        row =layout.row()
+        row.label(text = "导出选中结构到选中的世界",icon='ERROR')
+        box = layout.box()
+        row = box.row()
+        box.prop(scene, "save_list",text="选择世界")
+        box.label( text="结构位置：("+str(scene.schem_size[0])+"," +str(scene.schem_size[1])+","+ str(scene.schem_size[2])+")")
+        box.label(text="长:"+str(scene.schem_size[0])+"宽:" +str(scene.schem_size[1])+"高:"+ str(scene.schem_size[2])+" (blender坐标系)")
 
+        box.operator("baigave.calculate_size",text="计算结构大小")
+        box.operator("baigave.export_to_save",text="导出结构到存档")
+#创建存档面板
+class CreateLevel(bpy.types.Panel):
+    bl_label ="创建存档"
+    bl_idname ="CreateLevelPanel"
+    bl_space_type ='VIEW_3D'
+    bl_region_type ='UI'
+    bl_category ='BaiGave'
+    bl_parent_id ='MainPanel'
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene
+        
+        row = layout.row()    
+        row.label(text = "存档",icon='ERROR')
+        row = layout.row()
+        box = layout.box()
+        row=box.row()
+        box.prop(scene, "world_name", text="存档名称")
+        row = box.row()
+        row.label(text = "出生点坐标")
+        row = box.row()
+        row.prop(scene, "spawn_x", text="X")
+        row.prop(scene, "spawn_y", text="Y")
+        row.prop(scene, "spawn_z", text="Z")
+        row = box.row()
+        row.prop(scene, "difficulty", text="难度")
+        row = box.row()
+        row.prop(scene, "gametype", text="游戏模式")
+        row = box.row()
+        row.prop(scene, "overworld_generator_type", text="世界类型")
+        row = box.row()
+        row.prop(scene, "breaking_the_height_limit", text="突破限高？")
+        row = box.row()
+        row.prop(scene, "day_time", text="时间")
+        row = box.row()
+        row.prop(scene, "seed", text="种子")
+        row = layout.row()
+        row.operator("baigave.create_world", text="创建存档")
+#创建存档面板
+class MoreLevelSettings(bpy.types.Panel):
+    bl_label ="更多设置"
+    bl_idname ="MoreLevelSettings"
+    bl_space_type ='VIEW_3D'
+    bl_region_type ='UI'
+    bl_category ='BaiGave'
+    bl_parent_id ='CreateLevelPanel'
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene
+        box = layout.box()
+
+        box.label(text="是否在聊天框中公告玩家进度的达成")
+        box.prop(scene, "announce_advancements", text="")
+
+        box.label(text="由方块源（除TNT）爆炸炸毁的方块是否会有概率不掉落")
+        box.prop(scene, "block_explosion_drop_decay", text="")
+
+        box.label(text="命令方块执行命令时是否在聊天框中向管理员显示")
+        box.prop(scene, "command_block_output", text="")
+
+        box.label(text="是否让服务器停止检查使用鞘翅玩家的移动速度。")
+        box.prop(scene, "disable_elytra_movement_check", text="")
+
+        box.label(text="是否禁用袭击")
+        box.prop(scene, "disable_raids", text="")
+
+        box.label(text="是否进行昼夜更替和月相变化")
+        box.prop(scene, "do_daylight_cycle", text="")
+
+        box.label(text="非生物实体是否掉落物品")
+        box.prop(scene, "do_entity_drops", text="")
+
+        box.label(text="火是否蔓延及自然熄灭")
+        box.prop(scene, "do_fire_tick", text="")
+
+        box.label(text="玩家死亡时是否不显示死亡界面直接重生")
+        box.prop(scene, "do_immediate_respawn", text="")
+
+        box.label(text="幻翼是否在夜晚生成")
+        box.prop(scene, "do_insomnia", text="")
+
+        box.label(text="玩家的合成配方是否需要解锁才能使用")
+        box.prop(scene, "do_limited_crafting", text="")
+
+        box.label(text="生物在死亡时是否掉落物品")
+        box.prop(scene, "do_mob_loot", text="")
+
+        box.label(text="生物是否自然生成。不影响刷怪笼")
+        box.prop(scene, "do_mob_spawning", text="")
+
+        box.label(text="控制灾厄巡逻队的生成")
+        box.prop(scene, "do_patrol_spawning", text="")
+
+        box.label(text="方块被破坏时是否掉落物品")
+        box.prop(scene, "do_tile_drops", text="")
+
+        box.label(text="控制流浪商人的生成")
+        box.prop(scene, "do_trader_spawning", text="")
+
+        box.label(text="决定藤蔓是否会向周围扩散，不影响洞穴藤蔓、缠怨藤和垂泪藤")
+        box.prop(scene, "do_vines_spread", text="")
+
+        box.label(text="监守者是否生成")
+        box.prop(scene, "do_warden_spawning", text="")
+
+        box.label(text="天气是否变化")
+        box.prop(scene, "do_weather_cycle", text="")
+
+        box.label(text="玩家是否承受窒息伤害")
+        box.prop(scene, "drowning_damage", text="")
+
+        box.label(text="玩家是否承受跌落伤害")
+        box.prop(scene, "fall_damage", text="")
+
+        box.label(text="玩家是否承受火焰伤害[仅Java版][1]")
+        box.prop(scene, "fire_damage", text="")
+
+        box.label(text="当被激怒的条件敌对生物的目标玩家死亡时，该生物是否恢复未激怒状态")
+        box.prop(scene, "forgive_dead_players", text="")
+
+        box.label(text="玩家是否承受冰冻伤害")
+        box.prop(scene, "freeze_damage", text="")
+
+        box.label(text="玩家是否能听到可无视距离播放给全部玩家的特定游戏事件音效")
+        box.prop(scene, "global_sound_events", text="")
+
+        box.label(text="玩家死亡后是否保留物品栏物品、经验（死亡时物品不掉落、经验不清空）")
+        box.prop(scene, "keep_inventory", text="")
+
+        box.label(text="流动的熔岩是否可产生熔岩源")
+        box.prop(scene, "lava_source_conversion", text="")
+
+        box.label(text="是否在服务器日志中记录管理员使用过的命令")
+        box.prop(scene, "log_admin_commands", text="")
+
+        box.label(text="由生物源爆炸炸毁的方块是否会有概率不掉落")
+        box.prop(scene, "mob_explosion_drop_decay", text="")
+
+        box.label(text="生物是否能够进行破坏性行为")
+        box.prop(scene, "mob_griefing", text="")
+
+        box.label(text="玩家是否能在饥饿值足够时自然恢复生命值")
+        box.prop(scene, "natural_regeneration", text="")
+
+        box.label(text="调试屏幕是否简化而非显示详细信息")
+        box.prop(scene, "reduced_debug_info", text="")
+
+        box.label(text="玩家执行命令的返回信息是否在聊天框中显示。")
+        box.prop(scene, "send_command_feedback", text="")
+
+        box.label(text="是否在聊天框中显示玩家的死亡信息。")
+        box.prop(scene, "show_death_messages", text="")
+
+        box.label(text="是否允许旁观模式的玩家生成区块")
+        box.prop(scene, "spectators_generate_chunks", text="")
+
+        box.label(text="由TNT爆炸炸毁的方块是否会有概率不掉落")
+        box.prop(scene, "tnt_explosion_drop_decay", text="")
+
+        box.label(text="被激怒的条件敌对生物是否攻击附近任何玩家")
+        box.prop(scene, "universal_anger", text="")
+
+        box.label(text="流动的水是否可产生水源")
+        box.prop(scene, "water_source_conversion", text="")
+
+        box.label(text="指定单次命令执行可更改的最大方块数")
+        box.prop(scene, "command_modification_block_limit", text="")
+
+        box.label(text="决定了连锁型命令方块能连锁执行的总数量。	")
+        box.prop(scene, "max_command_chain_length", text="")
+
+        box.label(text="下雪时可在一格方块空间内堆积的雪的最高层数")
+        box.prop(scene, "snow_accumulation_height", text="")
+
+        box.label(text="首次进入服务器的玩家和没有重生点的死亡玩家在重生时与世界重生点坐标的距离")
+        box.prop(scene, "spawn_radius", text="")
+
+        box.label(text="每游戏刻每区段中随机的方块刻发生的频率")
+        box.prop(scene, "random_tick_speed", text="")
+
+        box.label(text="设置跳过夜晚所需的入睡玩家所占百分比。")
+        box.prop(scene, "players_sleeping_percentage", text="")
+
+       
 # 资源包面板
 class ResourcepacksPanel(bpy.types.Panel):
     bl_label = "资源包"
@@ -259,7 +466,7 @@ class ModList(bpy.types.UIList):
             row.label(text=item.name)
             row.label(text=item.description)
 
-classes=[ResourcepackList,ModList,MainPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,ModPanel,ResourcepacksPanel]
+classes=[ResourcepackList,ModList,MainPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,CreateLevel,ModPanel,ResourcepacksPanel,MoreLevelSettings]
 
 
 def register():

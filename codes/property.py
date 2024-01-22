@@ -7,6 +7,8 @@ import numpy as np
 import shutil
 import toml
 import json
+import random
+import importlib
 from .functions.get_data import get_file_path,get_all_data
 from .. import config
 from collections import Counter
@@ -29,6 +31,14 @@ class Property(bpy.types.PropertyGroup):
     bpy.types.Scene.versions_dir = bpy.props.StringProperty(
         name="版本路径",
         default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp","minecraft")
+    )
+    bpy.types.Scene.saves_dir = bpy.props.StringProperty(
+        name="存档路径",
+        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves")
+    )
+    bpy.types.Scene.schems_dir = bpy.props.StringProperty(
+        name=".schem文件路径",
+        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "schem")
     )
     bpy.types.Scene.zips_dir = bpy.props.StringProperty(
         name="zip文件路径",
@@ -62,12 +72,303 @@ class Property(bpy.types.PropertyGroup):
     bpy.types.Scene.min_coordinates = bpy.props.IntVectorProperty(name="最小坐标", size=3)
     bpy.types.Scene.max_coordinates = bpy.props.IntVectorProperty(name="最大坐标", size=3)
 
+    bpy.types.Scene.schem_size = bpy.props.IntVectorProperty(name="结构大小", size=3)
+    bpy.types.Scene.schem_location = bpy.props.IntVectorProperty(name="结构位置", size=3)
+
+
     # 定义一个 EnumProperty 作为下拉列表的选项
     bpy.types.Scene.version_list = bpy.props.EnumProperty(
         name="版本",
         description="选择一个版本",
         items=(),
     )
+    bpy.types.Scene.save_list = bpy.props.EnumProperty(
+        name="存档",
+        description="选择一个存档",
+        items=(),
+    )
+    bpy.types.Scene.schem_list = bpy.props.EnumProperty(
+        name=".schem文件",
+        description="选择一个.schem文件",
+        items=(),
+    )
+
+    bpy.types.Scene.schem_filename = bpy.props.StringProperty(name=".schem文件名", default="file")
+
+    bpy.types.Scene.world_name = bpy.props.StringProperty(name="World Name", default="World1")
+    bpy.types.Scene.spawn_x = bpy.props.IntProperty(name="Spawn X", default=0)
+    bpy.types.Scene.spawn_y = bpy.props.IntProperty(name="Spawn Y", default=64)
+    bpy.types.Scene.spawn_z = bpy.props.IntProperty(name="Spawn Z", default=0)
+    bpy.types.Scene.hardcore = bpy.props.EnumProperty(
+        name="极限模式",
+        items=[("0", "否", "否"), ("1", "是", "是")],
+        default="0"
+    )
+    bpy.types.Scene.difficulty = bpy.props.EnumProperty(
+        name="难度",
+        items=[("0", "和平", "和平模式"), ("1", "简单", "简单模式"), ("2", "普通", "普通模式"), ("3", "困难", "困难模式")],
+        default="0"
+    )
+    bpy.types.Scene.gametype = bpy.props.EnumProperty(
+        name="游戏模式",
+        items=[("0", "生存", "和平模式"), ("1", "创造", "创造模式"), ("2", "冒险", "冒险模式"), ("3", "旁观", "旁观模式")],
+        default="1"
+    )
+    bpy.types.Scene.overworld_generator_type = bpy.props.EnumProperty(
+        name="主世界生成类型",
+        items=[("noise", "噪波", "一般世界"), ("flat", "平坦", "平坦世界"), ("debug", "DEBUG", "DEBUG")],
+        default="noise"
+    )
+    bpy.types.Scene.allow_commands = bpy.props.EnumProperty(
+        name="允许指令",
+        items=[("0", "否", "否"), ("1", "是", "是")],
+        default="1"
+    )
+    bpy.types.Scene.breaking_the_height_limit = bpy.props.EnumProperty(
+        name="突破限高",
+        items=[("0", "否", "否"), ("1", "是", "突破限高至2032！")],
+        default="0"
+    )
+
+    # 布尔值
+    bpy.types.Scene.announce_advancements = bpy.props.EnumProperty(
+        name="Announce Advancements",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.block_explosion_drop_decay = bpy.props.EnumProperty(
+        name="Block Explosion Drop Decay",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.command_block_output = bpy.props.EnumProperty(
+        name="Command Block Output",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.disable_elytra_movement_check = bpy.props.EnumProperty(
+        name="Disable Elytra Movement Check",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.disable_raids = bpy.props.EnumProperty(
+        name="Disable Raids",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_daylight_cycle = bpy.props.EnumProperty(
+        name="Do Daylight Cycle",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_entity_drops = bpy.props.EnumProperty(
+        name="Do Entity Drops",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_fire_tick = bpy.props.EnumProperty(
+        name="Do Fire Tick",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_immediate_respawn = bpy.props.EnumProperty(
+        name="Do Immediate Respawn",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_insomnia = bpy.props.EnumProperty(
+        name="Do Insomnia",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_limited_crafting = bpy.props.EnumProperty(
+        name="Do Limited Crafting",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_mob_loot = bpy.props.EnumProperty(
+        name="Do Mob Loot",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_mob_spawning = bpy.props.EnumProperty(
+        name="Do Mob Spawning",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_patrol_spawning = bpy.props.EnumProperty(
+        name="Do Patrol Spawning",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_tile_drops = bpy.props.EnumProperty(
+        name="Do Tile Drops",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_trader_spawning = bpy.props.EnumProperty(
+        name="Do Trader Spawning",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_vines_spread = bpy.props.EnumProperty(
+        name="Do Vines Spread",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_warden_spawning = bpy.props.EnumProperty(
+        name="Do Warden Spawning",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.do_weather_cycle = bpy.props.EnumProperty(
+        name="Do Weather Cycle",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.drowning_damage = bpy.props.EnumProperty(
+        name="Drowning Damage",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.fall_damage = bpy.props.EnumProperty(
+        name="Fall Damage",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.fire_damage = bpy.props.EnumProperty(
+        name="Fire Damage",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.forgive_dead_players = bpy.props.EnumProperty(
+        name="Forgive Dead Players",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.freeze_damage = bpy.props.EnumProperty(
+        name="Freeze Damage",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.global_sound_events = bpy.props.EnumProperty(
+        name="Global Sound Events",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.keep_inventory = bpy.props.EnumProperty(
+        name="Keep Inventory",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.lava_source_conversion = bpy.props.EnumProperty(
+        name="Lava Source Conversion",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.log_admin_commands = bpy.props.EnumProperty(
+        name="Log Admin Commands",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.mob_explosion_drop_decay = bpy.props.EnumProperty(
+        name="Mob Explosion Drop Decay",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.mob_griefing = bpy.props.EnumProperty(
+        name="Mob Griefing",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.natural_regeneration = bpy.props.EnumProperty(
+        name="Natural Regeneration",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.reduced_debug_info = bpy.props.EnumProperty(
+        name="Reduced Debug Info",
+        items=[("False", "否", "否"), ("True", "是", "是")],
+        default="False"
+    )
+
+    bpy.types.Scene.send_command_feedback = bpy.props.EnumProperty(
+        name="Send Command Feedback",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.show_death_messages = bpy.props.EnumProperty(
+        name="Show Death Messages",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.spectators_generate_chunks = bpy.props.EnumProperty(
+        name="Spectators Generate Chunks",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.tnt_explosion_drop_decay = bpy.props.EnumProperty(
+        name="TNT Explosion Drop Decay",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.universal_anger = bpy.props.EnumProperty(
+        name="Universal Anger",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    bpy.types.Scene.water_source_conversion = bpy.props.EnumProperty(
+        name="Water Source Conversion",
+        items=[("True", "是", "是"), ("False", "否", "否")],
+        default="True"
+    )
+
+    # 整数
+    bpy.types.Scene.max_entity_cramming = bpy.props.IntProperty(name="Max Entity Cramming",default=12)
+    bpy.types.Scene.snow_accumulation_height = bpy.props.IntProperty(name="Snow Accumulation Height",default=1)
+    bpy.types.Scene.spawn_radius = bpy.props.IntProperty(name="Spawn Radius",default=10)
+    bpy.types.Scene.players_sleeping_percentage = bpy.props.IntProperty(name="Players Sleeping Percentage",default=0)
+    bpy.types.Scene.random_tick_speed = bpy.props.IntProperty(name="Random Tick Speed",default=0)
+    bpy.types.Scene.command_modification_block_limit = bpy.props.IntProperty(name="Command Modification Block Limit",default=32768)
+    bpy.types.Scene.max_command_chain_length = bpy.props.IntProperty(name="Max Command Chain Length",default=65536)
+    bpy.types.Scene.day_time = bpy.props.IntProperty(name="Day Time", default=16000)
+    bpy.types.Scene.seed = bpy.props.IntProperty(name="Seed", default=random.randint(0, 10000))
     
 def unzip_mods_files():
     # 指定的文件夹路径
@@ -391,7 +692,7 @@ def read_blockstate_files(directory,version):
 
 
 classes=[ModInfo,Property,UnzipModOperator,UnzipResourcepacksOperator]
-import importlib
+
 
 def register():
     threading.Thread(target=unzip_mods_files).start()

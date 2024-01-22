@@ -4,6 +4,8 @@ import bpy
 import os
 import re
 
+from ..block import block
+from ..blockstates import get_model
 from ..property import unzip_mods_files,unzip_resourcepacks_files
 
 class Read_mods_dir(bpy.types.Operator):
@@ -175,6 +177,96 @@ class Read_versions_dir(bpy.types.Operator):
             file.write(new_content)
 
         return {'FINISHED'}
+    
+class Read_saves_dir(bpy.types.Operator):
+    """读取目录"""
+    bl_idname = "baigave.read_saves_dir"
+    bl_label = "读取目录"
+    
+    def execute(self, context):
+        scene = context.scene
+        save_items = []
+        path = scene.saves_dir  # 使用自定义路径
+
+        try:
+            directories = next(os.walk(path))[1]  # 获取路径下的所有文件夹名称
+            directories = [d for d in directories if os.path.exists(os.path.join(path, d, 'level.dat'))]
+        except StopIteration:
+            directories = []
+
+        # 添加不存在于列表属性的文件夹名称，并删除不存在于文件夹中的item
+        for filename in directories:
+            save_items.append((filename, filename, ''))
+
+        bpy.types.Scene.save_list = bpy.props.EnumProperty(
+            name="存档",
+            description="选择一个存档",
+            items=save_items,
+        )
+        
+        # 获取当前选中的存档
+        selected_save = bpy.context.scene.save_list
+
+        # 读取config.py文件
+        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py") 
+        with open(config_path, 'r') as file:
+            content = file.read()
+
+        # 使用正则表达式找到"save"参数并替换其值
+        pattern = r'("save":\s*")([^"]*)(")'
+        new_content = re.sub(pattern, fr'\g<1>{selected_save}\g<3>', content)
+
+        # 将更改后的内容写回config.py文件
+        with open(config_path, 'w') as file:
+            file.write(new_content)
+
+        return {'FINISHED'}
+    
+class Read_schems_dir(bpy.types.Operator):
+    """读取schem目录"""
+    bl_idname = "baigave.read_schems_dir"
+    bl_label = "读取schem目录"
+    
+    def execute(self, context):
+        scene = context.scene
+        schem_items = []
+        path = scene.schems_dir  # 使用自定义路径
+
+        try:
+            # 获取路径下的所有文件
+            directories = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f)) and f.endswith('.schem')]
+        except StopIteration:
+            directories = []
+
+        # 添加不存在于列表属性的文件夹名称，并删除不存在于文件夹中的item
+        for filename in directories:
+            schem_items.append((filename, filename, ''))
+
+        bpy.types.Scene.schem_list = bpy.props.EnumProperty(
+            name=".schem文件",
+            description="选择一个.schem文件",
+            items=schem_items,
+        )
+        
+        # 获取当前选中的.schem文件
+        selected_schem = bpy.context.scene.schem_list
+
+        # 读取config.py文件
+        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py") 
+        with open(config_path, 'r') as file:
+            content = file.read()
+
+        # 使用正则表达式找到"schem"参数并替换其值
+        pattern = r'("schem":\s*")([^"]*)(")'
+        new_content = re.sub(pattern, fr'\g<1>{selected_schem}\g<3>', content)
+
+        # 将更改后的内容写回config.py文件
+        with open(config_path, 'w') as file:
+            file.write(new_content)
+
+        return {'FINISHED'}
+    
+
     
 # 添加一个操作类来处理上下移动和删除模组
 class MoveModItem(bpy.types.Operator):
@@ -361,7 +453,7 @@ class DeleteResourcepackOperator(bpy.types.Operator):
             
         return {'CANCELLED'}
 
-classes=[Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,MoveModItem,MoveResourcepackItem,AddModOperator,DeleteModOperator,AddResourcepackOperator,DeleteResourcepackOperator]
+classes=[Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,Read_saves_dir,Read_schems_dir,MoveModItem,MoveResourcepackItem,AddModOperator,DeleteModOperator,AddResourcepackOperator,DeleteResourcepackOperator]
 
 
 def register():
