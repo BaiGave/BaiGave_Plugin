@@ -138,7 +138,7 @@ class ImportPanel(bpy.types.Panel):
         col.operator("baigave.import_world", text="导入世界")
 
         row = layout.row()
-        row.operator("object.add_sway_animation", text="草摇摆")
+        row.operator("object.add_sway_animation", text="植物摇摆")
 
         row = layout.row()
         row.operator("baigave.map_optimize", text="执行优化")
@@ -147,8 +147,6 @@ class ImportPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, "is_weld", text="合并重叠顶点")
         
-        row = layout.row()
-        row.operator("baigave.objtoblocks", text="转换网格体")
 
         row = layout.row()
         row.operator("baigave.image_merger", text="合并图片")
@@ -237,6 +235,31 @@ class CreateLevel(bpy.types.Panel):
         row.prop(scene, "seed", text="种子")
         row = layout.row()
         row.operator("baigave.create_world", text="创建存档")
+        
+
+#创建编辑面板
+class EditPanel(bpy.types.Panel):
+    bl_label ="编辑"
+    bl_idname ="EditPanel"
+    bl_space_type ='VIEW_3D'
+    bl_region_type ='UI'
+    bl_category ='BaiGave'
+    bl_parent_id ='MainPanel'
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene
+        row = layout.row()
+        row.operator("baigave.prepareblocks", text="准备方块")
+        row = layout.row()
+        row.operator("baigave.add_face_attribute", text="给予方块属性值")
+        row = layout.row()
+        row.operator("baigave.objtoblocks", text="转换网格体(楼梯,半砖)")
+        row = layout.row()
+        row.operator("baigave.blockblender", text="转换网格体(方块)")
+
+        
 #创建存档面板
 class MoreLevelSettings(bpy.types.Panel):
     bl_label ="更多设置"
@@ -466,7 +489,7 @@ class ModList(bpy.types.UIList):
             row.label(text=item.name)
             row.label(text=item.description)
 
-classes=[ResourcepackList,ModList,MainPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,CreateLevel,ModPanel,ResourcepacksPanel,MoreLevelSettings]
+classes=[ResourcepackList,ModList,MainPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,ResourcepacksPanel,MoreLevelSettings]
 
 
 def register():
