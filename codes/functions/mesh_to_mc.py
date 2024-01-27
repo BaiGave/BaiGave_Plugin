@@ -546,78 +546,97 @@ class ObjToBlocks(bpy.types.Operator):
         return dict(coord_dict)
 
 
-#将普通网格体转换成mc
 class BlockBlender(bpy.types.Operator):
     bl_idname = "baigave.blockblender"
     bl_label = "BlockBlender"
 
     def execute(self, context):
         nodetree_target = "BlockBlender1.41"
-        # 检查是否有节点修改器，如果没有则添加一个
-        has_nodes_modifier = False
-        for modifier in context.active_object.modifiers:
-            if modifier.type == 'NODES':
-                has_nodes_modifier = True
-                break
-        if not has_nodes_modifier:
-            bpy.ops.object.modifier_add(type='NODES')
-        nodes_modifier=context.active_object.modifiers[0]
-        #导入几何节点
-        try:
-            nodes_modifier.node_group = bpy.data.node_groups[nodetree_target]
-        except:
-            file_path =os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","BlockBlender.blend")
-            inner_path = 'NodeTree'
-            object_name = nodetree_target
-            bpy.ops.wm.append(
-                filepath=os.path.join(file_path, inner_path, object_name),
-                directory=os.path.join(file_path, inner_path),
-                filename=object_name
-            )
-        #设置几何节点        
-        nodes_modifier.node_group = bpy.data.node_groups[nodetree_target]
-        nodes_modifier.show_viewport = True
-        # 存储图像节点和对应的名称
-        image_nodes = {}
         
-        # 遍历物体的所有材质
-        for slot in context.active_object.material_slots:
-            material = slot.material
-            if material:
-                # 检查每个材质的节点
-                if material.use_nodes:
-                    nodes = material.node_tree.nodes
-                    principled_node = None
-                    image_node = None
-                    # 遍历材质节点，寻找原理化 BSDF 和图像节点
-                    for node in nodes:
-                        if node.type == 'BSDF_PRINCIPLED':
-                            principled_node = node
-                        elif node.type == 'TEX_IMAGE':
-                            image_node = node
-                    # 如果找到了原理化 BSDF 和图像节点
-                    if principled_node and image_node:
-                        # 检查是否连接
-                        connected = False
-                        for link in material.node_tree.links:
-                            if link.to_node == principled_node and link.to_socket == principled_node.inputs[0]:
-                                connected = True
-                                break
-                        if connected:
-                            image = image_node.image
-                            if image:
-                                image_nodes[slot.slot_index] = image
-                            
-        # 遍历组输入节点，将图像与之对应
-        for group_input_name, image in image_nodes.items():
-            # 假设 nodes_modifier 是您的几何节点修改器
-            node_tree = nodes_modifier.node_group.nodes
-            # 寻找对应的组输入节点
-            for group_input in node_tree:
-                if  group_input.name == f"图像{group_input_name+1}":
-                    group_input.image = image
+        # 遍历所选的每个物体
+        for obj in context.selected_objects:
+            # 检查是否有节点修改器，如果没有则添加一个
+            has_nodes_modifier = False
+            for modifier in obj.modifiers:
+                if modifier.type == 'NODES':
+                    has_nodes_modifier = True
                     break
+            if not has_nodes_modifier:
+                bpy.ops.object.select_all(action='DESELECT')
+                obj.select_set(True)
+                bpy.context.view_layer.objects.active = obj
+                bpy.ops.object.modifier_add(type='NODES')
+                
+            nodes_modifier = obj.modifiers[0]
+            context_node_tree = obj.name
+            # 尝试导入几何节点
+            try:
+                nodes_modifier.node_group = bpy.data.node_groups[context_node_tree]
+            except:
+                # 如果 context_node_tree 不存在，则检查 nodetree_target 是否存在，不存在则添加，存在则复制
+                if nodetree_target not in bpy.data.node_groups:
+                    file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","BlockBlender.blend")
+                    inner_path = 'NodeTree'
+                    object_name = nodetree_target
+                    bpy.ops.wm.append(
+                        filepath=os.path.join(file_path, inner_path, object_name),
+                        directory=os.path.join(file_path, inner_path),
+                        filename=object_name
+                    )
+                    # 复制 nodetree_target 并重命名为 context_node_tree
+                    node_tree = bpy.data.node_groups[nodetree_target].copy()
+                    node_tree.name = context_node_tree
+                else:
+                    # 复制 nodetree_target 并重命名为 context_node_tree
+                    node_tree = bpy.data.node_groups[nodetree_target].copy()
+                    node_tree.name = context_node_tree
+            # 设置几何节点
+            nodes_modifier.node_group = bpy.data.node_groups[context_node_tree]
+            nodes_modifier.show_viewport = True
+            
+            # 存储图像节点和对应的名称
+            image_nodes = {}
+            
+            # 遍历物体的所有材质
+            for slot in obj.material_slots:
+                material = slot.material
+                if material:
+                    # 检查每个材质的节点
+                    if material.use_nodes:
+                        nodes = material.node_tree.nodes
+                        principled_node = None
+                        image_node = None
+                        # 遍历材质节点，寻找原理化 BSDF 和图像节点
+                        for node in nodes:
+                            if node.type == 'BSDF_PRINCIPLED':
+                                principled_node = node
+                            elif node.type == 'TEX_IMAGE':
+                                image_node = node
+                        # 如果找到了原理化 BSDF 和图像节点
+                        if principled_node and image_node:
+                            # 检查是否连接
+                            connected = False
+                            for link in material.node_tree.links:
+                                if link.to_node == principled_node and link.to_socket == principled_node.inputs[0]:
+                                    connected = True
+                                    break
+                            if connected:
+                                image = image_node.image
+                                if image:
+                                    image_nodes[slot.slot_index] = image
+                                    
+            # 遍历组输入节点，将图像与之对应
+            for group_input_name, image in image_nodes.items():
+                # 假设 nodes_modifier 是您的几何节点修改器
+                node_tree = nodes_modifier.node_group.nodes
+                # 寻找对应的组输入节点
+                for group_input in node_tree:
+                    if  group_input.name == f"图像{group_input_name+1}":
+                        group_input.image = image
+                        break
+        
         return {'FINISHED'}
+
     
 class AddFaceAttributeOperator(bpy.types.Operator):
     bl_idname = "baigave.add_face_attribute"
