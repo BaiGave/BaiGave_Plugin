@@ -221,6 +221,49 @@ class Read_saves_dir(bpy.types.Operator):
             file.write(new_content)
 
         return {'FINISHED'}
+
+class Read_colors_dir(bpy.types.Operator):
+    """读取目录"""
+    bl_idname = "baigave.read_colors_dir"
+    bl_label = "读取目录"
+    
+    def execute(self, context):
+        scene = context.scene
+        color_items = []
+        path = scene.colors_dir  # 使用自定义路径
+
+        try:
+            files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f)) and f.endswith('.py')]
+        except FileNotFoundError:
+            files = []
+
+        # 添加不存在于列表属性的文件夹名称，并删除不存在于文件夹中的item
+        for filename in files:
+            color_items.append((filename, filename, ''))
+
+        bpy.types.Scene.color_list = bpy.props.EnumProperty(
+            name="颜色",
+            description="选择一个颜色字典",
+            items=color_items,
+        )
+        
+        # 获取当前选中的版本
+        selected_version = bpy.context.scene.color_list
+
+        # 读取config.py文件
+        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py") 
+        with open(config_path, 'r') as file:
+            content = file.read()
+
+        # 使用正则表达式找到"color"参数并替换其值
+        pattern = r'("color":\s*")([^"]*)(")'
+        new_content = re.sub(pattern, fr'\g<1>{selected_version}\g<3>', content)
+
+        # 将更改后的内容写回config.py文件
+        with open(config_path, 'w') as file:
+            file.write(new_content)
+
+        return {'FINISHED'}
     
 class Read_schems_dir(bpy.types.Operator):
     """读取schem目录"""
@@ -453,7 +496,7 @@ class DeleteResourcepackOperator(bpy.types.Operator):
             
         return {'CANCELLED'}
 
-classes=[Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,Read_saves_dir,Read_schems_dir,MoveModItem,MoveResourcepackItem,AddModOperator,DeleteModOperator,AddResourcepackOperator,DeleteResourcepackOperator]
+classes=[Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,Read_saves_dir,Read_colors_dir,Read_schems_dir,MoveModItem,MoveResourcepackItem,AddModOperator,DeleteModOperator,AddResourcepackOperator,DeleteResourcepackOperator]
 
 
 def register():

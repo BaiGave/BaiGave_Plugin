@@ -1,6 +1,6 @@
 import os
 import bpy
-import bmesh
+import importlib
 import amulet
 from amulet.api.block import Block
 from amulet_nbt import TAG_Compound, TAG_Int, ByteArrayTag ,IntArrayTag,ShortTag,TAG_String
@@ -81,24 +81,6 @@ class ExportSchem(bpy.types.Operator):
         self.export_schem(context)
         ShowMessageBox("文件导出成功！","白给的插件",link_text="点击这里前往导出文件夹", link_operator=OpenFileManagerOperator)
         return {'FINISHED'}
-    def create_mesh(self,context):
-        # 创建一个新的网格对象
-        mes = bpy.data.meshes.new(name="test")
-        bm = bmesh.new()
-        ids=list(self.vertex_dict.values()) 
-        # 添加顶点和面到新网格
-        for coord, blockid in self.vertex_dict.items():
-            vert = bm.verts.new(coord)
-        bm.to_mesh(mes)
-        bm.free()
-        mes.attributes.new(name='blockid', type="INT", domain="POINT")
-        for i, item in enumerate(mes.attributes['blockid'].data):
-            item.value=ids[i]
-        # 创建一个新的对象，并将新网格链接到场景
-        ob = bpy.data.objects.new("test", mes)
-        bpy.context.collection.objects.link(ob)
-        bpy.context.view_layer.objects.active = ob
-        ob.select_set(True)
 
     def export_schem(self,context):
         # 创建一个 NBT 复合标签来存储数据

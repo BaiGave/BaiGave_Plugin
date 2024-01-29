@@ -36,6 +36,10 @@ class Property(bpy.types.PropertyGroup):
         name="存档路径",
         default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves")
     )
+    bpy.types.Scene.colors_dir = bpy.props.StringProperty(
+        name="颜色路径",
+        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "colors")
+    )
     bpy.types.Scene.schems_dir = bpy.props.StringProperty(
         name=".schem文件路径",
         default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "schem")
@@ -92,6 +96,12 @@ class Property(bpy.types.PropertyGroup):
         description="选择一个.schem文件",
         items=(),
     )
+    bpy.types.Scene.color_list = bpy.props.EnumProperty(
+        name="color文件",
+        description="选择一个颜色字典",
+        items=(),
+    )
+
 
     bpy.types.Scene.schem_filename = bpy.props.StringProperty(name=".schem文件名", default="file")
 
@@ -422,6 +432,18 @@ def unzip_mods_files():
                                 else:
                                     print(f"在 {file_name} 中找不到 'mods' 条目")
                             break
+                        elif member == 'mcmod.info':
+                            with zip_ref.open('mcmod.info') as mcmod_file:
+                                mcmod_content = mcmod_file.read()
+                                mcmod_data = json.loads(mcmod_content)
+                                if mcmod_data:
+                                    mod_info = mcmod_data[0]  
+                                    mod_id = mod_info.get("modid", "")
+                                    icon = mod_info.get("logoFile", "").replace("/", "\\") 
+                                    name = mod_info.get("name", "")  
+                                    description = mod_info.get("description", "")  
+                            break
+
                     try:
                         # 创建新文件夹以modid命名
                         new_folder_path = os.path.join(temp_dir, mod_id)
@@ -787,7 +809,7 @@ def read_blockstate_files(directory,version):
                                         except Exception as e:
                                             pass
     # 将所有字典写入文件
-    with open(os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin","colors.py"), 'w') as models_file:
+    with open(os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin","colors","colors.py"), 'w') as models_file:
         dict_names = [
             "cube_dict",
             "slab_dict",
@@ -818,7 +840,6 @@ def read_blockstate_files(directory,version):
             "stairs_west_bottom_inner_right",
         ]
 
-        # Iterate through the dictionaries and write to the file
         for dict_name in dict_names:
             models_file.write(f"{dict_name} = {{\n")
             write_model_dict(models_file, locals()[dict_name])

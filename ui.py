@@ -15,6 +15,7 @@ class MainPanel(bpy.types.Panel):
         bpy.ops.baigave.read_versions_dir()
         bpy.ops.baigave.read_saves_dir()
         bpy.ops.baigave.read_schems_dir()
+        bpy.ops.baigave.read_colors_dir()
         super().__init__()
 
     def draw(self,context):
@@ -171,24 +172,7 @@ class ExportPanel(bpy.types.Panel):
         layout = self.layout
         scene = context.scene
         
-        row = layout.row()    
-        row.label(text = "导出选中的结构",icon='ERROR')
         box = layout.box()
-        row = box.row()
-        box.prop(scene, "schem_filename", text="文件名")
-        row = box.row()
-        box.operator("baigave.export_schem", text="导出.schem文件")
-        row =layout.row()
-        row.label(text = "导出结构到选中的世界",icon='ERROR')
-        box = layout.box()
-        row = box.row()
-        box.prop(scene, "save_list",text="选择世界")
-        row = box.row()
-        box.prop(scene, "schem_list",text="选择.schem文件")
-        row =layout.row()
-        row.label(text = "导出选中结构到选中的世界",icon='ERROR')
-        box = layout.box()
-        row = box.row()
         box.prop(scene, "save_list",text="选择世界")
         box.label( text="结构位置：("+str(scene.schem_size[0])+"," +str(scene.schem_size[1])+","+ str(scene.schem_size[2])+")")
         box.label(text="长:"+str(scene.schem_size[0])+"宽:" +str(scene.schem_size[1])+"高:"+ str(scene.schem_size[2])+" (blender坐标系)")
@@ -250,14 +234,18 @@ class EditPanel(bpy.types.Panel):
     def draw(self,context):
         layout = self.layout
         scene = context.scene
-        row = layout.row()
-        row.operator("baigave.prepareblocks", text="准备方块")
-        row = layout.row()
-        row.operator("baigave.add_face_attribute", text="给予方块属性值")
-        row = layout.row()
-        row.operator("baigave.objtoblocks", text="转换网格体(楼梯,半砖)")
-        row = layout.row()
-        row.operator("baigave.blockblender", text="转换网格体(方块)")
+
+        box = layout.box()
+        box.prop(scene, "color_list",text="字典")
+        box.operator("baigave.objtoblocks", text="转换网格体(楼梯,半砖)")
+
+        box.operator("baigave.prepareblocks", text="准备方块")
+        box.operator("baigave.read_colors", text="读取")
+        box = layout.row()
+        # row.operator("baigave.add_face_attribute", text="给予方块属性值")
+        # row = layout.row()
+        
+        box.operator("baigave.blockblender", text="转换网格体(方块)")
 
         
 #创建存档面板

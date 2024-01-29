@@ -2,8 +2,6 @@ import os
 import bpy
 from ..block import block
 import numpy as np
-import importlib
-from ... import colors
 import time
 from .tip import ShowMessageBox
 from collections import defaultdict
@@ -300,7 +298,18 @@ class PrepareBlocks(bpy.types.Operator):
     bl_label = "PrepareBlocks"
 
     def execute(self, context):
-        importlib.reload(colors)
+        scene = context.scene
+        path = scene.colors_dir  # 使用自定义路径
+
+        selected_version = bpy.context.scene.color_list
+
+        # 读取选定的文件
+        selected_file_path = os.path.join(path, selected_version)
+        if os.path.exists(selected_file_path) and selected_file_path.endswith('.py'):
+            dict={}            
+            # 导入选择的文件并将其内容加载到字典中
+            with open(selected_file_path, 'r') as file:
+                exec(file.read(), {}, dict)
         
         # 创建一个新的集合
         collection_name="Blocks"
@@ -359,38 +368,38 @@ class PrepareBlocks(bpy.types.Operator):
             bpy.data.node_groups["集合信息"].nodes["节点名称"].inputs[0].default_value = collection
 
         # 处理 cube
-        next_id,id_map =create_node(colors.cube_dict, node_groups, "cube", next_id, id_map, collection)
+        next_id,id_map =create_node(dict['cube_dict'], node_groups, "cube", next_id, id_map, collection)
 
         # 处理 slab
-        next_id,id_map =create_node(colors.slab_dict, node_groups, "slab", next_id, id_map, collection)
+        next_id,id_map =create_node(dict['slab_dict'], node_groups, "slab", next_id, id_map, collection)
 
         # 处理 slab_top
-        next_id,id_map =create_node(colors.slab_top_dict, node_groups, "slab_top", next_id, id_map, collection)
+        next_id,id_map =create_node(dict['slab_top_dict'], node_groups, "slab_top", next_id, id_map, collection)
 
-        next_id,id_map =create_node(colors.stairs_west_top_outer_left, node_groups, "stairs_west_top_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_east_top_outer_left, node_groups, "stairs_east_top_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_south_top_outer_left, node_groups, "stairs_south_top_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_north_top_outer_left, node_groups, "stairs_north_top_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_west_bottom_outer_left, node_groups, "stairs_west_bottom_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_east_bottom_outer_left, node_groups, "stairs_east_bottom_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_south_bottom_outer_left, node_groups, "stairs_south_bottom_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_north_bottom_outer_left, node_groups, "stairs_north_bottom_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_west_top_straight, node_groups, "stairs_west_top_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_east_top_straight, node_groups, "stairs_east_top_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_west_bottom_straight, node_groups, "stairs_west_bottom_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_east_bottom_straight, node_groups, "stairs_east_bottom_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_north_top_straight, node_groups, "stairs_north_top_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_south_top_straight, node_groups, "stairs_south_top_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_north_bottom_straight, node_groups, "stairs_north_bottom_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_south_bottom_straight, node_groups, "stairs_south_bottom_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_south_top_inner_left, node_groups, "stairs_south_top_inner_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_north_top_inner_right, node_groups, "stairs_north_top_inner_right", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_west_top_inner_left, node_groups, "stairs_west_top_inner_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_west_top_inner_right, node_groups, "stairs_west_top_inner_right", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_south_bottom_inner_left, node_groups, "stairs_south_bottom_inner_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_north_bottom_inner_right, node_groups, "stairs_north_bottom_inner_right", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_west_bottom_inner_left, node_groups, "stairs_west_bottom_inner_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(colors.stairs_west_bottom_inner_right, node_groups, "stairs_west_bottom_inner_right", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_west_top_outer_left'], node_groups, "stairs_west_top_outer_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_east_top_outer_left'], node_groups, "stairs_east_top_outer_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_south_top_outer_left'], node_groups, "stairs_south_top_outer_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_north_top_outer_left'], node_groups, "stairs_north_top_outer_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_west_bottom_outer_left'], node_groups, "stairs_west_bottom_outer_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_east_bottom_outer_left'], node_groups, "stairs_east_bottom_outer_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_south_bottom_outer_left'], node_groups, "stairs_south_bottom_outer_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_north_bottom_outer_left'], node_groups, "stairs_north_bottom_outer_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_west_top_straight'], node_groups, "stairs_west_top_straight", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_east_top_straight'], node_groups, "stairs_east_top_straight", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_west_bottom_straight'], node_groups, "stairs_west_bottom_straight", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_east_bottom_straight'], node_groups, "stairs_east_bottom_straight", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_north_top_straight'], node_groups, "stairs_north_top_straight", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_south_top_straight'], node_groups, "stairs_south_top_straight", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_north_bottom_straight'], node_groups, "stairs_north_bottom_straight", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_south_bottom_straight'], node_groups, "stairs_south_bottom_straight", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_south_top_inner_left'], node_groups, "stairs_south_top_inner_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_north_top_inner_right'], node_groups, "stairs_north_top_inner_right", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_west_top_inner_left'], node_groups, "stairs_west_top_inner_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_west_top_inner_right'], node_groups, "stairs_west_top_inner_right", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_south_bottom_inner_left'], node_groups, "stairs_south_bottom_inner_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_north_bottom_inner_right'], node_groups, "stairs_north_bottom_inner_right", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_west_bottom_inner_left'], node_groups, "stairs_west_bottom_inner_left", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_west_bottom_inner_right'], node_groups, "stairs_west_bottom_inner_right", next_id, id_map,  collection)
 
         return {'FINISHED'}
 #将普通网格体转换成mc
@@ -637,7 +646,27 @@ class BlockBlender(bpy.types.Operator):
         
         return {'FINISHED'}
 
+class Read_colors_dir(bpy.types.Operator):
+    """读取目录"""
+    bl_idname = "baigave.read_colors"
+    bl_label = "读取目录"
     
+    def execute(self, context):
+        scene = context.scene
+        path = scene.colors_dir  # 使用自定义路径
+
+        selected_version = bpy.context.scene.color_list
+
+        # 读取选定的文件
+        selected_file_path = os.path.join(path, selected_version)
+        if os.path.exists(selected_file_path) and selected_file_path.endswith('.py'):
+            dict={}            
+            # 导入选择的文件并将其内容加载到字典中
+            with open(selected_file_path, 'r') as file:
+                exec(file.read(), {}, dict)
+            print(dict['cube_dict'])
+        
+        return {'FINISHED'}
 class AddFaceAttributeOperator(bpy.types.Operator):
     bl_idname = "baigave.add_face_attribute"
     bl_label = "添加面属性值"
@@ -649,7 +678,7 @@ class AddFaceAttributeOperator(bpy.types.Operator):
         for i, item in enumerate(obj.data.attributes['blockname'].data):
             item.value=obj.name.split("#", 1)[1]
         return {'FINISHED'}
-classes=[PrepareBlocks,ObjToBlocks,AddFaceAttributeOperator,BlockBlender]
+classes=[PrepareBlocks,ObjToBlocks,AddFaceAttributeOperator,BlockBlender,Read_colors_dir]
 
 
 def register():

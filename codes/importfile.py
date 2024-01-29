@@ -590,6 +590,7 @@ class ImportWorld(bpy.types.Operator):
                     # 获取坐标处的方块       
                     blc =level.get_version_block(x, y, z, "minecraft:overworld",("java", (1, 20, 4)))
                     id =blc[0]
+                    print(id)
                     if isinstance(id,amulet.api.block.Block):
                         id = str(id).replace('"', '')
                         result = remove_brackets(id) 
