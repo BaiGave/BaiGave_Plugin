@@ -69,6 +69,7 @@ def schem(level,chunks,filename="schem",position=(0,0,0)):
                     attr_value = "minecraft:air"
                 # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
                 obj_id = ob.name.split('#')[0]
+
                 # 将字符串类型的ID转换为整数
                 try:
                     obj_id_int = int(obj_id)
