@@ -1,6 +1,6 @@
 config={
-    "resourcepack_list": ["Connections_v1.1"],
-    "mod_list": ["minecraft", "yuushya", "资源包"],
+    "resourcepack_list": [],
+    "mod_list": ["minecraft", "yuushya", "byg"],
     "version":"1.20.1",
     "save":"bouddha",
     "schem":"",

@@ -187,7 +187,7 @@ def get_file_path(modid,type):
             elif type == 't':
                 temp_path=path + "\\textures\\" + id + ".png"
                 if os.path.exists(temp_path):
-                    return temp_path,None
+                    return temp_path
                 else:
                     continue
     

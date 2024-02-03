@@ -78,11 +78,11 @@ def block(textures,elements,position,rot,filename,has_air,collection=None):
     if collection == None:
         collection = bpy.context.collection
     ctm =0
-    for value in textures.values():
-        ctm_value = get_ctm_value(value)
-        if ctm_value != 0 and ctm_value is not None:
-            ctm = ctm_value
-            break
+    # for value in textures.values():
+    #     ctm_value = get_ctm_value(value)
+    #     if ctm_value != 0 and ctm_value is not None:
+    #         ctm = ctm_value
+    #         break
     mesh_name = filename
     mesh = create_mesh(mesh_name.split('#')[0]+"#"+str(ctm)+mesh_name.split('#')[1])
     obj = add_mesh_to_collection(collection, mesh)

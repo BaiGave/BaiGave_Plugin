@@ -4,6 +4,7 @@ from ..block import block
 import numpy as np
 import time
 from .tip import ShowMessageBox
+from ..register import register_blocks,create_or_clear_collection
 from collections import defaultdict
 from amulet_nbt import TAG_Compound, TAG_Int, ByteArrayTag ,IntArrayTag,ShortTag
 from ..blockstates import get_model
@@ -70,28 +71,6 @@ def export_schem(dict,filename="file"):
     with open(file_path, "wb") as f:
         schem.save_to(f)
 
-def create_or_clear_collection(collection_name):
-    # 检查集合是否已存在
-    if collection_name in bpy.data.collections:
-        existing_collection = bpy.data.collections.get(collection_name)
-        try:
-            bpy.context.scene.collection.children.link(existing_collection)
-        except:
-            pass
-        
-        # 删除集合中的所有物体
-        # for obj in existing_collection.objects:
-        #     bpy.data.objects.remove(obj)
-        # 隐藏集合
-        existing_collection.hide_render = True
-        existing_collection.hide_viewport = True
-    else:
-        # 创建一个新的集合
-        new_collection = bpy.data.collections.new(collection_name)
-        bpy.context.scene.collection.children.link(new_collection)
-        # 隐藏集合
-        new_collection.hide_render = True
-        new_collection.hide_viewport = True
 
 def create_mesh_from_dictionary(d,name):
     # 创建一个新的网格对象
@@ -107,43 +86,6 @@ def create_mesh_from_dictionary(d,name):
     collection_name="Blocks"
     create_or_clear_collection(collection_name)
     collection =bpy.data.collections.get(collection_name)
-    id_map = {}  # 用于将字符串id映射到数字的字典
-    next_id = 0  # 初始化 next_id
-    if not collection.objects:
-        filename=str(next_id)+"#"+str("minecraft:air")
-        textures,elements,rotation,_ =get_model("minecraft:air")
-        position = [0, 0, 0]
-        has_air = [True, True, True, True, True, True]
-        bloc=block(textures, elements, position,rotation, filename, has_air,collection)
-        bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
-        for i, item in enumerate(bloc.data.attributes['blockname'].data):
-            item.value="minecraft:air"
-        id_map["minecraft:air"] = next_id
-        next_id =next_id+1
-    elif collection.objects:
-        # 遍历集合中的每个物体
-        for ob in collection.objects:
-            # 假设属性名称为 'blockname'，如果属性存在
-            if 'blockname' in ob.data.attributes:
-                # 获取属性值
-                try:
-                    attr_value = ob.data.attributes['blockname'].data[0].value
-                except:
-                    attr_value = "minecraft:air"
-                # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
-                obj_id = ob.name.split('#')[0]
-                # 将字符串类型的ID转换为整数
-                try:
-                    obj_id_int = int(obj_id)
-                    # 找到最大ID
-                    if obj_id_int > next_id:
-                        next_id = obj_id_int
-                except ValueError:
-                    pass
-                # 将 ID 与属性值关联起来并存储到字典中
-                id_map[attr_value] = int(obj_id)
-        next_id =next_id+1
-    
     nodetree_target = "SchemToBlocks"
 
     #导入几何节点
@@ -161,20 +103,9 @@ def create_mesh_from_dictionary(d,name):
     # 创建顶点和顶点索引
     vertices = []
     ids = []  # 存储顶点id
+    print(list(set(d.values())))
+    id_map=register_blocks(list(set(d.values())))
     for coord, id_str in d.items():
-        # 将字符串id映射到数字，如果id_str已经有对应的数字id，则使用现有的数字id
-        if id_str not in id_map:
-            filename=str(next_id)+"#"+str(id_str)
-            textures,elements,rotation,_ =get_model(id_str)
-            position = [0, 0, 0]
-            has_air = [True, True, True, True, True, True]
-            bloc=block(textures, elements, position,rotation, filename, has_air,collection)
-            bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
-            for i, item in enumerate(bloc.data.attributes['blockname'].data):
-                item.value=id_str
-            id_map[id_str] = next_id
-            next_id += 1
-
         vertices.append((coord[0],-coord[1],coord[2]))
         # 将字符串id转换为相应的数字id
         ids.append(id_map[id_str])
@@ -246,52 +177,40 @@ def create_points_from_dictionary(d,name):
     
 def create_node(color_dict, node_groups, node_type, next_id, id_map, collection):
     node_0 = None
-    for color, color_value in color_dict.items():
-        if color_value not in id_map:
-            # 获取名为 node_type 的节点组
-            node_group = None
-            for group in node_groups:
-                if group.name == node_type:
-                    node_group = group
+    for color in color_dict.keys():
+        # 获取名为 node_type 的节点组
+        node_group = None
+        for group in node_groups:
+            if group.name == node_type:
+                node_group = group
 
-            # 如果找到了 node_type 节点组
-            if node_group:
-                if node_0 is None:
-                    node_0 = node_group.nodes.get("0")
-                node_1 = node_group.nodes.new(type=node_0.bl_idname)
-                node_1.location = (node_0.location.x + 200, node_0.location.y)
-                node_1.node_tree = bpy.data.node_groups.get(node_0.node_tree.name)
-                node_1.name = str(next_id)
-                node_1.inputs[3].default_value = next_id
-                node_1.inputs[4].default_value = color
+        # 如果找到了 node_type 节点组
+        if node_group:
+            if node_0 is None:
+                node_0 = node_group.nodes.get("0")
+            node_1 = node_group.nodes.new(type=node_0.bl_idname)
+            node_1.location = (node_0.location.x + 200, node_0.location.y)
+            node_1.node_tree = bpy.data.node_groups.get(node_0.node_tree.name)
+            node_1.name = str(next_id)
+            node_1.inputs[3].default_value = next_id
+            node_1.inputs[4].default_value = color
 
-                # 连接节点的前三个输入口
-                for i in range(3):
-                    input_socket_0 = node_0.outputs[i]
-                    output_socket_1 = node_1.inputs[i]
-                    node_group.links.new(output_socket_1, input_socket_0)
+            # 连接节点的前三个输入口
+            for i in range(3):
+                input_socket_0 = node_0.outputs[i]
+                output_socket_1 = node_1.inputs[i]
+                node_group.links.new(output_socket_1, input_socket_0)
 
-                if node_type == node_type:
-                    output_socket_1 = node_1.outputs[2]
-                    node_output = node_group.nodes.get("组输出")
-                    node_output.location = (node_1.location.x + 200, node_1.location.y)
-                    input_socket_output = node_output.inputs[0]
-                    node_group.links.new(input_socket_output, output_socket_1)
+            if node_type == node_type:
+                output_socket_1 = node_1.outputs[2]
+                node_output = node_group.nodes.get("组输出")
+                node_output.location = (node_1.location.x + 200, node_1.location.y)
+                input_socket_output = node_output.inputs[0]
+                node_group.links.new(input_socket_output, output_socket_1)
 
-                node_0 = node_1
-
-            # 创建 block
-            filename = f"{next_id}#{color_value}"
-            textures, elements, rotation, _ = get_model(color_value)
-            position = [0, 0, 0]
-            has_air = [True, True, True, True, True, True]
-            bloc = block(textures, elements, position, rotation, filename, has_air, collection)
-            bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
-
-            for i, item in enumerate(bloc.data.attributes['blockname'].data):
-                item.value = color_value
-            id_map[color_value] = next_id
-            next_id += 1
+            node_0 = node_1
+    id_map=register_blocks(color_dict.values())
+    next_id = max(id_map.values()) + 1
     return next_id,id_map
 class PrepareBlocks(bpy.types.Operator):
     bl_idname = "baigave.prepareblocks"
@@ -315,43 +234,8 @@ class PrepareBlocks(bpy.types.Operator):
         collection_name="Blocks"
         create_or_clear_collection(collection_name)
         collection =bpy.data.collections.get(collection_name)
-        id_map = {}  # 用于将字符串id映射到数字的字典
-        next_id = 0  # 初始化 next_id
-        if not collection.objects:
-            filename=str(next_id)+"#"+str("minecraft:air")
-            textures,elements,rotation,_ =get_model("minecraft:air")
-            position = [0, 0, 0]
-            has_air = [True, True, True, True, True, True]
-            bloc=block(textures, elements, position,rotation, filename, has_air,collection)
-            bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
-            for i, item in enumerate(bloc.data.attributes['blockname'].data):
-                item.value="minecraft:air"
-            id_map["minecraft:air"] = next_id
-            next_id += 1
-        elif collection.objects:
-            # 遍历集合中的每个物体
-            for ob in collection.objects:
-                # 假设属性名称为 'blockname'，如果属性存在
-                if 'blockname' in ob.data.attributes:
-                    # 获取属性值
-                    try:
-                        attr_value = ob.data.attributes['blockname'].data[0].value
-                    except:
-                        attr_value = "minecraft:air"
-                    # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
-                    obj_id = ob.name.split('#')[0]
-                    # 将字符串类型的ID转换为整数
-                    try:
-                        obj_id_int = int(obj_id)
-                        # 找到最大ID
-                        if obj_id_int > next_id:
-                            next_id = obj_id_int
-                    except ValueError:
-                        pass
-                    # 将 ID 与属性值关联起来并存储到字典中
-                    id_map[attr_value] = int(obj_id)
-                
-            next_id =next_id+1
+        id_map=register_blocks(None)
+        next_id = max(id_map.values()) + 1
         nodetree_target = "Blockblender"
         # 检查几何节点是否存在
         if nodetree_target not in bpy.data.node_groups.keys():

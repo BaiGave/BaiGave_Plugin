@@ -9,11 +9,8 @@ from .block import block
 from .functions.get_data import get_all_data
 from .classification_files.block_type import exclude
 from .schem import schem_chunk,schem_liquid,schem,remove_brackets
-from .blockstates import get_model
-# from .unuse.generate import generate
-# from .unuse.chunk  import chunk as create_chunk
 from .functions.mesh_to_mc import create_mesh_from_dictionary,create_or_clear_collection
-
+from .register import register_blocks
 import json
 import amulet
 import amulet_nbt
@@ -38,48 +35,6 @@ class ImportBlock(bpy.types.Operator):
         variants = data.get("variants", {})
         # 提取所需内容
         multipart = data.get("multipart", [])
-
-        # 创建一个新的集合
-        collection_name="Blocks"
-        create_or_clear_collection(collection_name)
-        collection =bpy.data.collections.get(collection_name)
-        id_map = {}  # 用于将字符串id映射到数字的字典
-        next_id = 0  # 初始化 next_id
-        if not collection.objects:
-            #next_id=0
-            filename=str(next_id)+"#"+str("minecraft:air")
-            textures,elements,rotation,_ =get_model("minecraft:air")
-            position = [0, 0, 0]
-            has_air = [True, True, True, True, True, True]
-            bloc=block(textures, elements, position,rotation, filename, has_air,collection)
-            bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
-            for i, item in enumerate(bloc.data.attributes['blockname'].data):
-                item.value="minecraft:air"
-            id_map["minecraft:air"] = next_id
-        elif collection.objects:
-            # 遍历集合中的每个物体
-            for ob in collection.objects:
-                # 假设属性名称为 'blockname'，如果属性存在
-                if 'blockname' in ob.data.attributes:
-                    # 获取属性值
-                    try:
-                        attr_value = ob.data.attributes['blockname'].data[0].value
-                    except:
-                        attr_value = "minecraft:air"
-                    # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
-                    obj_id = ob.name.split('#')[0]
-                    # 将字符串类型的ID转换为整数
-                    try:
-                        obj_id_int = int(obj_id)
-                        # 找到最大ID
-                        if obj_id_int > next_id:
-                            next_id = obj_id_int
-                    except ValueError:
-                        pass
-                    # 将 ID 与属性值关联起来并存储到字典中
-                    id_map[attr_value] = int(obj_id)
-                
-        next_id =next_id+1
         
         id_list = []
         if variants != {}:
@@ -115,21 +70,8 @@ class ImportBlock(bpy.types.Operator):
 
                 # 添加到结果列表
                 id_list.append(namespace+filename)
+        register_blocks(id_list)
 
-        # 输出结果
-        for id in id_list:
-            # 将字符串id映射到数字，如果id已经有对应的数字id，则使用现有的数字id
-            if id not in id_map:
-                filename=str(next_id)+"#"+str(id)
-                textures,elements,rotation,_ =get_model(id)
-                position = [0, 0, 0]
-                has_air = [True, True, True, True, True, True]
-                bloc=block(textures, elements, position,rotation, filename, has_air,collection)
-                bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
-                for i, item in enumerate(bloc.data.attributes['blockname'].data):
-                    item.value=id
-                id_map[id] = next_id
-                next_id += 1
 
             
         return {'FINISHED'}
@@ -179,11 +121,11 @@ class ImportNBT(bpy.types.Operator):
                 block_state = ', '.join([f'{k}={v}' for k, v in block_state.items()])
             else:
                 block_state = None
-            
-            if block_state is not None:
-                d[(pos[0],pos[2],pos[1])] = str(block_name)+"["+block_state+"]"
-            else:
-                d[(pos[0],pos[2],pos[1])] = block_name
+            if block_name !="minecraft:air":
+                if block_state is not None:
+                    d[(pos[0],pos[2],pos[1])] = str(block_name)+"["+block_state+"]"
+                else:
+                    d[(pos[0],pos[2],pos[1])] = block_name
         end_time = time.time()
         print("代码块执行时间：", end_time - start_time, "秒")
 
@@ -465,7 +407,6 @@ class SNA_OT_My_Generic_Operator_A38B8(bpy.types.Operator):
     def invoke(self, context, event):
         return self.execute(context)
 
-import random
 
     
 # class SelectArea(bpy.types.Operator):
@@ -528,43 +469,6 @@ class ImportWorld(bpy.types.Operator):
         collection_name="Blocks"
         create_or_clear_collection(collection_name)
         collection =bpy.data.collections.get(collection_name)
-        id_map = {}  # 用于将字符串id映射到数字的字典
-        next_id = 0  # 初始化 next_id
-        if not collection.objects:
-            filename=str(next_id)+"#"+str("minecraft:air")
-            textures,elements,rotation,_ =get_model("minecraft:air")
-            position = [0, 0, 0]
-            has_air = [True, True, True, True, True, True]
-            bloc=block(textures, elements, position,rotation, filename, has_air,collection)
-            bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
-            for i, item in enumerate(bloc.data.attributes['blockname'].data):
-                item.value="minecraft:air"
-            id_map["minecraft:air"] = next_id
-            next_id += 1
-        elif collection.objects:
-            # 遍历集合中的每个物体
-            for ob in collection.objects:
-                # 假设属性名称为 'blockname'，如果属性存在
-                if 'blockname' in ob.data.attributes:
-                    # 获取属性值
-                    try:
-                        attr_value = ob.data.attributes['blockname'].data[0].value
-                    except:
-                        attr_value = "minecraft:air"
-                    # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
-                    obj_id = ob.name.split('#')[0]
-                    # 将字符串类型的ID转换为整数
-                    try:
-                        obj_id_int = int(obj_id)
-                        # 找到最大ID
-                        if obj_id_int > next_id:
-                            next_id = obj_id_int
-                    except ValueError:
-                        pass
-                    # 将 ID 与属性值关联起来并存储到字典中
-                    id_map[attr_value] = int(obj_id)
-                
-            next_id =next_id+1
         nodetree_target = "SchemToBlocks"
 
         #导入几何节点
@@ -590,33 +494,20 @@ class ImportWorld(bpy.types.Operator):
                     # 获取坐标处的方块       
                     blc =level.get_version_block(x, y, z, "minecraft:overworld",("java", (1, 20, 4)))
                     id =blc[0]
-                    print(id)
                     if isinstance(id,amulet.api.block.Block):
                         id = str(id).replace('"', '')
                         result = remove_brackets(id) 
                         if result not in exclude:  
                             # 将字符串id映射到数字，如果id已经有对应的数字id，则使用现有的数字id
-                            if id not in id_map:
-                                filename=str(next_id)+"#"+str(id)
-                                textures,elements,rotation,_ =get_model(id)
-                                position = [0, 0, 0]
-                                has_air = [True, True, True, True, True, True]
-                                bloc=block(textures, elements, position,rotation, filename, has_air,collection)
-                                bloc.data.attributes.new(name='blockname', type="STRING", domain="FACE")
-                                for i, item in enumerate(bloc.data.attributes['blockname'].data):
-                                    item.value=id
-                                id_map[id] = next_id
-                                next_id += 1
-
                             vertices.append((x-min_coords[0],-(z-min_coords[2]),y-min_coords[1]))
                             # 将字符串id转换为相应的数字id
-                            ids.append(id_map[id])
+                            ids.append(id)
 
-            
+        id_map=register_blocks(list(set(ids)))
         # 将顶点和顶点索引添加到网格中
         mesh.from_pydata(vertices, [], [])
         for i, item in enumerate(obj.data.attributes['blockid'].data):
-            item.value=ids[i]
+            item.value=id_map[ids[i]]
         #群系上色
         for i, item in enumerate(obj.data.attributes['biome'].data):
             item.color[:]=(0.149,0.660,0.10,0.00)
