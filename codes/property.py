@@ -393,64 +393,74 @@ def unzip_mods_files():
             # 构造完整的文件路径
             file_path = os.path.join(folder_path, file_name)
 
-            version = None
-            file_name_parts = file_name.replace('.jar', '').split('_')
-            for part in file_name_parts:
-                if all(char.isdigit() or char == '.' for char in part) and part.count('.') <= 2 and all(char.isdigit() or char == '.' for char in ''.join(file_name_parts)):
-                    version = part
-                    break
             # 解压文件
             with zipfile.ZipFile(file_path, 'r') as zip_ref:
                 mod_id = None 
-                if version:
-                    mod_id = "minecraft"
-                    # 创建新文件夹以modid命名
-                    new_folder_path = os.path.join(temp_dir, mod_id,version)
-                else:
-                    for member in zip_ref.namelist():
-                        # 判断是否存在fabric.mod.json，若存在则读取其中的modid
-                        if member == 'fabric.mod.json':
-                            with zip_ref.open(member) as mod_json_file:
-                                mod_json_content = mod_json_file.read()
-                                mod_data = json.loads(mod_json_content,strict=False)
-                                # 读取 "id" 字段的值
-                                mod_id = mod_data.get("id","")
-                                icon = mod_data.get("icon","").replace("/", "\\")
-                                name = mod_data.get("name","")
-                                description = mod_data.get("description","")
-                            break  # 找到fabric.mod.json后终止循环
-                        elif member == 'META-INF/mods.toml':
-                            with zip_ref.open('META-INF/mods.toml') as mods_toml_file:
-                                mods_toml_content = mods_toml_file.read()
-                                mods_toml_data = toml.loads(mods_toml_content.decode('utf-8'))
-                                if "mods" in mods_toml_data:
-                                    for mod_entry in mods_toml_data["mods"]:
-                                        mod_id = mod_entry["modId"]
-                                        icon = mod_entry.get("logoFile", "").replace("/", "\\")  # 添加默认值，防止没有 "logoFile" 字段时报错
-                                        name = mod_entry.get("displayName", "")  # 添加默认值，防止没有 "displayName" 字段时报错
-                                        description = mod_entry.get("description", "")  # 添加默认值，防止没有 "description" 字段时报错
-                                else:
-                                    print(f"在 {file_name} 中找不到 'mods' 条目")
-                            break
-                        elif member == 'mcmod.info':
-                            with zip_ref.open('mcmod.info') as mcmod_file:
-                                mcmod_content = mcmod_file.read()
-                                mcmod_data = json.loads(mcmod_content)
-                                if mcmod_data:
-                                    mod_info = mcmod_data[0]  
-                                    mod_id = mod_info.get("modid", "")
-                                    icon = mod_info.get("logoFile", "").replace("/", "\\") 
-                                    name = mod_info.get("name", "")  
-                                    description = mod_info.get("description", "")  
-                            break
+                for member in zip_ref.namelist():
+                    if member == 'version.json':
+                        with zip_ref.open(member) as mod_json_file:
+                            mod_json_content = mod_json_file.read()
+                            mod_data = json.loads(mod_json_content,strict=False)
+                            # 读取 "id" 字段的值
+                            mod_id = "minecraft"
+                            version = mod_data.get("id","")
+                            icon = None
+                            name = mod_data.get("name","")
+                            description = "我的世界原版"
+                        new_folder_path = os.path.join(temp_dir,mod_id,version)
+                        break  # 找到后终止循环
+                    # 判断是否存在fabric.mod.json，若存在则读取其中的modid
+                    elif member == 'fabric.mod.json':
+                        with zip_ref.open(member) as mod_json_file:
+                            mod_json_content = mod_json_file.read()
+                            mod_data = json.loads(mod_json_content,strict=False)
+                            # 读取 "id" 字段的值
+                            mod_id = mod_data.get("id","")
+                            icon = mod_data.get("icon","").replace("/", "\\")
+                            name = mod_data.get("name","")
+                            description = mod_data.get("description","")
+                        try:
+                            # 创建新文件夹以modid命名
+                            new_folder_path = os.path.join(temp_dir, mod_id)
+                        except:
+                            pass
+                        break  # 找到fabric.mod.json后终止循环
+                    elif member == 'META-INF/mods.toml':
+                        with zip_ref.open('META-INF/mods.toml') as mods_toml_file:
+                            mods_toml_content = mods_toml_file.read()
+                            mods_toml_data = toml.loads(mods_toml_content.decode('utf-8'))
+                            if "mods" in mods_toml_data:
+                                for mod_entry in mods_toml_data["mods"]:
+                                    mod_id = mod_entry["modId"]
+                                    icon = mod_entry.get("logoFile", "").replace("/", "\\")  # 添加默认值，防止没有 "logoFile" 字段时报错
+                                    name = mod_entry.get("displayName", "")  # 添加默认值，防止没有 "displayName" 字段时报错
+                                    description = mod_entry.get("description", "")  # 添加默认值，防止没有 "description" 字段时报错
+                            else:
+                                print(f"在 {file_name} 中找不到 'mods' 条目")
+                        try:
+                            # 创建新文件夹以modid命名
+                            new_folder_path = os.path.join(temp_dir, mod_id)
+                        except:
+                            pass
+                        break
+                    elif member == 'mcmod.info':
+                        with zip_ref.open('mcmod.info') as mcmod_file:
+                            mcmod_content = mcmod_file.read()
+                            mcmod_data = json.loads(mcmod_content)
+                            if mcmod_data:
+                                mod_info = mcmod_data[0]  
+                                mod_id = mod_info.get("modid", "")
+                                icon = mod_info.get("logoFile", "").replace("/", "\\") 
+                                name = mod_info.get("name", "")  
+                                description = mod_info.get("description", "")  
+                        try:
+                            # 创建新文件夹以modid命名
+                            new_folder_path = os.path.join(temp_dir, mod_id)
+                        except:
+                            pass
+                        break
 
-                    try:
-                        # 创建新文件夹以modid命名
-                        new_folder_path = os.path.join(temp_dir, mod_id)
-                    except:
-                        pass
                     
-
                 if mod_id:
                     try:
                         if not os.path.exists(new_folder_path):
@@ -488,9 +498,11 @@ def unzip_mods_files():
                             pass
                     try:
                         if mod_id!="minecraft":
-                            print(file_path)
                             new_name = os.path.join(folder_path, mod_id+".jar")
-                            print(new_name)
+                            zip_ref.close()
+                            os.rename(file_path, new_name)
+                        elif mod_id == "minecraft":
+                            new_name = os.path.join(folder_path, version+".jar")
                             zip_ref.close()
                             os.rename(file_path, new_name)
                     except Exception as e:
@@ -859,7 +871,7 @@ def register():
     bpy.types.Scene.my_properties = bpy.props.PointerProperty(type=Property)
     temp_dir = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")
     importlib.reload(config)
-    threading.Thread(target=read_blockstate_files, args=(temp_dir,config.config["version"])).start()
+    #threading.Thread(target=read_blockstate_files, args=(temp_dir,config.config["version"])).start()
     
 def unregister():
     for cls in classes:
