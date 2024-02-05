@@ -44,22 +44,13 @@ class ExportSchem(bpy.types.Operator):
          # 创建空字典来存储顶点数据
         selected_objects = bpy.context.selected_objects
         self.vertex_dict = {} 
-        collection =bpy.data.collections.get("Blocks")
-        if collection.objects:
-            # 遍历集合中的每个物体
-            for o in collection.objects:
-                # 假设属性名称为 'blockname'，如果属性存在
-                if 'blockname' in o.data.attributes:
-                    # 获取属性值
-                    try:
-                        attr_value = o.data.attributes['blockname'].data[0].value
-                    except:
-                        # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
-                        air_id = int(o.name.split('#')[0])
-                        id =air_id
-                        attr_value = "minecraft:air"
-                    id = int(o.name.split('#')[0])
-                    self.block_id_name_map[id] = attr_value
+
+        filepath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp","Blocks.py")
+        # 从文件中读取字典id_map
+        id_map_file = open(filepath, 'r')
+        self.block_id_name_map = eval(id_map_file.read().strip())  
+        id_map_file.close()
+
         for obj in selected_objects:
             if obj.type == 'MESH':
                 mesh = obj.data
@@ -74,7 +65,7 @@ class ExportSchem(bpy.types.Operator):
 
                     # 获取顶点属性值（blockid）
                     blockid = obj.data.attributes['blockid'].data[vertex.index].value
-                    if blockid == air_id:
+                    if blockid == 0:
                         continue
                     # 将顶点坐标与属性值关联存储到字典中
                     self.vertex_dict[coord] = blockid
@@ -114,10 +105,9 @@ class ExportSchem(bpy.types.Operator):
         Length = max_y - min_y + 1
         Height = max_z - min_z + 1
         block_data = [0] * (Length * Width * Height)
-
-
+        block_id_name_map=list(self.block_id_name_map.keys())
         for position, block in self.vertex_dict.items():
-            block =self.block_id_name_map[block]
+            block =block_id_name_map[block]
             # 如果方块不在 Palette 中，添加它
             if block not in schem['Palette']:
                 schem['Palette'][block] = TAG_Int(palette_index)
@@ -149,31 +139,15 @@ class Calculate_Size(bpy.types.Operator):
     bl_idname = "baigave.calculate_size"
     bl_label = "计算大小"
     vertex_dict = {} 
-    block_id_name_map = {}  # 创建一个字典来存储 ID 和方块名称的映射
-
     def execute(self, context):
          # 创建空字典来存储顶点数据
         selected_objects = bpy.context.selected_objects
         self.vertex_dict = {} 
-        collection =bpy.data.collections.get("Blocks")
 
         min_coords = [float('inf')] * 3  
         max_coords = [float('-inf')] * 3 
-        if collection.objects:
-            # 遍历集合中的每个物体
-            for o in collection.objects:
-                # 假设属性名称为 'blockname'，如果属性存在
-                if 'blockname' in o.data.attributes:
-                    # 获取属性值
-                    try:
-                        attr_value = o.data.attributes['blockname'].data[0].value
-                    except:
-                        # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
-                        air_id = int(o.name.split('#')[0])
-                        id =air_id
-                        attr_value = "minecraft:air"
-                    id = int(o.name.split('#')[0])
-                    self.block_id_name_map[id] = attr_value
+
+
         for obj in selected_objects:
             if obj.type == 'MESH':
                 mesh = obj.data
@@ -187,7 +161,7 @@ class Calculate_Size(bpy.types.Operator):
 
                     # 获取顶点属性值（blockid）
                     blockid = obj.data.attributes['blockid'].data[vertex.index].value
-                    if blockid == air_id:
+                    if blockid == 0:
                         continue
 
                     # 更新最小和最大坐标
@@ -226,23 +200,12 @@ class ExportToSave(bpy.types.Operator):
          # 创建空字典来存储顶点数据
         selected_objects = bpy.context.selected_objects
         self.vertex_dict = {} 
-        collection =bpy.data.collections.get("Blocks")
 
-        if collection.objects:
-            # 遍历集合中的每个物体
-            for o in collection.objects:
-                # 假设属性名称为 'blockname'，如果属性存在
-                if 'blockname' in o.data.attributes:
-                    # 获取属性值
-                    try:
-                        attr_value = o.data.attributes['blockname'].data[0].value
-                    except:
-                        # 获取物体ID（假设ID是以#分隔的字符串的第一个部分）
-                        air_id = int(o.name.split('#')[0])
-                        id =air_id
-                        attr_value = "minecraft:air"
-                    id = int(o.name.split('#')[0])
-                    self.block_id_name_map[id] = attr_value
+        filepath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp","Blocks.py")
+        # 从文件中读取字典id_map
+        id_map_file = open(filepath, 'r')
+        self.block_id_name_map = eval(id_map_file.read().strip())  
+        id_map_file.close()
         for obj in selected_objects:
             if obj.type == 'MESH':
                 mesh = obj.data
@@ -255,7 +218,7 @@ class ExportToSave(bpy.types.Operator):
 
                     # 获取顶点属性值（blockid）
                     blockid = obj.data.attributes['blockid'].data[vertex.index].value
-                    if blockid == air_id:
+                    if blockid == 0:
                         continue
 
                     # 将顶点坐标与属性值关联存储到字典中
@@ -264,9 +227,9 @@ class ExportToSave(bpy.types.Operator):
         # 遍历坐标表
         for coordinates, block_id in self.vertex_dict.items():
             x, y, z = coordinates
-
+            block_id_name_map=list(self.block_id_name_map.keys())
             # 获取方块名称
-            block_name = self.block_id_name_map.get(block_id, 'minecraft:air')
+            block_name = block_id_name_map[block_id]
             if block_name != "minecraft:air":
                 namespace, path = block_name.split(':')
                 # 处理带有方块属性的情况

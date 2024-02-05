@@ -171,7 +171,8 @@ class ExportPanel(bpy.types.Panel):
     def draw(self,context):
         layout = self.layout
         scene = context.scene
-        
+        row = layout.row()
+        row.operator("baigave.export_schem", text="导出结构")
         box = layout.box()
         box.prop(scene, "save_list",text="选择世界")
         box.label( text="结构位置：("+str(scene.schem_size[0])+"," +str(scene.schem_size[1])+","+ str(scene.schem_size[2])+")")

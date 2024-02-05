@@ -109,15 +109,13 @@ class CreateWorld(bpy.types.Operator):
         # 将NBT数据写入文件
         filepath =os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves",World_Name,"level.dat")
         level_dat.save_to(filepath)
-
-        if HeightLimit ==1:
+        if HeightLimit == "1":
             source_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "datapacks", "datapacks.zip")
             destination_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves", World_Name, "datapacks")
-
             # 创建目标文件夹（如果不存在）
             if not os.path.exists(destination_path):
                 os.makedirs(destination_path)
-
+            
             # 复制文件
             shutil.copy(source_path, destination_path)
         ShowMessageBox("世界创建成功！","白给的插件",link_text="点击这里前往导出文件夹", link_operator=OpenFileManagerOperator)
