@@ -91,6 +91,26 @@ class CreateWorld(bpy.types.Operator):
         random_tick_speed = bpy.context.scene.random_tick_speed
         max_command_chain_length =bpy.context.scene.max_command_chain_length
         command_modification_block_limit = bpy.context.scene.command_modification_block_limit
+
+        #玩家能力：
+        flying = bpy.context.scene.flying
+        flySpeed = bpy.context.scene.flySpeed
+        instabuild = bpy.context.scene.instabuild
+        invulnerable = bpy.context.scene.invulnerable
+        mayBuild = bpy.context.scene.mayBuild
+        mayfly = bpy.context.scene.mayfly
+        walkSpeed = bpy.context.scene.walkSpeed
+
+        luck = bpy.context.scene.luck
+        max_health = bpy.context.scene.max_health
+        knockback_resistance = bpy.context.scene.knockback_resistance
+        movement_speed = bpy.context.scene.movement_speed
+        armor = bpy.context.scene.armor
+        armor_toughness = bpy.context.scene.armor_toughness
+        attack_damage = bpy.context.scene.attack_damage
+        attack_speed = bpy.context.scene.attack_speed
+
+
         folderpath =os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves",World_Name)
 
         # 创建存档文件夹
@@ -104,7 +124,9 @@ class CreateWorld(bpy.types.Operator):
     fall_damage, fire_damage, forgive_dead_players, freeze_damage, global_sound_events, keep_inventory, lava_source_conversion, log_admin_commands,
     max_command_chain_length,max_entity_cramming, mob_explosion_drop_decay, mob_griefing, natural_regeneration, players_sleeping_percentage,
     random_tick_speed, reduced_debug_info, send_command_feedback, show_death_messages, snow_accumulation_height, spawn_radius, spectators_generate_chunks,
-    tnt_explosion_drop_decay, universal_anger, water_source_conversion
+    tnt_explosion_drop_decay, universal_anger, water_source_conversion,HeightLimit,flying, flySpeed, instabuild, invulnerable, mayBuild, mayfly, walkSpeed,
+    luck,max_health,knockback_resistance,movement_speed,armor,armor_toughness,attack_damage,attack_speed
+
 )
         # 将NBT数据写入文件
         filepath =os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves",World_Name,"level.dat")

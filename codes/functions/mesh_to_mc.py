@@ -3,7 +3,7 @@ import bpy
 import numpy as np
 import time
 from .tip import ShowMessageBox
-from ..register import register_blocks,create_or_clear_collection
+from ..register import register_blocks,create_or_clear_collection,register_blocks_only_names
 from collections import defaultdict
 from amulet_nbt import TAG_Compound, TAG_Int, ByteArrayTag ,IntArrayTag,ShortTag
 
@@ -169,10 +169,8 @@ def create_points_from_dictionary(d,name):
     mesh.from_pydata(vertices, [], [])
     for i, item in enumerate(obj.data.attributes['blocktype'].data):
         item.value=ids[i]
-    for i, item in enumerate(obj.data.attributes['blocktype'].data):
-        print(item.value)
     
-def create_node(color_dict, node_groups, node_type, next_id, id_map, collection):
+def create_node(color_dict, node_groups, node_type, next_id, id_map):
     node_0 = None
     for color in color_dict.keys():
         # 获取名为 node_type 的节点组
@@ -206,6 +204,7 @@ def create_node(color_dict, node_groups, node_type, next_id, id_map, collection)
                 node_group.links.new(input_socket_output, output_socket_1)
 
             node_0 = node_1
+            next_id +=1
     id_map=register_blocks(color_dict.values())
     next_id = max(id_map.values()) + 1
     return next_id,id_map
@@ -249,38 +248,38 @@ class PrepareBlocks(bpy.types.Operator):
             bpy.data.node_groups["集合信息"].nodes["节点名称"].inputs[0].default_value = collection
 
         # 处理 cube
-        next_id,id_map =create_node(dict['cube_dict'], node_groups, "cube", next_id, id_map, collection)
+        next_id,id_map =create_node(dict['cube_dict'], node_groups, "cube", next_id, id_map)
 
         # 处理 slab
-        next_id,id_map =create_node(dict['slab_dict'], node_groups, "slab", next_id, id_map, collection)
+        next_id,id_map =create_node(dict['slab_dict'], node_groups, "slab", next_id, id_map)
 
         # 处理 slab_top
-        next_id,id_map =create_node(dict['slab_top_dict'], node_groups, "slab_top", next_id, id_map, collection)
+        next_id,id_map =create_node(dict['slab_top_dict'], node_groups, "slab_top", next_id, id_map)
 
-        next_id,id_map =create_node(dict['stairs_west_top_outer_left'], node_groups, "stairs_west_top_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_east_top_outer_left'], node_groups, "stairs_east_top_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_south_top_outer_left'], node_groups, "stairs_south_top_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_north_top_outer_left'], node_groups, "stairs_north_top_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_west_bottom_outer_left'], node_groups, "stairs_west_bottom_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_east_bottom_outer_left'], node_groups, "stairs_east_bottom_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_south_bottom_outer_left'], node_groups, "stairs_south_bottom_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_north_bottom_outer_left'], node_groups, "stairs_north_bottom_outer_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_west_top_straight'], node_groups, "stairs_west_top_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_east_top_straight'], node_groups, "stairs_east_top_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_west_bottom_straight'], node_groups, "stairs_west_bottom_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_east_bottom_straight'], node_groups, "stairs_east_bottom_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_north_top_straight'], node_groups, "stairs_north_top_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_south_top_straight'], node_groups, "stairs_south_top_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_north_bottom_straight'], node_groups, "stairs_north_bottom_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_south_bottom_straight'], node_groups, "stairs_south_bottom_straight", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_south_top_inner_left'], node_groups, "stairs_south_top_inner_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_north_top_inner_right'], node_groups, "stairs_north_top_inner_right", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_west_top_inner_left'], node_groups, "stairs_west_top_inner_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_west_top_inner_right'], node_groups, "stairs_west_top_inner_right", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_south_bottom_inner_left'], node_groups, "stairs_south_bottom_inner_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_north_bottom_inner_right'], node_groups, "stairs_north_bottom_inner_right", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_west_bottom_inner_left'], node_groups, "stairs_west_bottom_inner_left", next_id, id_map,  collection)
-        next_id,id_map =create_node(dict['stairs_west_bottom_inner_right'], node_groups, "stairs_west_bottom_inner_right", next_id, id_map,  collection)
+        next_id,id_map =create_node(dict['stairs_west_top_outer_left'], node_groups, "stairs_west_top_outer_left", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_east_top_outer_left'], node_groups, "stairs_east_top_outer_left", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_south_top_outer_left'], node_groups, "stairs_south_top_outer_left", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_north_top_outer_left'], node_groups, "stairs_north_top_outer_left", next_id, id_map,)
+        next_id,id_map =create_node(dict['stairs_west_bottom_outer_left'], node_groups, "stairs_west_bottom_outer_left", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_east_bottom_outer_left'], node_groups, "stairs_east_bottom_outer_left", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_south_bottom_outer_left'], node_groups, "stairs_south_bottom_outer_left", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_north_bottom_outer_left'], node_groups, "stairs_north_bottom_outer_left", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_west_top_straight'], node_groups, "stairs_west_top_straight", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_east_top_straight'], node_groups, "stairs_east_top_straight", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_west_bottom_straight'], node_groups, "stairs_west_bottom_straight", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_east_bottom_straight'], node_groups, "stairs_east_bottom_straight", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_north_top_straight'], node_groups, "stairs_north_top_straight", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_south_top_straight'], node_groups, "stairs_south_top_straight", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_north_bottom_straight'], node_groups, "stairs_north_bottom_straight", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_south_bottom_straight'], node_groups, "stairs_south_bottom_straight", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_south_top_inner_left'], node_groups, "stairs_south_top_inner_left", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_north_top_inner_right'], node_groups, "stairs_north_top_inner_right", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_west_top_inner_left'], node_groups, "stairs_west_top_inner_left", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_west_top_inner_right'], node_groups, "stairs_west_top_inner_right", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_south_bottom_inner_left'], node_groups, "stairs_south_bottom_inner_left", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_north_bottom_inner_right'], node_groups, "stairs_north_bottom_inner_right", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_west_bottom_inner_left'], node_groups, "stairs_west_bottom_inner_left", next_id, id_map)
+        next_id,id_map =create_node(dict['stairs_west_bottom_inner_right'], node_groups, "stairs_west_bottom_inner_right", next_id, id_map)
 
         return {'FINISHED'}
 #将普通网格体转换成mc
@@ -524,7 +523,8 @@ class BlockBlender(bpy.types.Operator):
                     if  group_input.name == f"图像{group_input_name+1}":
                         group_input.image = image
                         break
-        
+        ids=['minecraft:black_wool', 'minecraft:blue_wool', 'minecraft:brown_wool', 'minecraft:cyan_wool', 'minecraft:gray_wool', 'minecraft:green_wool', 'minecraft:light_blue_wool', 'minecraft:light_gray_wool', 'minecraft:lime_wool', 'minecraft:magenta_wool', 'minecraft:orange_wool', 'minecraft:pink_wool', 'minecraft:purple_wool', 'minecraft:red_wool', 'minecraft:white_wool', 'minecraft:yellow_wool', 'minecraft:cobblestone', 'minecraft:sand', 'minecraft:dirt', 'minecraft:grass_block[snowy=false]', 'minecraft:oak_log[axis=x]', 'minecraft:oak_planks', 'minecraft:oak_leaves', 'minecraft:granite', 'minecraft:gravel', 'minecraft:diorite', 'minecraft:andesite', 'minecraft:stone', 'minecraft:sandstone', 'minecraft:end_stone', 'minecraft:deepslate[axis=x]', 'minecraft:glass']
+        register_blocks_only_names(ids)
         return {'FINISHED'}
 
 class Read_colors_dir(bpy.types.Operator):

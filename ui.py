@@ -264,6 +264,68 @@ class MoreLevelSettings(bpy.types.Panel):
         scene = context.scene
         box = layout.box()
 
+        box.label(text="指定单次命令执行可更改的最大方块数")
+        box.prop(scene, "command_modification_block_limit", text="")
+
+        box.label(text="决定了连锁型命令方块能连锁执行的总数量。	")
+        box.prop(scene, "max_command_chain_length", text="")
+
+        box.label(text="下雪时可在一格方块空间内堆积的雪的最高层数")
+        box.prop(scene, "snow_accumulation_height", text="")
+
+        box.label(text="首次进入服务器的玩家和没有重生点的死亡玩家在重生时与世界重生点坐标的距离")
+        box.prop(scene, "spawn_radius", text="")
+
+        box.label(text="每游戏刻每区段中随机的方块刻发生的频率")
+        box.prop(scene, "random_tick_speed", text="")
+
+        box.label(text="设置跳过夜晚所需的入睡玩家所占百分比。")
+        box.prop(scene, "players_sleeping_percentage", text="")
+#创建存档面板
+class Ability(bpy.types.Panel):
+    bl_label ="玩家能力"
+    bl_idname ="Ability"
+    bl_space_type ='VIEW_3D'
+    bl_region_type ='UI'
+    bl_category ='BaiGave'
+    bl_parent_id ='CreateLevelPanel'
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene
+        box = layout.box()
+        box.prop(scene, "flySpeed", text="飞行速度")
+        box.prop(scene, "walkSpeed", text="行走速度")
+        # box.prop(scene, "flying", text="正在飞行？")
+        # box.prop(scene, "mayfly", text="能飞行？")
+        # box.prop(scene, "mayBuild", text="能建造？")
+        # box.prop(scene, "instabuild", text="表示玩家是否可以瞬间摧毁方块")
+        # box.prop(scene, "invulnerable", text="表示玩家是否能抵消除虚空伤害所有伤害和有害的效果")
+        box.prop(scene, "luck", text="幸运值")
+        box.prop(scene, "max_health", text="最大生命值")
+        box.prop(scene, "knockback_resistance", text="击退抗性")
+        #box.prop(scene, "movement_speed", text="移动加速度")
+        box.prop(scene, "armor", text="盔甲值")
+        box.prop(scene, "armor_toughness", text="盔甲韧性")
+        box.prop(scene, "attack_damage", text="攻击伤害")
+        box.prop(scene, "attack_speed", text="攻击速度")
+
+#创建存档面板
+class GameRules(bpy.types.Panel):
+    bl_label ="游戏规则"
+    bl_idname ="GameRules"
+    bl_space_type ='VIEW_3D'
+    bl_region_type ='UI'
+    bl_category ='BaiGave'
+    bl_parent_id ='MoreLevelSettings'
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene
+        box = layout.box()
+
         box.label(text="是否在聊天框中公告玩家进度的达成")
         box.prop(scene, "announce_advancements", text="")
 
@@ -378,24 +440,6 @@ class MoreLevelSettings(bpy.types.Panel):
         box.label(text="流动的水是否可产生水源")
         box.prop(scene, "water_source_conversion", text="")
 
-        box.label(text="指定单次命令执行可更改的最大方块数")
-        box.prop(scene, "command_modification_block_limit", text="")
-
-        box.label(text="决定了连锁型命令方块能连锁执行的总数量。	")
-        box.prop(scene, "max_command_chain_length", text="")
-
-        box.label(text="下雪时可在一格方块空间内堆积的雪的最高层数")
-        box.prop(scene, "snow_accumulation_height", text="")
-
-        box.label(text="首次进入服务器的玩家和没有重生点的死亡玩家在重生时与世界重生点坐标的距离")
-        box.prop(scene, "spawn_radius", text="")
-
-        box.label(text="每游戏刻每区段中随机的方块刻发生的频率")
-        box.prop(scene, "random_tick_speed", text="")
-
-        box.label(text="设置跳过夜晚所需的入睡玩家所占百分比。")
-        box.prop(scene, "players_sleeping_percentage", text="")
-
        
 # 资源包面板
 class ResourcepacksPanel(bpy.types.Panel):
@@ -478,7 +522,8 @@ class ModList(bpy.types.UIList):
             row.label(text=item.name)
             row.label(text=item.description)
 
-classes=[ResourcepackList,ModList,MainPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,ResourcepacksPanel,MoreLevelSettings]
+classes=[ResourcepackList,ModList,MainPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
+         Ability]
 
 
 def register():

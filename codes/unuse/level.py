@@ -15,7 +15,8 @@ def create_level(World_Name, SpawnX, SpawnY, SpawnZ, hardcore, Difficulty, allow
                 randomTickSpeed="0", reducedDebugInfo="False", sendCommandFeedback="True",
                 showDeathMessages="True", snowAccumulationHeight="1", spawnRadius="10",
                 spectatorsGenerateChunks="True", tntExplosionDropDecay="True", universalAnger="True",
-                waterSourceConversion="True"):    
+                waterSourceConversion="True",HeightLimit="0",flying=0, flySpeed=0.05, instabuild=1, invulnerable=1, mayBuild=1, mayfly=1, walkSpeed=0.1,
+                luck=0,Max_health=0,Knockback_resistance=0,Movement_speed=0,Armor=0,Armor_toughness=0,Attack_damage=0,Attack_speed=0):    
     data = TAG_Compound()
     data['version'] = TAG_Int(19133)
     data['GameType'] = TAG_Int(GameType)
@@ -39,6 +40,58 @@ def create_level(World_Name, SpawnX, SpawnY, SpawnZ, hardcore, Difficulty, allow
     data['BorderWarningTime'] = TAG_Double(15)
     data['BorderDamagePerBlock'] = TAG_Double(0.200000002980232)
     data['BorderSafeZone'] = TAG_Double(5)
+
+
+    # 创建一个名为"datapacks"的标记，并添加玩家数据到其中
+    DataPacks = TAG_Compound()
+    Disabled =TAG_List()
+    
+    if HeightLimit == "1":
+        Enabled = TAG_List([TAG_String("vanilla"), TAG_String("file/datapacks.zip")])
+    else:
+        Enabled = TAG_List([TAG_String("vanilla")])
+
+
+    DataPacks['Disabled'] = Disabled
+    DataPacks['Enabled'] = Enabled
+
+    Luck = TAG_Compound()
+    Luck['Base'] = TAG_Double(luck)
+    Luck['Name'] = TAG_String("minecraft:generic.luck")
+
+    max_health = TAG_Compound()
+    max_health['Base'] = TAG_Double(Max_health)
+    max_health['Name'] = TAG_String("minecraft:generic.max_health")
+
+    knockback_resistance = TAG_Compound()
+    knockback_resistance['Base'] = TAG_Double(Knockback_resistance)
+    knockback_resistance['Name'] = TAG_String("minecraft:generic.knockback_resistance")
+
+    movement_speed = TAG_Compound()
+    movement_speed['Base'] = TAG_Double(Movement_speed)
+    movement_speed['Name'] = TAG_String("minecraft:generic.movement_speed")
+
+    armor = TAG_Compound()
+    armor['Base'] = TAG_Double(Armor)
+    armor['Name'] = TAG_String("minecraft:generic.armor")
+
+    armor_toughness = TAG_Compound()
+    armor_toughness['Base'] = TAG_Double(Armor_toughness)
+    armor_toughness['Name'] = TAG_String("minecraft:generic.armor_toughness")
+
+    attack_damage = TAG_Compound()
+    attack_damage['Base'] = TAG_Double(Attack_damage)
+    attack_damage['Name'] = TAG_String("minecraft:generic.attack_damage")
+
+    attack_speed = TAG_Compound()
+    attack_speed['Base'] = TAG_Double(Attack_speed)
+    attack_speed['Name'] = TAG_String("minecraft:generic.attack_speed")
+
+
+    # 创建Attributes列表并将属性对象添加到列表中
+    Attributes = TAG_List([max_health, knockback_resistance, movement_speed, armor, armor_toughness, attack_damage, attack_speed, Luck])
+
+
 
     # 创建一个名为"GameRules"的标记，并添加规则数据到其中
     GameRules = TAG_Compound()
@@ -88,16 +141,15 @@ def create_level(World_Name, SpawnX, SpawnY, SpawnZ, hardcore, Difficulty, allow
     GameRules['universalAnger'] = TAG_String(universalAnger)
     GameRules['waterSourceConversion'] = TAG_String(waterSourceConversion)
 
-    # 创建一个名为"Version"的标记
+    # 创建一个名为"abilities"的标记
     abilities = TAG_Compound()
-    abilities['flying'] = TAG_Byte(0)
-    abilities['flySpeed'] = TAG_Float(1.1)
-    abilities['instabuild'] = TAG_Byte(1)
-    abilities['invulnerable'] = TAG_Byte(1)
-    abilities['mayBuild'] = TAG_Byte(1)
-    abilities['mayfly'] = TAG_Byte(1)
-    abilities['walkSpeed'] = TAG_Float(1.1)
-
+    abilities['flying'] = TAG_Byte(flying)
+    abilities['flySpeed'] = TAG_Float(flySpeed)
+    abilities['instabuild'] = TAG_Byte(instabuild)
+    abilities['invulnerable'] = TAG_Byte(invulnerable)
+    abilities['mayBuild'] = TAG_Byte(mayBuild)
+    abilities['mayfly'] = TAG_Byte(mayfly)
+    abilities['walkSpeed'] = TAG_Float(walkSpeed)
     # 创建一个名为"Player"的标记，并添加玩家数据到其中
     player = TAG_Compound()
     player['Health'] = TAG_Short(20)
@@ -112,8 +164,11 @@ def create_level(World_Name, SpawnX, SpawnY, SpawnZ, hardcore, Difficulty, allow
     player['Score'] = TAG_Int(0)
     player['Inventory'] = TAG_List()
     player['abilities'] = abilities
+    player['Attributes']=Attributes
     player['Pos'] = TAG_List([TAG_Double(SpawnX), TAG_Double(SpawnY), TAG_Double(SpawnZ)])
 
+
+    
     # 创建一个名为"Version"的标记
     Version = TAG_Compound()
     Version['Id'] = TAG_Int(3105)
@@ -136,7 +191,6 @@ def create_level(World_Name, SpawnX, SpawnY, SpawnZ, hardcore, Difficulty, allow
     overworld_generator = TAG_Compound()
     
     overworld_generator['type'] = TAG_String(OverworldGenerator_Type)
-    print(OverworldGenerator_Type)
     if OverworldGenerator_Type =="noise":
         overworld_generator['settings'] = TAG_String("minecraft:large_biomes")
         overworld_generator['biome_source'] = overworld_biome_source
@@ -200,6 +254,7 @@ def create_level(World_Name, SpawnX, SpawnY, SpawnZ, hardcore, Difficulty, allow
     data['Version'] = Version
     data['WorldGenSettings'] = WorldGenSettings
     data['GameRules'] = GameRules
+    data['DataPacks'] = DataPacks
     level_dat = TAG_Compound({'Data': data})
 
     return level_dat

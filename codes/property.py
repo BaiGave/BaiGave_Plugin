@@ -379,6 +379,24 @@ class Property(bpy.types.PropertyGroup):
     bpy.types.Scene.max_command_chain_length = bpy.props.IntProperty(name="Max Command Chain Length",default=65536)
     bpy.types.Scene.day_time = bpy.props.IntProperty(name="Day Time", default=16000)
     bpy.types.Scene.seed = bpy.props.IntProperty(name="Seed", default=random.randint(0, 10000))
+
+    bpy.types.Scene.flySpeed = bpy.props.FloatProperty(name="FlySpeed", default=0.05)
+    bpy.types.Scene.flying = bpy.props.BoolProperty(name="Flying", default=False)
+    bpy.types.Scene.instabuild = bpy.props.BoolProperty(name="instabuild", default=True)
+    bpy.types.Scene.invulnerable = bpy.props.BoolProperty(name="invulnerable", default=True)
+    bpy.types.Scene.mayBuild = bpy.props.BoolProperty(name="mayBuild", default=True)
+    bpy.types.Scene.mayfly = bpy.props.BoolProperty(name="mayfly", default=True)
+
+    bpy.types.Scene.walkSpeed = bpy.props.FloatProperty(name="walkSpeed", default=0.1)
+
+    bpy.types.Scene.luck = bpy.props.FloatProperty(name="幸运值", default=0, min=-1024, max=1024)
+    bpy.types.Scene.max_health = bpy.props.FloatProperty(name="最大生命值", default=20, min=1, max=1024)
+    bpy.types.Scene.knockback_resistance = bpy.props.FloatProperty(name="击退抗性", default=0, min=0, max=1)
+    bpy.types.Scene.movement_speed = bpy.props.FloatProperty(name="移动加速度", default=0, min=0, max=1024)
+    bpy.types.Scene.armor = bpy.props.FloatProperty(name="盔甲值", default=0, min=0, max=30)
+    bpy.types.Scene.armor_toughness = bpy.props.FloatProperty(name="盔甲韧性", default=0, min=0, max=20)
+    bpy.types.Scene.attack_damage = bpy.props.FloatProperty(name="攻击伤害", default=0, min=0, max=2048)
+    bpy.types.Scene.attack_speed = bpy.props.FloatProperty(name="攻击速度", default=0, min=0, max=1024)
     
 def unzip_mods_files():
     # 指定的文件夹路径
