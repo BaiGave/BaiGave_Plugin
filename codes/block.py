@@ -1,5 +1,6 @@
 import bpy
 import os
+import math
 import bmesh
 import importlib
 from .. import config
@@ -38,8 +39,6 @@ def search_ctm_properties(folder_path,id):
                         return path, ctm
 
 
-                       
-
 
 def get_ctm_value(modid):
     importlib.reload(config)
@@ -74,17 +73,17 @@ def get_ctm_value(modid):
 
 
             
-def block(textures,elements,position,rot,filename,has_air,collection=None):
+def block(textures,elements,position,rot,filename,has_air,collection=None,uvlock=False):
     if collection == None:
         collection = bpy.context.collection
-    ctm =0
+    #ctm =0
     # for value in textures.values():
     #     ctm_value = get_ctm_value(value)
     #     if ctm_value != 0 and ctm_value is not None:
     #         ctm = ctm_value
     #         break
     mesh_name = filename
-    mesh = create_mesh(mesh_name.split('#')[0]+"#"+str(ctm)+mesh_name.split('#')[1])
+    mesh = create_mesh(mesh_name)
     obj = add_mesh_to_collection(collection, mesh)
     vertices = []
     faces = []
@@ -94,7 +93,7 @@ def block(textures,elements,position,rot,filename,has_air,collection=None):
     uv_rotation_list = []
     vertices_dict ={}
     
-    vertices,faces,direction,texture_list,uv_list,uv_rotation_list = extract_vertices_from_elements(textures, elements, has_air,None,rot, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
+    vertices,faces,direction,texture_list,uv_list,uv_rotation_list = extract_vertices_from_elements(textures, elements, has_air,None,[0,0,0], vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
     
     bm = bmesh.new()
     for v in vertices:
@@ -143,14 +142,117 @@ def block(textures,elements,position,rot,filename,has_air,collection=None):
 
     # 设置3D游标位置
     bpy.context.scene.cursor.location = (0, 0, 0)
-    
+
     # 设置物体的原点中心位置为3D游标位置
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
     bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
     obj.location = position
+    if not rot==[0,0,0]:
+        #这不是最优解
+        if "button" in filename and "face=wall" in filename:
+            if rot[2]==90:
+                rot[2]=270
+            elif rot[2]==270:
+                rot[2]=90
+            elif rot[2]==0:
+                rot[2]=180
+            elif rot[2]==180:
+                rot[2]=0
+        # 设置 obj 的欧拉旋转角度为转换后的弧度
+        obj.rotation_euler = [math.radians(rot[0]), math.radians(rot[1]), math.radians(rot[2])]
+        
+        # 应用旋转
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+        if rot[0] ==90 and rot[1] ==0 and rot[2] ==0:
+            bpy.context.scene.cursor.location = (0, -1, 0)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            obj.location = position
+            if uvlock ==True:
+                bpy.ops.baigave.map_optimize()
+            obj.select_set(False)
+            return obj
+        elif rot[0] ==90 and rot[1] ==0 and rot[2] ==180:
+            bpy.context.scene.cursor.location = (-1, 0, 0)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            obj.location = position
+            if uvlock ==True:
+                bpy.ops.baigave.map_optimize()
+            obj.select_set(False)
+            return obj
+        elif rot[0] ==90 and rot[1] ==0 and rot[2] ==270:
+            bpy.context.scene.cursor.location = (-1, -1, 0)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            obj.location = position
+            if uvlock ==True:
+                bpy.ops.baigave.map_optimize()            
+            obj.select_set(False)
+            return obj
+        elif rot[0] ==0 and rot[1] ==0 and rot[2] ==270:
+            bpy.context.scene.cursor.location = (0, -1, 0)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            obj.location = position
+            if uvlock ==True:
+                bpy.ops.baigave.map_optimize()      
+            obj.select_set(False)
+            return obj
+        elif rot[0] ==180 and rot[1] ==0 and rot[2] ==0:
+            bpy.context.scene.cursor.location = (0, -1, -1)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            obj.location = position
+            if uvlock ==True:
+                bpy.ops.baigave.map_optimize()      
+            obj.select_set(False)
+            return obj
+        elif rot[0] ==0 and rot[1] ==0 and rot[2] ==180:
+            bpy.context.scene.cursor.location = (-1, -1, 0)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            obj.location = position
+            if uvlock ==True:
+                bpy.ops.baigave.map_optimize()      
+            obj.select_set(False)
+            return obj
+        elif rot[0] ==180 and rot[1] ==0 and rot[2] ==270:
+            bpy.context.scene.cursor.location = (-1, -1, -1)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            obj.location = position
+            if uvlock ==True:
+                bpy.ops.baigave.map_optimize()      
+            obj.select_set(False)
+            return obj
+        elif rot[0] ==180 and rot[1] ==0 and rot[2] ==90:
+            bpy.context.scene.cursor.location = (0, 0, -1)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            obj.location = position
+            if uvlock ==True:
+                bpy.ops.baigave.map_optimize()      
+            obj.select_set(False)
+            return obj
+        elif rot[0] ==0 and rot[1] ==0 and rot[2] ==90:
+            bpy.context.scene.cursor.location = (-1, 0, 0)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            obj.location = position
+            if uvlock ==True:
+                bpy.ops.baigave.map_optimize()      
+            obj.select_set(False)
+            return obj
+        elif rot[0] ==180 and rot[1] ==0 and rot[2] ==180:
+            bpy.context.scene.cursor.location = (-1, 0, -1)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            obj.location = position
+            if uvlock ==True:
+                bpy.ops.baigave.map_optimize()      
+            obj.select_set(False)
+            return obj
+        elif rot[0] ==270 and rot[1] ==0 and rot[2] ==180:
+            bpy.context.scene.cursor.location = (-1, -1, -1)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            obj.location = position
+            if uvlock ==True:
+                bpy.ops.baigave.map_optimize()      
+            obj.select_set(False)
+            return obj
     obj.select_set(False)
-
     return obj
 
 

@@ -30,6 +30,8 @@ def blockstates(coord,chunks, level, vertices, faces, direction, texture_list, u
                 # 如果 parent 是 "block/cube"，将 has_air 设为 False
                 if parent == "block/cube":
                     has_air[i] = False
+                if parent == "minecraft:block/cube_column_horizontal":
+                    has_air[i] = False
                 if parent =="yuushya:block/template_column":
                     has_air[i] = False
         except:

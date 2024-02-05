@@ -11,23 +11,19 @@ def create_or_clear_collection(collection_name):
             bpy.context.scene.collection.children.link(existing_collection)
         except:
             pass
-        
-        # 隐藏集合
-        existing_collection.hide_render = True
-        existing_collection.hide_viewport = True
+
     else:
         # 创建一个新的集合
         new_collection = bpy.data.collections.new(collection_name)
         bpy.context.scene.collection.children.link(new_collection)
-        # 隐藏集合
-        new_collection.hide_render = True
-        new_collection.hide_viewport = True
-
+        
 def register_blocks(ids):
+    
     collection_name = "Blocks"
     create_or_clear_collection(collection_name)
     collection = bpy.data.collections.get(collection_name)
-    
+    collection.hide_render = False
+    collection.hide_viewport = False
     filepath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp","Blocks.py")
     
     # 从文件中读取字典id_map
@@ -50,10 +46,10 @@ def register_blocks(ids):
         id_map_file.write(str(id_map))  # 将字典转换为字符串并写入文件
         id_map_file.close()
         filename=str(next_id)+"#"+str("minecraft:air")
-        textures,elements,rotation,_ =get_model("minecraft:air")
+        textures,elements,rotation,uvlock =get_model("minecraft:air")
         position = [0, 0, 0]
         has_air = [True, True, True, True, True, True]
-        bloc=block(textures, elements, position,rotation, filename, has_air,collection)
+        bloc=block(textures, elements, position,rotation, filename, has_air,collection,uvlock)
         id_map["minecraft:air"] = next_id
         next_id =1
     if ids != None and ids!=[]:
@@ -61,12 +57,13 @@ def register_blocks(ids):
             if id not in id_map:
                 filename=str(next_id)+"#"+str(id)
                 # 获取模型数据
-                textures, elements, rotation, _ = get_model(id)
+                textures, elements, rotation, uvlock = get_model(id)
                 position = [0, 0, 0]
                 has_air = [True, True, True, True, True, True]
-                # 创建block对象
-                bloc = block(textures, elements, position, rotation, filename, has_air, collection)
 
+                # 创建block对象
+                bloc = block(textures, elements, position, rotation, filename, has_air, collection,uvlock)
+                
                 id_map[id] = next_id
                 next_id += 1  # 修改这里，确保每次迭代都递增next_id
 
@@ -77,4 +74,7 @@ def register_blocks(ids):
         id_map_file.write(f"    '{key}': {value},\n")
     id_map_file.write("}\n")  # 结束写入字典
     id_map_file.close()
+
+    collection.hide_render = True
+    collection.hide_viewport = True
     return id_map

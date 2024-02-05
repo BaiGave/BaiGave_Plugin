@@ -6,8 +6,6 @@ import amulet
 from .classification_files.block_type import liquid,exclude,sea_plants
 import numpy as np
 import os
-from .block import block
-from .blockstates import get_model
 from .register import create_or_clear_collection,register_blocks
 
 #用于删除[]的部分 
@@ -83,6 +81,7 @@ def schem(level,chunks,filename="schem",position=(0,0,0)):
     id_map=register_blocks(list(set(ids)))
     # 将顶点和顶点索引添加到网格中
     mesh.from_pydata(vertices, [], [])
+    #给予顶点id
     for i, item in enumerate(obj.data.attributes['blockid'].data):
         item.value=id_map[ids[i]]
     #群系上色

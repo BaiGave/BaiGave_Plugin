@@ -1,13 +1,11 @@
 import os
 import bpy
-from ..block import block
 import numpy as np
 import time
 from .tip import ShowMessageBox
 from ..register import register_blocks,create_or_clear_collection
 from collections import defaultdict
 from amulet_nbt import TAG_Compound, TAG_Int, ByteArrayTag ,IntArrayTag,ShortTag
-from ..blockstates import get_model
 
 # 全局缓存来存储计算结果
 distance_cache = {}
@@ -103,7 +101,6 @@ def create_mesh_from_dictionary(d,name):
     # 创建顶点和顶点索引
     vertices = []
     ids = []  # 存储顶点id
-    print(list(set(d.values())))
     id_map=register_blocks(list(set(d.values())))
     for coord, id_str in d.items():
         vertices.append((coord[0],-coord[1],coord[2]))
