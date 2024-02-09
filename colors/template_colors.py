@@ -1,5 +1,5 @@
 cube_dict = {
-   (0.53, 0.53, 0.54, 1.0): "minecraft:andesite",
+
 }
 slab_dict = {
 
