@@ -235,18 +235,24 @@ class EditPanel(bpy.types.Panel):
     def draw(self,context):
         layout = self.layout
         scene = context.scene
-
-        box = layout.box()
-        box.prop(scene, "color_list",text="字典")
-        box.operator("baigave.objtoblocks", text="转换网格体(楼梯,半砖)")
-
-        box.operator("baigave.prepareblocks", text="准备方块")
-        box.operator("baigave.read_colors", text="读取")
-        box = layout.row()
-        # row.operator("baigave.add_face_attribute", text="给予方块属性值")
-        # row = layout.row()
+        my_properties = scene.my_properties 
         
-        box.operator("baigave.blockblender", text="转换网格体(方块)")
+        row = layout.row()
+        row.prop(scene, "color_list",text="对照表")
+        row = layout.row()
+        row.label(text="生成方块颜色对照表：")
+        row = layout.row()
+        
+        row.template_list("ColorToBlockList", "", my_properties, "color_to_block_list", my_properties, "color_to_block_list_index")
+        col = row.column()
+        col.operator("baigave.add_color_to_block_operator",text="", icon='ADD')
+        col.operator("baigave.delete_color_to_block_operator",text="", icon='REMOVE')
+        row = layout.row()
+        row.operator("baigave.make_color_dict", text="制作颜色-方块字典")
+        row = layout.row()
+        row.operator("baigave.objtoblocks", text="生成点云(转楼梯/台阶方块所需)")
+        row = layout.row()
+        row.operator("baigave.blockblender", text="转换网格体(方块)")
 
         
 #创建存档面板
@@ -513,6 +519,12 @@ class ResourcepackList(bpy.types.UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             layout.label(text=item.name)
 
+# 定义 UIList 类 ColorToBlockList
+class ColorToBlockList(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            layout.label(text=item.name)
+
 # 定义 UIList 类 ModList
 class ModList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
@@ -522,7 +534,7 @@ class ModList(bpy.types.UIList):
             row.label(text=item.name)
             row.label(text=item.description)
 
-classes=[ResourcepackList,ModList,MainPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
+classes=[ResourcepackList,ColorToBlockList,ModList,MainPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
          Ability]
 
 
