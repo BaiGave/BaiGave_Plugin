@@ -1,6 +1,5 @@
 import os
 import bpy
-import importlib
 import amulet
 from amulet.api.block import Block
 from amulet_nbt import TAG_Compound, TAG_Int, ByteArrayTag ,IntArrayTag,ShortTag,TAG_String
@@ -45,11 +44,13 @@ class ExportSchem(bpy.types.Operator):
         selected_objects = bpy.context.selected_objects
         self.vertex_dict = {} 
 
-        filepath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp","Blocks.py")
-        # 从文件中读取字典id_map
-        id_map_file = open(filepath, 'r')
-        self.block_id_name_map = eval(id_map_file.read().strip())  
-        id_map_file.close()
+        # 尝试从 .blend 文件中获取文本数据
+        text_data = bpy.data.texts.get("Blocks.py")
+        if not text_data:  # 如果文本数据不存在，则创建一个新的文本数据对象
+            ShowMessageBox("未注册方块，无法导出。","白给的插件")
+
+        # 从文本数据中读取字典 id_map
+        self.block_id_name_map = eval(text_data.as_string())
 
         for obj in selected_objects:
             if obj.type == 'MESH':
@@ -201,11 +202,13 @@ class ExportToSave(bpy.types.Operator):
         selected_objects = bpy.context.selected_objects
         self.vertex_dict = {} 
 
-        filepath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp","Blocks.py")
-        # 从文件中读取字典id_map
-        id_map_file = open(filepath, 'r')
-        self.block_id_name_map = eval(id_map_file.read().strip())  
-        id_map_file.close()
+        # 尝试从 .blend 文件中获取文本数据
+        text_data = bpy.data.texts.get("Blocks.py")
+        if not text_data:  # 如果文本数据不存在，则创建一个新的文本数据对象
+            ShowMessageBox("未注册方块，无法导出。","白给的插件")
+
+        # 从文本数据中读取字典 id_map
+        self.block_id_name_map = eval(text_data.as_string())
         for obj in selected_objects:
             if obj.type == 'MESH':
                 mesh = obj.data

@@ -1,9 +1,8 @@
 import os
 import bpy
 import numpy as np
-import time
 from .tip import ShowMessageBox
-from ..register import register_blocks,create_or_clear_collection,register_blocks_only_names
+from ..register import register_blocks,create_or_clear_collection
 from collections import defaultdict
 from amulet_nbt import TAG_Compound, TAG_Int, ByteArrayTag ,IntArrayTag,ShortTag
 
@@ -169,138 +168,87 @@ def create_points_from_dictionary(d,name):
     mesh.from_pydata(vertices, [], [])
     for i, item in enumerate(obj.data.attributes['blocktype'].data):
         item.value=ids[i]
+    return obj
     
-def create_node(color_dict, node_groups, node_type, next_id, id_map):
+def create_node(color_dict, node_groups, node_type, next_id, id_map,group_name="",blocktype=0):
     node_0 = None
-    for color in color_dict.keys():
-        # 获取名为 node_type 的节点组
-        node_group = None
+
+    if id_map ==register_blocks(color_dict.values()):
         for group in node_groups:
-            if group.name == node_type:
-                node_group = group
+            if group.name == group_name:
+                node_collection = group.nodes.get("方块集合")
+                try:
+                    node_collection.inputs[0].default_value = bpy.data.collections["Blocks"]
+                except:
+                    register_blocks(None)
+        return next_id,id_map
+    else:
+        first_id=next_id
+        for color in color_dict.keys():
+            # 获取名为 node_type 的节点组
+            node_group = None
+            for group in node_groups:
+                if group.name == node_type:
+                    node_group = group
 
-        # 如果找到了 node_type 节点组
-        if node_group:
-            if node_0 is None:
-                node_0 = node_group.nodes.get("0")
-            node_1 = node_group.nodes.new(type=node_0.bl_idname)
-            node_1.location = (node_0.location.x + 200, node_0.location.y)
-            node_1.node_tree = bpy.data.node_groups.get(node_0.node_tree.name)
-            node_1.name = str(next_id)
-            node_1.inputs[3].default_value = next_id
-            node_1.inputs[4].default_value = color
+            # 如果找到了 node_type 节点组
+            if node_group:
+                if node_0 is None:
+                    node_0 = node_group.nodes.get("0")
+                node_1 = node_group.nodes.new(type=node_0.bl_idname)
+                node_1.location = (node_0.location.x + 200, node_0.location.y)
+                node_1.node_tree = bpy.data.node_groups.get(node_0.node_tree.name)
+                node_1.name = str(next_id)
+                node_1.inputs[0].default_value = next_id
+                node_1.inputs[1].default_value = color
+                node_1.inputs[3].default_value = blocktype
 
-            # 连接节点的前三个输入口
-            for i in range(3):
-                input_socket_0 = node_0.outputs[i]
-                output_socket_1 = node_1.inputs[i]
+                input_socket_0 = node_0.outputs[0]
+                output_socket_1 = node_1.inputs[2]
                 node_group.links.new(output_socket_1, input_socket_0)
 
-            if node_type == node_type:
-                output_socket_1 = node_1.outputs[2]
-                node_output = node_group.nodes.get("组输出")
-                node_output.location = (node_1.location.x + 200, node_1.location.y)
-                input_socket_output = node_output.inputs[0]
-                node_group.links.new(input_socket_output, output_socket_1)
-
-            node_0 = node_1
-            next_id +=1
-    id_map=register_blocks(color_dict.values())
+                
+                node_0 = node_1
+                next_id +=1
+        id_map=register_blocks(color_dict.values())
     next_id = max(id_map.values()) + 1
-    return next_id,id_map
-class PrepareBlocks(bpy.types.Operator):
-    bl_idname = "baigave.prepareblocks"
-    bl_label = "PrepareBlocks"
+    if node_group:
+        output_socket_1 = node_1.outputs[0]
+        node_output = node_group.nodes.get("组输出")
+        node_output.location = (node_1.location.x + 200, node_1.location.y)
+        input_socket_output = node_output.inputs[0]
+        node_group.links.new(input_socket_output, output_socket_1)
 
-    def execute(self, context):
-        scene = context.scene
-        path = scene.colors_dir  # 使用自定义路径
-
-        selected_version = bpy.context.scene.color_list
-
-        # 读取选定的文件
-        selected_file_path = os.path.join(path, selected_version)
-        if os.path.exists(selected_file_path) and selected_file_path.endswith('.py'):
-            dict={}            
-            # 导入选择的文件并将其内容加载到字典中
-            with open(selected_file_path, 'r') as file:
-                exec(file.read(), {}, dict)
+        node_input =node_group.nodes.get("Group Input")
+        node_first =node_group.nodes.get(str(first_id))
+        node_0 = node_group.nodes.get("0")
+        node_group.nodes.remove(node_0)
+        node_group.links.new(node_input.outputs[0], node_first.inputs[2])
         
-        # 创建一个新的集合
-        collection_name="Blocks"
-        create_or_clear_collection(collection_name)
-        collection =bpy.data.collections.get(collection_name)
-        id_map=register_blocks(None)
-        next_id = max(id_map.values()) + 1
-        nodetree_target = "Blockblender"
-        # 检查几何节点是否存在
-        if nodetree_target not in bpy.data.node_groups.keys():
-            # 指定节点组名称
-            nodetree_target = "Blockblender"
-            # 加载.blend文件
-            with bpy.data.libraries.load(os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","BlockBlender.blend")) as (data_from, data_to):
-                # 导入指定的节点组
-                data_to.node_groups = [nodetree_target]
-        node_groups = bpy.data.node_groups
 
-        #设置几何节点        
-        if "集合信息" in bpy.data.node_groups:
-            bpy.data.node_groups["集合信息"].nodes["节点名称"].inputs[0].default_value = collection
 
-        # 处理 cube
-        next_id,id_map =create_node(dict['cube_dict'], node_groups, "cube", next_id, id_map)
-
-        # 处理 slab
-        next_id,id_map =create_node(dict['slab_dict'], node_groups, "slab", next_id, id_map)
-
-        # 处理 slab_top
-        next_id,id_map =create_node(dict['slab_top_dict'], node_groups, "slab_top", next_id, id_map)
-
-        next_id,id_map =create_node(dict['stairs_west_top_outer_left'], node_groups, "stairs_west_top_outer_left", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_east_top_outer_left'], node_groups, "stairs_east_top_outer_left", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_south_top_outer_left'], node_groups, "stairs_south_top_outer_left", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_north_top_outer_left'], node_groups, "stairs_north_top_outer_left", next_id, id_map,)
-        next_id,id_map =create_node(dict['stairs_west_bottom_outer_left'], node_groups, "stairs_west_bottom_outer_left", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_east_bottom_outer_left'], node_groups, "stairs_east_bottom_outer_left", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_south_bottom_outer_left'], node_groups, "stairs_south_bottom_outer_left", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_north_bottom_outer_left'], node_groups, "stairs_north_bottom_outer_left", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_west_top_straight'], node_groups, "stairs_west_top_straight", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_east_top_straight'], node_groups, "stairs_east_top_straight", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_west_bottom_straight'], node_groups, "stairs_west_bottom_straight", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_east_bottom_straight'], node_groups, "stairs_east_bottom_straight", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_north_top_straight'], node_groups, "stairs_north_top_straight", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_south_top_straight'], node_groups, "stairs_south_top_straight", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_north_bottom_straight'], node_groups, "stairs_north_bottom_straight", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_south_bottom_straight'], node_groups, "stairs_south_bottom_straight", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_south_top_inner_left'], node_groups, "stairs_south_top_inner_left", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_north_top_inner_right'], node_groups, "stairs_north_top_inner_right", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_west_top_inner_left'], node_groups, "stairs_west_top_inner_left", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_west_top_inner_right'], node_groups, "stairs_west_top_inner_right", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_south_bottom_inner_left'], node_groups, "stairs_south_bottom_inner_left", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_north_bottom_inner_right'], node_groups, "stairs_north_bottom_inner_right", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_west_bottom_inner_left'], node_groups, "stairs_west_bottom_inner_left", next_id, id_map)
-        next_id,id_map =create_node(dict['stairs_west_bottom_inner_right'], node_groups, "stairs_west_bottom_inner_right", next_id, id_map)
-
-        return {'FINISHED'}
+    
+    return next_id,id_map
+ 
 #将普通网格体转换成mc
 class ObjToBlocks(bpy.types.Operator):
     bl_idname = "baigave.objtoblocks"
     bl_label = "ObjToBlocks"
 
     def execute(self, context):
-        start_time = time.time()
         nodetree_target = "ObjToBlocks"
-        filename=context.active_object.name
+        obj= context.active_object
+        filename=obj.name+"点云"
         d = {}
         # 检查是否有节点修改器，如果没有则添加一个
         has_nodes_modifier = False
-        for modifier in context.active_object.modifiers:
+        for modifier in obj.modifiers:
             if modifier.type == 'NODES':
                 has_nodes_modifier = True
                 break
         if not has_nodes_modifier:
             bpy.ops.object.modifier_add(type='NODES')
-        nodes_modifier=context.active_object.modifiers[0]
+        nodes_modifier=obj.modifiers[0]
         #导入几何节点
         try:
             nodes_modifier.node_group = bpy.data.node_groups[nodetree_target]
@@ -392,15 +340,70 @@ class ObjToBlocks(bpy.types.Operator):
                 d[(int(coord[0])-1, -int(coord[1]), int(coord[2]))] =26# "block_stairs[facing=west,half=bottom,shape=inner_right]"
             
             
+        points =create_points_from_dictionary(d,filename)
 
-        end_time = time.time()
-        print("代码块执行时间：", end_time - start_time, "秒")
+        # 获取物体上的所有修改器并移除它们
+        for modifier in obj.modifiers:
+            obj.modifiers.remove(modifier)
 
-        start_time = time.time()
-        create_points_from_dictionary(d,filename)
-        end_time = time.time()
-        print("代码块执行时间：", end_time - start_time, "秒")
-        nodes_modifier.show_viewport = False
+        # 检查是否有节点修改器，如果没有则添加一个
+        has_nodes_modifier = False
+        for modifier in obj.modifiers:
+            if modifier.type == 'NODES':
+                has_nodes_modifier = True
+                break
+        if not has_nodes_modifier:
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select_set(True)
+            bpy.context.view_layer.objects.active = obj
+            bpy.ops.object.modifier_add(type='NODES')
+            
+        nodes_modifier = obj.modifiers[0]
+        nodes_modifier.name="模型转换"
+        context_node_tree = obj.name
+        node_groups = bpy.data.node_groups
+        # 尝试导入几何节点
+        try:
+            nodes_modifier.node_group = node_groups[context_node_tree]
+        except:
+            # 如果 context_node_tree 不存在，则检查 nodetree_target 是否存在，不存在则添加，存在则复制
+            if nodetree_target not in node_groups:
+                file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","BlockBlender++.blend")
+                inner_path = 'NodeTree'
+                object_name = nodetree_target
+                bpy.ops.wm.append(
+                    filepath=os.path.join(file_path, inner_path, object_name),
+                    directory=os.path.join(file_path, inner_path),
+                    filename=object_name
+                )
+                # 复制 nodetree_target 并重命名为 context_node_tree
+                node_tree = node_groups[nodetree_target].copy()
+                node_tree.name = context_node_tree
+            else:
+                # 复制 nodetree_target 并重命名为 context_node_tree
+                node_tree = node_groups[nodetree_target].copy()
+                node_tree.name = context_node_tree
+        # 设置几何节点
+        nodes_modifier.node_group = node_groups[context_node_tree]
+        nodes_modifier.show_viewport = True
+
+        # 遍历对象的所有修改器
+        for modifier in obj.modifiers:
+            # 检查修改器名称是否为“模型转换”
+            if modifier.name == '模型转换':
+                # 设置名为“UV”的字符串值为“UVMap”
+                if 'Input_58' in modifier:
+                    modifier['Input_58'] = obj.data.uv_layers.active.name
+
+        for group in node_groups:
+            if group.name == context_node_tree:
+                node_collection = group.nodes.get("物体信息")
+                try:
+                    node_collection.inputs[0].default_value = points
+                except:
+                    pass
+
+
         return {'FINISHED'}
     
 
@@ -440,8 +443,25 @@ class BlockBlender(bpy.types.Operator):
     bl_label = "BlockBlender"
 
     def execute(self, context):
-        nodetree_target = "BlockBlender1.41"
-        
+        nodetree_target = "模型转换"
+        scene = context.scene
+        path = scene.colors_dir  # 使用自定义路径
+
+        selected_version = bpy.context.scene.color_list
+
+        # 读取选定的文件
+        selected_file_path = os.path.join(path, selected_version)
+        if os.path.exists(selected_file_path) and selected_file_path.endswith('.py'):
+            dict={}            
+            # 导入选择的文件并将其内容加载到字典中
+            with open(selected_file_path, 'r') as file:
+                exec(file.read(), {}, dict)
+
+        # 创建一个新的集合
+        id_map=register_blocks(None)
+        next_id = max(id_map.values()) + 1
+
+        node_groups = bpy.data.node_groups
         # 遍历所选的每个物体
         for obj in context.selected_objects:
             # 检查是否有节点修改器，如果没有则添加一个
@@ -457,14 +477,15 @@ class BlockBlender(bpy.types.Operator):
                 bpy.ops.object.modifier_add(type='NODES')
                 
             nodes_modifier = obj.modifiers[0]
+            nodes_modifier.name="模型转换"
             context_node_tree = obj.name
             # 尝试导入几何节点
             try:
-                nodes_modifier.node_group = bpy.data.node_groups[context_node_tree]
+                nodes_modifier.node_group = node_groups[context_node_tree]
             except:
                 # 如果 context_node_tree 不存在，则检查 nodetree_target 是否存在，不存在则添加，存在则复制
-                if nodetree_target not in bpy.data.node_groups:
-                    file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","BlockBlender.blend")
+                if nodetree_target not in node_groups:
+                    file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","BlockBlender++.blend")
                     inner_path = 'NodeTree'
                     object_name = nodetree_target
                     bpy.ops.wm.append(
@@ -473,93 +494,81 @@ class BlockBlender(bpy.types.Operator):
                         filename=object_name
                     )
                     # 复制 nodetree_target 并重命名为 context_node_tree
-                    node_tree = bpy.data.node_groups[nodetree_target].copy()
+                    node_tree = node_groups[nodetree_target].copy()
                     node_tree.name = context_node_tree
                 else:
                     # 复制 nodetree_target 并重命名为 context_node_tree
-                    node_tree = bpy.data.node_groups[nodetree_target].copy()
+                    node_tree = node_groups[nodetree_target].copy()
                     node_tree.name = context_node_tree
             # 设置几何节点
-            nodes_modifier.node_group = bpy.data.node_groups[context_node_tree]
+            nodes_modifier.node_group = node_groups[context_node_tree]
             nodes_modifier.show_viewport = True
-            
-            # 存储图像节点和对应的名称
-            image_nodes = {}
-            
-            # 遍历物体的所有材质
-            for slot in obj.material_slots:
-                material = slot.material
-                if material:
-                    # 检查每个材质的节点
-                    if material.use_nodes:
-                        nodes = material.node_tree.nodes
-                        principled_node = None
-                        image_node = None
-                        # 遍历材质节点，寻找原理化 BSDF 和图像节点
-                        for node in nodes:
-                            if node.type == 'BSDF_PRINCIPLED':
-                                principled_node = node
-                            elif node.type == 'TEX_IMAGE':
-                                image_node = node
-                        # 如果找到了原理化 BSDF 和图像节点
-                        if principled_node and image_node:
-                            # 检查是否连接
-                            connected = False
-                            for link in material.node_tree.links:
-                                if link.to_node == principled_node and link.to_socket == principled_node.inputs[0]:
-                                    connected = True
-                                    break
-                            if connected:
-                                image = image_node.image
-                                if image:
-                                    image_nodes[slot.slot_index] = image
-                                    
-            # 遍历组输入节点，将图像与之对应
-            for group_input_name, image in image_nodes.items():
-                # 假设 nodes_modifier 是您的几何节点修改器
-                node_tree = nodes_modifier.node_group.nodes
-                # 寻找对应的组输入节点
-                for group_input in node_tree:
-                    if  group_input.name == f"图像{group_input_name+1}":
-                        group_input.image = image
-                        break
-        ids=['minecraft:black_wool', 'minecraft:blue_wool', 'minecraft:brown_wool', 'minecraft:cyan_wool', 'minecraft:gray_wool', 'minecraft:green_wool', 'minecraft:light_blue_wool', 'minecraft:light_gray_wool', 'minecraft:lime_wool', 'minecraft:magenta_wool', 'minecraft:orange_wool', 'minecraft:pink_wool', 'minecraft:purple_wool', 'minecraft:red_wool', 'minecraft:white_wool', 'minecraft:yellow_wool', 'minecraft:cobblestone', 'minecraft:sand', 'minecraft:dirt', 'minecraft:grass_block[snowy=false]', 'minecraft:oak_log[axis=x]', 'minecraft:oak_planks', 'minecraft:oak_leaves', 'minecraft:granite', 'minecraft:gravel', 'minecraft:diorite', 'minecraft:andesite', 'minecraft:stone', 'minecraft:sandstone', 'minecraft:end_stone', 'minecraft:deepslate[axis=x]', 'minecraft:glass']
-        register_blocks_only_names(ids)
-        return {'FINISHED'}
 
-class Read_colors_dir(bpy.types.Operator):
-    """读取目录"""
-    bl_idname = "baigave.read_colors"
-    bl_label = "读取目录"
-    
-    def execute(self, context):
-        scene = context.scene
-        path = scene.colors_dir  # 使用自定义路径
 
-        selected_version = bpy.context.scene.color_list
+            # 遍历对象的所有修改器
+            for modifier in obj.modifiers:
+                # 检查修改器名称是否为“模型转换”
+                if modifier.name == '模型转换':
+                    # 设置名为“UV”的字符串值为“UVMap”
+                    if 'Input_58' in modifier:
+                        modifier['Input_58'] = obj.data.uv_layers.active.name
+            for group in node_groups:
+                if group.name == context_node_tree:
+                    node_collection = group.nodes.get("方块集合")
+                    try:
+                        node_collection.inputs[0].default_value = bpy.data.collections["Blocks"]
+                    except:
+                        register_blocks(None)
+                    node_number = group.nodes.get("普通方块数量")
+                    node_number.inputs[0].default_value = len(dict['cube_dict'])
 
-        # 读取选定的文件
-        selected_file_path = os.path.join(path, selected_version)
-        if os.path.exists(selected_file_path) and selected_file_path.endswith('.py'):
-            dict={}            
-            # 导入选择的文件并将其内容加载到字典中
-            with open(selected_file_path, 'r') as file:
-                exec(file.read(), {}, dict)
-            print(dict['cube_dict'])
+                    # 初始化总长度
+                    all = 0
+
+                    # 遍历主字典中的每个子字典，并将它们的长度相加
+                    for key in dict:
+                        all += len(dict[key])
+                    node_number = group.nodes.get("所有数量")
+                    node_number.inputs[0].default_value = all
+
+            # 处理 cube
+            next_id,id_map =create_node(dict['cube_dict'], node_groups, "普通方块", next_id, id_map,context_node_tree)
+            # 处理 slab
+            next_id,id_map =create_node(dict['slab_dict'], node_groups, "slab", next_id, id_map,blocktype=1)
+
+            # 处理 slab_top
+            next_id,id_map =create_node(dict['slab_top_dict'], node_groups, "slab_top", next_id, id_map,blocktype=2)
+
+            next_id,id_map =create_node(dict['stairs_west_top_outer_left'], node_groups, "stairs_west_top_outer_left", next_id, id_map,blocktype=3)
+            next_id,id_map =create_node(dict['stairs_east_top_outer_left'], node_groups, "stairs_east_top_outer_left", next_id, id_map,blocktype=4)
+            next_id,id_map =create_node(dict['stairs_south_top_outer_left'], node_groups, "stairs_south_top_outer_left", next_id, id_map,blocktype=5)
+            next_id,id_map =create_node(dict['stairs_north_top_outer_left'], node_groups, "stairs_north_top_outer_left", next_id, id_map,blocktype=6)
+            next_id,id_map =create_node(dict['stairs_west_bottom_outer_left'], node_groups, "stairs_west_bottom_outer_left", next_id, id_map,blocktype=7)
+            next_id,id_map =create_node(dict['stairs_east_bottom_outer_left'], node_groups, "stairs_east_bottom_outer_left", next_id, id_map,blocktype=8)
+            next_id,id_map =create_node(dict['stairs_south_bottom_outer_left'], node_groups, "stairs_south_bottom_outer_left", next_id, id_map,blocktype=9)
+            next_id,id_map =create_node(dict['stairs_north_bottom_outer_left'], node_groups, "stairs_north_bottom_outer_left", next_id, id_map,blocktype=10)
+            next_id,id_map =create_node(dict['stairs_west_top_straight'], node_groups, "stairs_west_top_straight", next_id, id_map,blocktype=11)
+            next_id,id_map =create_node(dict['stairs_east_top_straight'], node_groups, "stairs_east_top_straight", next_id, id_map,blocktype=12)
+            next_id,id_map =create_node(dict['stairs_west_bottom_straight'], node_groups, "stairs_west_bottom_straight", next_id, id_map,blocktype=13)
+            next_id,id_map =create_node(dict['stairs_east_bottom_straight'], node_groups, "stairs_east_bottom_straight", next_id, id_map,blocktype=14)
+            next_id,id_map =create_node(dict['stairs_north_top_straight'], node_groups, "stairs_north_top_straight", next_id, id_map,blocktype=15)
+            next_id,id_map =create_node(dict['stairs_south_top_straight'], node_groups, "stairs_south_top_straight", next_id, id_map,blocktype=16)
+            next_id,id_map =create_node(dict['stairs_north_bottom_straight'], node_groups, "stairs_north_bottom_straight", next_id, id_map,blocktype=17)
+            next_id,id_map =create_node(dict['stairs_south_bottom_straight'], node_groups, "stairs_south_bottom_straight", next_id, id_map,blocktype=18)
+            next_id,id_map =create_node(dict['stairs_south_top_inner_left'], node_groups, "stairs_south_top_inner_left", next_id, id_map,blocktype=19)
+            next_id,id_map =create_node(dict['stairs_north_top_inner_right'], node_groups, "stairs_north_top_inner_right", next_id, id_map,blocktype=20)
+            next_id,id_map =create_node(dict['stairs_west_top_inner_left'], node_groups, "stairs_west_top_inner_left", next_id, id_map,blocktype=21)
+            next_id,id_map =create_node(dict['stairs_west_top_inner_right'], node_groups, "stairs_west_top_inner_right", next_id, id_map,blocktype=22)
+            next_id,id_map =create_node(dict['stairs_south_bottom_inner_left'], node_groups, "stairs_south_bottom_inner_left", next_id, id_map,blocktype=23)
+            next_id,id_map =create_node(dict['stairs_north_bottom_inner_right'], node_groups, "stairs_north_bottom_inner_right", next_id, id_map,blocktype=24)
+            next_id,id_map =create_node(dict['stairs_west_bottom_inner_left'], node_groups, "stairs_west_bottom_inner_left", next_id, id_map,blocktype=25)
+            next_id,id_map =create_node(dict['stairs_west_bottom_inner_right'], node_groups, "stairs_west_bottom_inner_right", next_id, id_map,blocktype=26)
         
+            
+            
         return {'FINISHED'}
-class AddFaceAttributeOperator(bpy.types.Operator):
-    bl_idname = "baigave.add_face_attribute"
-    bl_label = "添加面属性值"
-    
-    def execute(self, context):
-        # 获取当前选中的对象
-        obj = context.object
-        obj.data.attributes.new(name='blockname', type="STRING", domain="FACE")
-        for i, item in enumerate(obj.data.attributes['blockname'].data):
-            item.value=obj.name.split("#", 1)[1]
-        return {'FINISHED'}
-classes=[PrepareBlocks,ObjToBlocks,AddFaceAttributeOperator,BlockBlender,Read_colors_dir]
+
+classes=[ObjToBlocks,BlockBlender]
 
 
 def register():

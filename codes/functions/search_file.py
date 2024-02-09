@@ -4,8 +4,6 @@ import bpy
 import os
 import re
 
-from ..block import block
-from ..blockstates import get_model
 from ..property import unzip_mods_files,unzip_resourcepacks_files
 
 class Read_mods_dir(bpy.types.Operator):
@@ -203,9 +201,9 @@ class Read_saves_dir(bpy.types.Operator):
             description="选择一个存档",
             items=save_items,
         )
-        
-        # 获取当前选中的存档
-        selected_save = bpy.context.scene.save_list
+
+        selected_save = getattr(bpy.context.scene, 'save_list', None)
+
 
         # 读取config.py文件
         config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py") 
@@ -291,8 +289,9 @@ class Read_schems_dir(bpy.types.Operator):
             items=schem_items,
         )
         
-        # 获取当前选中的.schem文件
-        selected_schem = bpy.context.scene.schem_list
+        selected_schem = getattr(bpy.context.scene, 'schem_list', None)
+
+
 
         # 读取config.py文件
         config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py") 
@@ -309,7 +308,6 @@ class Read_schems_dir(bpy.types.Operator):
 
         return {'FINISHED'}
     
-
     
 # 添加一个操作类来处理上下移动和删除模组
 class MoveModItem(bpy.types.Operator):
@@ -432,7 +430,7 @@ class AddResourcepackOperator(bpy.types.Operator):
 
     # 定义一个属性来存储文件路径
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    # 定义一个属性来过滤文件类型，只显示.jar文件
+    # 定义一个属性来过滤文件类型，只显示.zip文件
     filter_glob: bpy.props.StringProperty(default="*.zip", options={'HIDDEN'})
 
     def execute(self, context):
@@ -496,7 +494,63 @@ class DeleteResourcepackOperator(bpy.types.Operator):
             
         return {'CANCELLED'}
 
-classes=[Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,Read_saves_dir,Read_colors_dir,Read_schems_dir,MoveModItem,MoveResourcepackItem,AddModOperator,DeleteModOperator,AddResourcepackOperator,DeleteResourcepackOperator]
+class AddColorToBlockOperator(bpy.types.Operator):
+    bl_idname = "baigave.add_color_to_block_operator"
+    bl_label = "添加方块"
+
+    # 定义一个属性来存储文件路径
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    # 定义一个属性来过滤文件类型，只显示.json文件
+    filter_glob: bpy.props.StringProperty(default="*.json", options={'HIDDEN'})
+
+    files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup)
+
+    def execute(self, context):
+        scene = context.scene
+        my_properties = scene.my_properties
+        color_to_block_list = my_properties.color_to_block_list
+
+        source_file = os.path.dirname(self.filepath) 
+        
+        for f in self.files:
+
+            # 从文件路径中提取文件名
+            filename = f.name.replace(".json","")
+
+            # 检查文件名是否已经在列表中
+            if not any(item.name == filename for item in color_to_block_list):
+                # 文件名不在列表中，添加到列表
+                item = color_to_block_list.add()
+                item.name = filename
+                item.filepath=source_file+"\\"+f.name
+
+        return {'FINISHED'}
+
+        
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+class DeleteColorToBlockOperator(bpy.types.Operator):
+    bl_idname = "baigave.delete_color_to_block_operator"
+    bl_label = "删除方块"
+
+    def execute(self, context):
+        scene = context.scene
+        my_properties = scene.my_properties
+        color_to_block_list = my_properties.color_to_block_list
+        index = my_properties.color_to_block_list_index
+
+        # 删除选定的颜色到方块映射
+        if index < len(color_to_block_list):
+            color_to_block_list.remove(index)
+
+        return {'FINISHED'}
+
+
+
+classes=[Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,Read_saves_dir,Read_colors_dir,Read_schems_dir,MoveModItem,MoveResourcepackItem,
+         AddModOperator,DeleteModOperator,AddResourcepackOperator,DeleteResourcepackOperator,AddColorToBlockOperator,DeleteColorToBlockOperator]
 
 
 def register():

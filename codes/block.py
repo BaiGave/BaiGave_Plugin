@@ -161,7 +161,7 @@ def block(textures,elements,position,rot,filename,has_air,collection=None,uvlock
                 rot[2]=0
         # 设置 obj 的欧拉旋转角度为转换后的弧度
         obj.rotation_euler = [math.radians(rot[0]), math.radians(rot[1]), math.radians(rot[2])]
-        
+        uvlock=False
         # 应用旋转
         bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
         if rot[0] ==90 and rot[1] ==0 and rot[2] ==0:
