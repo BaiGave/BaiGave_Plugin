@@ -86,7 +86,7 @@ def schem(level,chunks,cached,filename="schem",position=(0,0,0)):
         IDCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/id_map.pkl"
         with open(IDCachePath, 'rb') as f:
             vertices,ids,id_map = pickle.load(f)
-        id_map=registered_blocks(id_map)
+        id_map=register_blocks(id_map)
 
     # 将顶点和顶点索引添加到网格中
     mesh.from_pydata(vertices, [], [])
