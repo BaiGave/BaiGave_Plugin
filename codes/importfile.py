@@ -14,6 +14,7 @@ from .register import register_blocks
 import json
 import amulet
 import amulet_nbt
+import threading
 
 
 class ImportBlock(bpy.types.Operator):
@@ -202,16 +203,21 @@ class ImportSchem(bpy.types.Operator):
         image = bpy.data.images.new("colormap", width=image_width, height=image_height)
         image.use_fake_user = True
 
-        #设置默认颜色
-        for y in range(image_height):
-            for x in range(image_width):
-                pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
-                image.pixels[pixel_index : pixel_index + 4] = default_color
+        def set_default_color(image, image_width, image_height, default_color):
+            # 设置默认颜色
+            for y in range(image_height):
+                for x in range(image_width):
+                    pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
+                    image.pixels[pixel_index : pixel_index + 4] = default_color
+        # 创建一个新的线程来执行 set_default_color 函数
+        thread = threading.Thread(target=set_default_color, args=(image, image_width, image_height, default_color))
+        # 启动新的线程
+        thread.start()
 
         #小模型，直接导入
         if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2]) < bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_minsize:
             #几何节点+py方法
-            schem(level,chunks,name)
+            schem(level,chunks,False,name)
             schem_liquid(level,chunks)
             materials = bpy.data.materials
             for material in materials:
@@ -227,53 +233,96 @@ class ImportSchem(bpy.types.Operator):
 
         #大模型，分块导入
         else:
-            mp_chunks = all_chunks
+            processnum = bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_processnumber
+            x_cut = (chunks[1][0]-chunks[0][0]+1)//processnum
+            x_list = [[chunks[0][0]+i*x_cut+1, chunks[0][0]+(i+1)*x_cut+1] for i in range(processnum)]
+            x_list[0][0] = chunks[0][0]
+            x_list[-1][1] = chunks[1][0]
             VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
             with open(VarCachePath, 'wb') as file:
-                pickle.dump((chunks,mp_chunks,self.filepath,bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_intervaltime,bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_processnumber),file)
-            bpy.data.window_managers["WinMan"].bcp_max_connections = 32
-            bpy.data.window_managers['WinMan'].bcp_port = 5001
-            bpy.ops.wm.open_command_port()
-            blender_path = bpy.app.binary_path
-            pool_path = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/multiprocess/multiprocess_pool.py"
-            subprocess.Popen([blender_path,"-P",pool_path,"-p","9","9","9","9","--no-window-focus"])
+                pickle.dump((self.filepath,chunks,name,x_list,processnum),file)
 
+            blender_path = bpy.app.binary_path
+            ImportPath = bpy.utils.script_path_user()
+            MultiprocessPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_mp.py"
+            MPliquidPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_liquid_mp.py"
+            #多进程实现方法：后台启动headless blender(-b)，只运行python代码(-P)，不显示界面
+            for num in range(processnum):
+                ChunkIndex = f"import bpy;bpy.context.scene.frame_current = {num}"
+                subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
         end_time = time.time()
         print("预处理时间：", end_time - start_time, "秒")
+        try:
+            schem_liquid(level,chunks)
+        except Exception as e:
+            print("流体出错了:", e)
+
+        CacheFolder = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/"
+        # 检查所有的文件是否都存在
+        while not all(os.path.exists(os.path.join(CacheFolder, f'chunk{i}.pkl')) for i in range(processnum)):
+            time.sleep(0.5)
+        merged_dict = {}
+        merged_vertices = []
+        merged_ids = []
+        counter = 0
+        # 获取所有的缓存文件
+        for i in range(processnum):
+            # 加载每个文件中的字典
+            with open(os.path.join(CacheFolder, f'chunk{i}.pkl'), 'rb') as f:
+                vertices,ids,id_map = pickle.load(f)
+            # 将字典合并到大字典中
+            for key, value in id_map.items():
+                if key not in merged_dict:
+                    merged_dict[key] = counter
+                    counter += 1
+            # 将列表合并到大列表中
+            merged_vertices.extend(vertices)
+            merged_ids.extend(ids)
+
+        IDCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/id_map.pkl"
+        with open(IDCachePath, 'wb') as f:
+            pickle.dump((merged_vertices,merged_ids,merged_dict), f)
+
+        bpy.ops.baigave.multiprocess_import()
+
         return {'FINISHED'}
     
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
-#进程池管理器
-class MultiprocessPool(bpy.types.Operator):
-    bl_idname = "baigave.multiprocess_pool"
+#多进程结束后导入模型
+class MultiprocessImport(bpy.types.Operator):
+    bl_idname = "baigave.multiprocess_import"
     bl_label = "导入.schem文件"
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
 
     def execute(self, context):
         VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
         with open(VarCachePath, 'rb') as file:
-            chunks,mp_chunks,schempath,interval,processnum = pickle.load(file)
-        #多进程导入模型
-        bpy.data.window_managers["WinMan"].bcp_max_connections = 32
-        bpy.data.window_managers['WinMan'].bcp_port = 5002
-        bpy.ops.wm.open_command_port()
-        blender_path = bpy.app.binary_path
-        ImportPath = bpy.utils.script_path_user()
-        MultiprocessPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_mp.py"
-        MPliquidPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_liquid_mp.py"
-        #多进程实现方法：后台启动headless blender(-b)，只运行python代码(-P)，不显示界面
-        for num in range(len(mp_chunks)):
-            if num < processnum:
-                ChunkIndex = f"import bpy;bpy.context.scene.frame_current = {num}"
-                subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
-                bpy.context.scene.frame_current = num
-                time.sleep(interval)
-        subprocess.Popen([blender_path,"-b","-P",MPliquidPath])
-        return {'FINISHED'}
+            schempath,chunks,name,x_list,processnum = pickle.load(file)
+        level = amulet.load_level(schempath)
+        schem(level,chunks,True,name)
 
-#每个进程调用一类功能，导入特定方块
+        materials = bpy.data.materials
+        for material in materials:
+            try:
+                node_tree = material.node_tree
+                nodes = node_tree.nodes
+                for node in nodes:
+                    if node.type == 'TEX_IMAGE':
+                        if node.name == '色图':
+                            node.image = bpy.data.images.get("colormap")
+            except Exception as e:
+                print("材质出错了:", e)
+
+        return {'FINISHED'}
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+#每个进程分别处理一个区块
 class MultiprocessSchem(bpy.types.Operator):
     bl_idname = "baigave.import_schem_mp"
     bl_label = "导入.schem文件"
@@ -281,45 +330,12 @@ class MultiprocessSchem(bpy.types.Operator):
     filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
 
     def execute(self, context):
-        start_time = time.time()
         VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
         with open(VarCachePath, 'rb') as file:
-            chunks,mp_chunks,schempath,interval,processnum = pickle.load(file)
+            schempath,chunks,name,x_list,processnum = pickle.load(file)
+        level = amulet.load_level(schempath)
+        schem_chunk(level,chunks,x_list,name)
 
-        level = amulet.load_level(self.filepath)
-        current_frame = int(bpy.context.scene.frame_current)
-        nbt_data = amulet_nbt._load_nbt.load(self.filepath)
-        #print(nbt_data["BlockEntities"])
-        
-        size = {
-            "x":int(nbt_data["Width"]),
-            "y":int(nbt_data["Height"]),
-            "z":int(nbt_data["Length"])
-        }
-        #print(size)
-
-        # 设置图片的大小和颜色
-        image_width = int(size["z"])
-        image_height = int(size["x"])
-        default_color = (0.47, 0.75, 0.35, 1.0)  # RGBA颜色，对应#79c05a
-
-        # 创建一个新的图片
-        filename = os.path.basename(self.filepath)
-        image = bpy.data.images.new(filename+"_colormap", width=image_width, height=image_height)
-
-        #设置默认颜色
-        for y in range(image_height):
-            for x in range(image_width):
-                pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
-                image.pixels[pixel_index : pixel_index + 4] = default_color
-
-        if current_frame < len(mp_chunks):
-            schem_chunk(level,chunks,mp_chunks[current_frame])
-        end_time = time.time()
-        print("预处理时间：", end_time - start_time, "秒")
-
-        ModelCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/chunk{}.blend".format(current_frame)
-        bpy.ops.wm.save_as_mainfile(filepath=ModelCachePath)
         return {'FINISHED'}
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
@@ -544,7 +560,7 @@ class ImportWorld(bpy.types.Operator):
 
 
 classes=[ImportBlock,ImportSchem,MultiprocessSchem,Importjson,ImportWorld,#SelectArea,
-         ImportNBT,SNA_AddonPreferences_F35F8,SNA_OT_My_Generic_Operator_A38B8,ImportSchemLiquid,MultiprocessPool]
+         ImportNBT,SNA_AddonPreferences_F35F8,SNA_OT_My_Generic_Operator_A38B8,ImportSchemLiquid,MultiprocessImport]
 
 def register():
     for cls in classes:

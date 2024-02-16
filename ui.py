@@ -106,13 +106,13 @@ class ImportPanel(bpy.types.Panel):
         if not True: split_8D70F.operator_context = "EXEC_DEFAULT"
         op = split_8D70F.operator('sna.my_generic_operator_a38b8', text='', icon_value=692, emboss=True, depress=False)
         split_8D70F.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_minsize', text='方块数分界线', icon_value=0, emboss=True)
-        split_3E557 = box.split(factor=0.47, align=True)
+        split_3E557 = box.split(factor=1, align=True)
         split_3E557.enabled = True
         split_3E557.active = True
         split_3E557.alignment = 'Expand'.upper()
         if not True: split_3E557.operator_context = "EXEC_DEFAULT"
-        split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_processnumber', text='进程数', icon_value=0, emboss=False)
-        split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_intervaltime', text='间隔(秒)', icon_value=0, emboss=True)
+        split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_processnumber', text='进程数', icon_value=0, emboss=True)
+        # split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_intervaltime', text='间隔(秒)', icon_value=0, emboss=True)
         layout.split()
         box = layout.box()
         box.label(text="导入方块")

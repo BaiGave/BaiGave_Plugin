@@ -6,7 +6,8 @@ import amulet
 from .classification_files.block_type import liquid,exclude,sea_plants
 import numpy as np
 import os
-from .register import create_or_clear_collection,register_blocks
+from .register import create_or_clear_collection,register_blocks,registered_blocks
+import pickle
 
 #用于删除[]的部分 
 def remove_brackets(input_string):
@@ -24,7 +25,7 @@ def remove_brackets(input_string):
     return output_string
 
 
-def schem(level,chunks,filename="schem",position=(0,0,0)):
+def schem(level,chunks,cached,filename="schem",position=(0,0,0)):
     # 获取最小和最大坐标
     min_coords = chunks[0]
     max_coords = chunks[1]
@@ -56,34 +57,43 @@ def schem(level,chunks,filename="schem",position=(0,0,0)):
             directory=os.path.join(file_path, inner_path),
             filename=object_name
         )
-    # 创建顶点和顶点索引
-    vertices = []
-    ids = []  # 存储顶点id
 
-    # 遍历范围内所有的坐标
-    for x in range(min_coords[0], max_coords[0] + 1):
-        for y in range(min_coords[1], max_coords[1] + 1):
-            for z in range(min_coords[2], max_coords[2] + 1):
-                try:
-                    # 获取坐标处的方块       
-                    blc =level.get_version_block(x, y, z, "main",("java", (1, 20, 4)))
-                    id =blc[0]
-                    if isinstance(id,amulet.api.block.Block):
-                        id = str(id).replace('"', '')
-                        result = remove_brackets(id) 
-                        if result not in exclude:  
-                            vertices.append((x-min_coords[0],-(z-min_coords[2]),y-min_coords[1]))
-                            # 将字符串id转换为相应的数字id
-                            ids.append(id)
-                except:
-                    pass
+    if not cached:
+        # 创建顶点和顶点索引
+        vertices = []
+        ids = []  # 存储顶点id
 
-    id_map=register_blocks(list(set(ids)))
+        # 遍历范围内所有的坐标
+        for x in range(min_coords[0], max_coords[0] + 1):
+            for y in range(min_coords[1], max_coords[1] + 1):
+                for z in range(min_coords[2], max_coords[2] + 1):
+                    try:
+                        # 获取坐标处的方块       
+                        blc =level.get_version_block(x, y, z, "main",("java", (1, 20, 4)))
+                        id =blc[0]
+                        if isinstance(id,amulet.api.block.Block):
+                            id = str(id).replace('"', '')
+                            result = remove_brackets(id) 
+                            if result not in exclude:  
+                                vertices.append((x-min_coords[0],-(z-min_coords[2]),y-min_coords[1]))
+                                # 将字符串id转换为相应的数字id
+                                ids.append(id)
+                    except:
+                        pass
+
+        id_map=register_blocks(list(set(ids)))
+    else:
+        IDCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/id_map.pkl"
+        with open(IDCachePath, 'rb') as f:
+            vertices,ids,id_map = pickle.load(f)
+        id_map=registered_blocks(id_map)
+
     # 将顶点和顶点索引添加到网格中
     mesh.from_pydata(vertices, [], [])
     #给予顶点id
     for i, item in enumerate(obj.data.attributes['blockid'].data):
         item.value=id_map[ids[i]]
+        #print(item.value)
     #群系上色
     for i, item in enumerate(obj.data.attributes['biome'].data):
         item.color[:]=(0.149,0.660,0.10,0.00)
@@ -114,82 +124,39 @@ def schem(level,chunks,filename="schem",position=(0,0,0)):
 
     
 
-def schem_chunk(level,chunks,i,filename="Schemetics",position=(0,0,0)):
+def schem_chunk(level,chunks,x_list,filename="schem",position=(0,0,0)):
+    # 获取最小和最大坐标
+    min_coords = chunks[0]
+    max_coords = chunks[1]
+    current_frame = bpy.context.scene.frame_current
+
+    # 创建顶点和顶点索引
     vertices = []
-    faces = []
-    direction = []
-    texture_list = []
-    uv_list = []
-    uv_rotation_list = []
-    vertices_dict ={}
+    ids = []  # 存储顶点id
 
-    for x in range(i[0]*16, i[0]*16+16):
-        for y in range(chunks[0][1], chunks[1][1]):
-            for z in range(i[1]*16, i[1]*16+16):
-                # 获取坐标处的方块
-                id = level.get_block(x, y, z, "main")
-                if isinstance(id,amulet.api.block.Block):
-                    id =str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(id)[0]).replace('"', '')
-                    result = remove_brackets(id) 
-                    if result not in exclude:  
-                        vertices,faces,direction,texture_list,uv_list,uv_rotation_list = blockstates((x,y,z),chunks, level, vertices, faces, direction, texture_list, uv_list, uv_rotation_list, vertices_dict)
-                   
-    collection = bpy.context.collection
-    mesh_name = filename
-    mesh = create_mesh(mesh_name)
-    obj = add_mesh_to_collection(collection, mesh)
-    obj.location = position
+    # 遍历范围内所有的坐标
+    for x in range(x_list[current_frame][0], x_list[current_frame][1]):
+        for y in range(min_coords[1], max_coords[1] + 1):
+            for z in range(min_coords[2], max_coords[2] + 1):
+                try:
+                    # 获取坐标处的方块       
+                    blc =level.get_version_block(x, y, z, "main",("java", (1, 20, 4)))
+                    id =blc[0]
+                    if isinstance(id,amulet.api.block.Block):
+                        id = str(id).replace('"', '')
+                        result = remove_brackets(id) 
+                        if result not in exclude:  
+                            vertices.append((x-min_coords[0],-(z-min_coords[2]),y-min_coords[1]))
+                            # 将字符串id转换为相应的数字id
+                            ids.append(id)
+                except:
+                    pass
 
-    
-    bm = bmesh.new()
-    vert_layer = bm.verts.layers.float_color.new('biome')
-    for v in vertices:
-        vert=bm.verts.new(v)
-        vert[vert_layer] =(0.149,0.660,0.10,0.00)
-        
-    bm.verts.ensure_lookup_table()
-    
-    uv_layer = bm.loops.layers.uv.new()  # 添加UV图层
-    
-    for face_index, f in enumerate(faces):
-        verts_list=[]
-        for i in f:
-            vert =bm.verts[i]
-            if vert not in verts_list:
-                verts_list.append(vert)
-        existing_face = bm.faces.get(verts_list)
-        if existing_face is not None:
-            face = existing_face
-        elif len(verts_list)>2:
-            face = bm.faces.new(verts_list)
-        else:
-            continue
+    id_map=register_blocks(list(set(ids)))
 
-        mat = get_or_create_material(texture_list[face_index],filename)
-        mat.blend_method = 'CLIP'
-        mat.shadow_method = 'CLIP'
-        if mat.name not in obj.data.materials:
-            obj.data.materials.append(mat)
-
-        face.material_index = obj.data.materials.find(mat.name)
-
-        if uv_list[face_index] == "Auto":
-            for loop in face.loops:
-                vertex = loop.vert
-                uv = (vertex.co.y, vertex.co.z) if direction[face_index] in ['west', 'east'] \
-                    else (vertex.co.x, vertex.co.z) if direction[face_index] in ['north', 'south'] \
-                    else (vertex.co.x, vertex.co.y)
-                loop[uv_layer].uv = uv
-        else:
-            rotation = uv_rotation_list[face_index]
-            uv_coords = uv_list[face_index]
-            for i, loop in enumerate(face.loops):
-                #set_uv这个方法有问题 在使用stripped_oak_wood 方块时出错
-                loop[uv_layer].uv = set_uv(uv_coords, i, rotation)
-    bm.faces.ensure_lookup_table()
-    bm.to_mesh(mesh)
-    bm.free()
-    
+    IDCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/chunk{}.pkl".format(current_frame)
+    with open(IDCachePath, 'wb') as f:
+        pickle.dump((vertices,ids,id_map), f)
     
     
 
