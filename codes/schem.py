@@ -204,7 +204,10 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
         for y in range(min_coord[1], max_coord[1] + 1):
             for z in range(min_coord[2], max_coord[2] + 1):
                 # 获取坐标处的方块
-                id = level.get_block(x, y, z, "main")
+                try:
+                    id = level.get_block(x, y, z, "main")
+                except:
+                    continue
                 if isinstance(id,amulet.api.block.Block):
                     if id.extra_blocks !=():
                         id=str(level.translation_manager.get_("java", (1, 20, 4)).block.from_universal(id.extra_blocks[0])[0]).replace('"', '')
