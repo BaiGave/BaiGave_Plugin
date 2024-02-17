@@ -14,13 +14,13 @@ from .. import config
 from collections import Counter
 from PIL import Image
 class ModInfo(bpy.types.PropertyGroup):
-    icon: bpy.props.StringProperty(name="图标")
-    name: bpy.props.StringProperty(name="名称")
-    description: bpy.props.StringProperty(name="描述")
+    icon: bpy.props.StringProperty(name="图标") # type: ignore
+    name: bpy.props.StringProperty(name="名称") # type: ignore
+    description: bpy.props.StringProperty(name="描述") # type: ignore
 
 class BlockInfo(bpy.types.PropertyGroup):
-    name: bpy.props.StringProperty(name="名称")
-    filepath: bpy.props.StringProperty(name="文件位置")
+    name: bpy.props.StringProperty(name="名称") # type: ignore
+    filepath: bpy.props.StringProperty(name="文件位置") # type: ignore
 
 #属性
 class Property(bpy.types.PropertyGroup):
@@ -70,17 +70,17 @@ class Property(bpy.types.PropertyGroup):
     )
     bpy.types.Scene.is_weld = bpy.props.BoolProperty(name="合并重叠顶点", default=True)
 
-    JsonImportSpeed: bpy.props.FloatProperty(name="导入速度(秒每个）",description="Import speed",min=0.01, max=2.0,default=1.0)
-    resourcepack_list: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup)
-    resourcepack_list_index: bpy.props.IntProperty()
+    JsonImportSpeed: bpy.props.FloatProperty(name="导入速度(秒每个）",description="Import speed",min=0.01, max=2.0,default=1.0) # type: ignore
+    resourcepack_list: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup) # type: ignore
+    resourcepack_list_index: bpy.props.IntProperty() # type: ignore
 
     # 定义 mod_list 属性
-    mod_list: bpy.props.CollectionProperty(type=ModInfo)
-    mod_list_index: bpy.props.IntProperty()
+    mod_list: bpy.props.CollectionProperty(type=ModInfo) # type: ignore
+    mod_list_index: bpy.props.IntProperty() # type: ignore
 
     # 定义 color_to_block_list 属性
-    color_to_block_list: bpy.props.CollectionProperty(type=BlockInfo)
-    color_to_block_list_index: bpy.props.IntProperty()
+    color_to_block_list: bpy.props.CollectionProperty(type=BlockInfo) # type: ignore
+    color_to_block_list_index: bpy.props.IntProperty() # type: ignore
     bpy.types.Scene.min_coordinates = bpy.props.IntVectorProperty(name="最小坐标", size=3)
     bpy.types.Scene.max_coordinates = bpy.props.IntVectorProperty(name="最大坐标", size=3)
 
@@ -1096,7 +1096,7 @@ class MakeColorDict(bpy.types.Operator):
     bl_idname = "baigave.make_color_dict"
     bl_label = "制作方块-颜色对照表"
 
-    n: bpy.props.StringProperty(name="文件名", default="")
+    n: bpy.props.StringProperty(name="文件名", default="") # type: ignore
 
     def execute(self, context):
         scene = context.scene
@@ -1132,6 +1132,10 @@ class MakeColorDict(bpy.types.Operator):
         layout.prop(self, "n")
 classes=[ModInfo,BlockInfo,Property,UnzipModOperator,UnzipResourcepacksOperator,MakeColorDict]
 
+import subprocess
+import sys
+import pkg_resources
+
 
 def register():
     threading.Thread(target=unzip_mods_files).start()
@@ -1141,6 +1145,16 @@ def register():
     bpy.types.Scene.my_properties = bpy.props.PointerProperty(type=Property)
     temp_dir = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")
     importlib.reload(config)
+    python_exe = os.path.join(sys.prefix, 'bin', 'python.exe')
+    # 检查库是否已经安装
+    try:
+        dist = pkg_resources.get_distribution('amulet-core')
+        print('{} ({}) 已经安装'.format(dist.key, dist.version))
+    except pkg_resources.DistributionNotFound:
+        print('amulet-core 未安装! 正在安装中...')
+        # 安装库
+        subprocess.call([python_exe, "-m", "pip", "install", "amulet-core"])
+
     #threading.Thread(target=read_blockstate_files, args=(temp_dir,config.config["version"])).start()
     
 def unregister():
