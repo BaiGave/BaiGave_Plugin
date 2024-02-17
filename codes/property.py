@@ -1132,9 +1132,7 @@ class MakeColorDict(bpy.types.Operator):
         layout.prop(self, "n")
 classes=[ModInfo,BlockInfo,Property,UnzipModOperator,UnzipResourcepacksOperator,MakeColorDict]
 
-import subprocess
-import sys
-import pkg_resources
+
 
 
 def register():
@@ -1145,16 +1143,7 @@ def register():
     bpy.types.Scene.my_properties = bpy.props.PointerProperty(type=Property)
     temp_dir = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")
     importlib.reload(config)
-    python_exe = os.path.join(sys.prefix, 'bin', 'python.exe')
-    # 检查库是否已经安装
-    try:
-        dist = pkg_resources.get_distribution('amulet-core')
-        print('{} ({}) 已经安装'.format(dist.key, dist.version))
-    except pkg_resources.DistributionNotFound:
-        print('amulet-core 未安装! 正在安装中...')
-        # 安装库
-        subprocess.call([python_exe, "-m", "pip", "install", "amulet-core"])
-
+    
     #threading.Thread(target=read_blockstate_files, args=(temp_dir,config.config["version"])).start()
     
 def unregister():

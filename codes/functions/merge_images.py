@@ -1,5 +1,16 @@
 import bpy
 import os
+import sys
+import zipfile
+
+# 指定.zip文件和目标文件夹
+zip_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "site-packages.zip")
+target_folder = os.path.join(sys.prefix, 'lib')
+
+# 使用zipfile模块解压.zip文件
+with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+    # 解压.zip文件到目标文件夹，覆盖已存在的文件
+    zip_ref.extractall(target_folder)
 from PIL import Image
 
 def read_properties_file(file_path):
@@ -47,7 +58,7 @@ class ImageMergerOperator(bpy.types.Operator):
     bl_label = "合并图片"
 
     # 定义一个属性来存储文件路径
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
 
     def execute(self, context):
         # 获取用户选择的文件路径

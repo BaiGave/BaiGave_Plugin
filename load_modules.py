@@ -1,6 +1,10 @@
 import bpy
 import importlib
 
+if "property" in locals():
+	importlib.reload(property)
+else:
+	from .codes import property
 if "sway_animation" in locals():
 	importlib.reload(sway_animation)
 else:
@@ -35,11 +39,6 @@ if "mesh_to_mc" in locals():
 	importlib.reload(mesh_to_mc)
 else:
 	from .codes.functions import mesh_to_mc
-
-if "property" in locals():
-	importlib.reload(property)
-else:
-	from .codes import property
 
 if "BaiGave_Rig" in locals():
 	importlib.reload(BaiGave_Rig)

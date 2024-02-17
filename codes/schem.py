@@ -210,9 +210,15 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                     continue
                 if isinstance(id,amulet.api.block.Block):
                     if id.extra_blocks !=():
-                        id=str(level.translation_manager.get_("java", (1, 20, 4)).block.from_universal(id.extra_blocks[0])[0]).replace('"', '')
+                        try:
+                            id=str(level.translation_manager.get_("java", (1, 20, 4)).block.from_universal(id.extra_blocks[0])[0]).replace('"', '')
+                        except:
+                            continue
                     else:
-                        id =str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(id)[0]).replace('"', '')
+                        try:
+                            id =str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(id)[0]).replace('"', '')
+                        except:
+                            continue
                     
                     result = remove_brackets(id) 
                     if result in liquid:
@@ -227,7 +233,10 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                         # 判断是否有空气方块
                         has_air = [True] * 6  # 默认为 True
                         for i, adj_coord in enumerate(adjacent_coords):
-                            name = level.get_block(adj_coord[0], adj_coord[1], adj_coord[2], "main")
+                            try:
+                                name = level.get_block(adj_coord[0], adj_coord[1], adj_coord[2], "main")
+                            except:
+                                continue
                             if isinstance(name,amulet.api.block.Block):
                                 if name.extra_blocks !=():
                                     extra_blocks=str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(name.extra_blocks[0])[0]).replace('"', '')
@@ -240,7 +249,10 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                                     if extra_blocks in liquid:
                                         has_air[i] = False
                                         continue
-                                name =str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(name)[0]).replace('"', '')
+                                try:
+                                    name =str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(name)[0]).replace('"', '')
+                                except:
+                                    continue
                                 # 找到等号的位置
                                 equal_index = name.find('[')
 
