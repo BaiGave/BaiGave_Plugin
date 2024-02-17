@@ -23,9 +23,9 @@ class ImportBlock(bpy.types.Operator):
     bl_idname = 'baigave.import_block'
 
     # 定义一个属性来存储文件路径
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
     # 定义一个属性来过滤文件类型，只显示.json文件
-    filter_glob: bpy.props.StringProperty(default="*.json", options={'HIDDEN'})
+    filter_glob: bpy.props.StringProperty(default="*.json", options={'HIDDEN'}) # type: ignore
     def execute(self, context):
         namespace=os.path.basename(os.path.dirname(os.path.dirname(self.filepath)))+":"
         # 读取JSON文件
@@ -86,9 +86,9 @@ class ImportNBT(bpy.types.Operator):
     bl_label = "导入.nbt文件"
     
     # 定义一个属性来存储文件路径
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
     # 定义一个属性来过滤文件类型，只显示.nbt文件
-    filter_glob: bpy.props.StringProperty(default="*.nbt", options={'HIDDEN'})
+    filter_glob: bpy.props.StringProperty(default="*.nbt", options={'HIDDEN'}) # type: ignore
 
     # 定义操作的执行函数
     def execute(self, context):
@@ -153,9 +153,9 @@ class ImportSchem(bpy.types.Operator):
     bl_label = "导入.schem文件"
     
     # 定义一个属性来存储文件路径
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
     # 定义一个属性来过滤文件类型，只显示.schem文件
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
+    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'}) # type: ignore
 
     # 定义操作的执行函数
     def execute(self, context):
@@ -213,9 +213,10 @@ class ImportSchem(bpy.types.Operator):
         thread = threading.Thread(target=set_default_color, args=(image, image_width, image_height, default_color))
         # 启动新的线程
         thread.start()
-
+        processnum = bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_processnumber
         #小模型，直接导入
-        if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2]) < bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_minsize:
+        if True:
+        #if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2]) < bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_minsize:
             #几何节点+py方法
             schem(level,chunks,False,name)
             schem_liquid(level,chunks)
@@ -233,7 +234,6 @@ class ImportSchem(bpy.types.Operator):
 
         #大模型，分块导入
         else:
-            processnum = bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_processnumber
             x_cut = (chunks[1][0]-chunks[0][0]+1)//processnum
             x_list = [[chunks[0][0]+i*x_cut+1, chunks[0][0]+(i+1)*x_cut+1] for i in range(processnum)]
             x_list[0][0] = chunks[0][0]
@@ -250,40 +250,40 @@ class ImportSchem(bpy.types.Operator):
             for num in range(processnum):
                 ChunkIndex = f"import bpy;bpy.context.scene.frame_current = {num}"
                 subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
-        end_time = time.time()
-        print("预处理时间：", end_time - start_time, "秒")
-        try:
-            schem_liquid(level,chunks)
-        except Exception as e:
-            print("流体出错了:", e)
+            end_time = time.time()
+            print("预处理时间：", end_time - start_time, "秒")
+            try:
+                schem_liquid(level,chunks)
+            except Exception as e:
+                print("流体出错了:", e)
 
-        CacheFolder = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/"
-        # 检查所有的文件是否都存在
-        while not all(os.path.exists(os.path.join(CacheFolder, f'chunk{i}.pkl')) for i in range(processnum)):
-            time.sleep(0.5)
-        merged_dict = {}
-        merged_vertices = []
-        merged_ids = []
-        counter = 0
-        # 获取所有的缓存文件
-        for i in range(processnum):
-            # 加载每个文件中的字典
-            with open(os.path.join(CacheFolder, f'chunk{i}.pkl'), 'rb') as f:
-                vertices,ids,id_map = pickle.load(f)
-            # 将字典合并到大字典中
-            for key, value in id_map.items():
-                if key not in merged_dict:
-                    merged_dict[key] = counter
-                    counter += 1
-            # 将列表合并到大列表中
-            merged_vertices.extend(vertices)
-            merged_ids.extend(ids)
+            CacheFolder = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/"
+            # 检查所有的文件是否都存在
+            while not all(os.path.exists(os.path.join(CacheFolder, f'chunk{i}.pkl')) for i in range(processnum)):
+                time.sleep(0.5)
+            merged_dict = {}
+            merged_vertices = []
+            merged_ids = []
+            counter = 0
+            # 获取所有的缓存文件
+            for i in range(processnum):
+                # 加载每个文件中的字典
+                with open(os.path.join(CacheFolder, f'chunk{i}.pkl'), 'rb') as f:
+                    vertices,ids,id_map = pickle.load(f)
+                # 将字典合并到大字典中
+                for key, value in id_map.items():
+                    if key not in merged_dict:
+                        merged_dict[key] = counter
+                        counter += 1
+                # 将列表合并到大列表中
+                merged_vertices.extend(vertices)
+                merged_ids.extend(ids)
 
-        IDCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/id_map.pkl"
-        with open(IDCachePath, 'wb') as f:
-            pickle.dump((merged_vertices,merged_ids,merged_dict), f)
+            IDCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/id_map.pkl"
+            with open(IDCachePath, 'wb') as f:
+                pickle.dump((merged_vertices,merged_ids,merged_dict), f)
 
-        bpy.ops.baigave.multiprocess_import()
+            bpy.ops.baigave.multiprocess_import()
 
         return {'FINISHED'}
     
@@ -295,8 +295,8 @@ class ImportSchem(bpy.types.Operator):
 class MultiprocessImport(bpy.types.Operator):
     bl_idname = "baigave.multiprocess_import"
     bl_label = "导入.schem文件"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
+    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'}) # type: ignore
 
     def execute(self, context):
         VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
@@ -326,8 +326,8 @@ class MultiprocessImport(bpy.types.Operator):
 class MultiprocessSchem(bpy.types.Operator):
     bl_idname = "baigave.import_schem_mp"
     bl_label = "导入.schem文件"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
+    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'}) # type: ignore
 
     def execute(self, context):
         VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
@@ -345,8 +345,8 @@ class MultiprocessSchem(bpy.types.Operator):
 class ImportSchemLiquid(bpy.types.Operator):
     bl_idname = "baigave.import_schem_liquid"
     bl_label = "导入.schem文件"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'})
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
+    filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'}) # type: ignore
 
     def execute(self, context):
         VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
@@ -367,7 +367,7 @@ class Importjson(bpy.types.Operator):
     bl_idname = "baigave.import_json"
     bl_label = "导入json文件"
 
-    filepath: bpy.props.StringProperty(subtype='FILE_PATH')
+    filepath: bpy.props.StringProperty(subtype='FILE_PATH') # type: ignore
 
     def execute(self, context):
         # 检查文件路径是否有效
@@ -391,9 +391,9 @@ class Importjson(bpy.types.Operator):
 
 class SNA_AddonPreferences_F35F8(bpy.types.AddonPreferences):
     bl_idname = 'BaiGave_Plugin'
-    sna_processnumber: bpy.props.IntProperty(name='ProcessNumber', description='最大进程数，同时处理这么多个区块', default=6, subtype='NONE', min=1, max=64)
-    sna_intervaltime: bpy.props.FloatProperty(name='IntervalTime', description='处理完每个区块，间隔一段时间再导入进来。较小值减少总时间；较大值能避免blender卡住，边导边用', default=1.0, subtype='NONE', unit='NONE', min=0.0, max=10.0, step=3, precision=1)
-    sna_minsize: bpy.props.IntProperty(name='MinSize', description='超过这个数就会启用多进程分区块导入', default=1000000, subtype='NONE', min=1000, max=99999999)
+    sna_processnumber: bpy.props.IntProperty(name='ProcessNumber', description='最大进程数，同时处理这么多个区块', default=6, subtype='NONE', min=1, max=64) # type: ignore
+    sna_intervaltime: bpy.props.FloatProperty(name='IntervalTime', description='处理完每个区块，间隔一段时间再导入进来。较小值减少总时间；较大值能避免blender卡住，边导边用', default=1.0, subtype='NONE', unit='NONE', min=0.0, max=10.0, step=3, precision=1) # type: ignore
+    sna_minsize: bpy.props.IntProperty(name='MinSize', description='超过这个数就会启用多进程分区块导入', default=1000000, subtype='NONE', min=1000, max=99999999) # type: ignore
 
     def draw(self, context):
         if not (False):
@@ -464,7 +464,7 @@ class ImportWorld(bpy.types.Operator):
     current_chunk_index = 0  # 当前处理的区块索引
 
     # 定义一个属性来存储文件路径
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
 
 
     def execute(self, context):

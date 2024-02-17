@@ -313,7 +313,7 @@ class Read_schems_dir(bpy.types.Operator):
 class MoveModItem(bpy.types.Operator):
     bl_idname = "baigave.move_mod_item"
     bl_label = "移动"
-    direction: bpy.props.StringProperty()  
+    direction: bpy.props.StringProperty()  # type: ignore
 
     def execute(self, context):
         scene = context.scene
@@ -334,7 +334,7 @@ class MoveModItem(bpy.types.Operator):
 class MoveResourcepackItem(bpy.types.Operator):
     bl_idname = "baigave.move_resourcepack_item"
     bl_label = "移动"
-    direction: bpy.props.StringProperty()  
+    direction: bpy.props.StringProperty()   # type: ignore
 
     def execute(self, context):
         scene = context.scene
@@ -356,9 +356,9 @@ class AddModOperator(bpy.types.Operator):
     bl_label = "添加模组"
 
     # 定义一个属性来存储文件路径
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
     # 定义一个属性来过滤文件类型，只显示.jar文件
-    filter_glob: bpy.props.StringProperty(default="*.jar", options={'HIDDEN'})
+    filter_glob: bpy.props.StringProperty(default="*.jar", options={'HIDDEN'}) # type: ignore
 
     def execute(self, context):
         source_file = self.filepath
@@ -429,9 +429,9 @@ class AddResourcepackOperator(bpy.types.Operator):
     bl_label = "添加模组"
 
     # 定义一个属性来存储文件路径
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore # type: ignore
     # 定义一个属性来过滤文件类型，只显示.zip文件
-    filter_glob: bpy.props.StringProperty(default="*.zip", options={'HIDDEN'})
+    filter_glob: bpy.props.StringProperty(default="*.zip", options={'HIDDEN'}) # type: ignore
 
     def execute(self, context):
         source_file = self.filepath
@@ -499,11 +499,11 @@ class AddColorToBlockOperator(bpy.types.Operator):
     bl_label = "添加方块"
 
     # 定义一个属性来存储文件路径
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")# type: ignore
     # 定义一个属性来过滤文件类型，只显示.json文件
-    filter_glob: bpy.props.StringProperty(default="*.json", options={'HIDDEN'})
+    filter_glob: bpy.props.StringProperty(default="*.json", options={'HIDDEN'})# type: ignore
 
-    files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup)
+    files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup) # type: ignore
 
     def execute(self, context):
         scene = context.scene
