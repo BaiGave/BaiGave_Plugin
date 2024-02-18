@@ -64,6 +64,10 @@ class Property(bpy.types.PropertyGroup):
         name="材质节点路径",
         default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","Material.blend")
     )
+    bpy.types.Scene.wxr_sky_blend_path = bpy.props.StringProperty(
+        name="WXR的天空路径",
+        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","天空V0.12.blend")
+    )
     bpy.types.Scene.geometrynodes_blend_path = bpy.props.StringProperty(
         name="几何节点路径",
         default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","GeometryNodes.blend")

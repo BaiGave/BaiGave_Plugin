@@ -226,17 +226,17 @@ def layer2d(self,context):
 #属性
 class Settings(bpy.types.PropertyGroup):
     steve : bpy.props.BoolProperty( name="史蒂夫", description="A simple bool property",
-     default = False ,update = steve)
+     default = False ,update = steve) # type: ignore
     alex : bpy.props.BoolProperty( name="艾利克斯", description="A simple bool property",
-     default = True ,update = alex)
+     default = True ,update = alex) # type: ignore
     vanllia : bpy.props.BoolProperty( name="原版", description="A simple bool property",
-     default = True ,update = vanllia)
+     default = True ,update = vanllia) # type: ignore
     normal : bpy.props.BoolProperty( name="普通", description="A simple bool property",
-     default = False ,update = normal)
+     default = False ,update = normal) # type: ignore
     Layer2d : bpy.props.BoolProperty( name="2d", description="A simple bool property",
-     default = True ,update = layer2d)
+     default = True ,update = layer2d) # type: ignore
     Layer3d : bpy.props.BoolProperty( name="3d", description="A simple bool property",
-     default = False ,update = layer3d)
+     default = False ,update = layer3d) # type: ignore
     
 classes=[Settings,SPAWN_MODEL]
 

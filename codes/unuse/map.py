@@ -13,7 +13,7 @@ class Map(bpy.types.Operator):
     """生成地图(性能有问题)"""
     bl_idname = "baigave.spawn_map"
     bl_label = "生成地图"
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
 
     def __init__(self):
         self.start_time = 0

@@ -222,6 +222,8 @@ class CreateLevel(bpy.types.Panel):
         row.operator("baigave.create_world", text="创建存档")
         
 
+
+
 #创建编辑面板
 class EditPanel(bpy.types.Panel):
     bl_label ="编辑"
@@ -492,7 +494,7 @@ class ModPanel(bpy.types.Panel):
         my_properties = scene.my_properties 
         row = layout.row()
         # 添加 Minecraft 版本选择
-        row.label(text="选择 Minecraft 版本:")
+        
         row = layout.row()
         row.prop(scene, "version_list", text="")
         row = layout.row()
@@ -509,6 +511,25 @@ class ModPanel(bpy.types.Panel):
         # 添加一个按钮
         layout.operator("baigave.unzip_mods_operator", text="刷新")
 
+
+#创建WXR的天空面板
+class SkyPanel(bpy.types.Panel):
+    bl_label ="天空"
+    bl_idname ="SkyPanel"
+    bl_space_type ='VIEW_3D'
+    bl_region_type ='UI'
+    bl_category ='BaiGave'
+    bl_parent_id ='MainPanel'
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene
+        my_properties = scene.my_properties 
+        row = layout.row()
+        row.label(text="WXR的天空",icon="EVENT_W")
+        row = layout.row()
+        row.operator("baigave.sky_import", text="导入WXR的天空")
 # -----------------------------------------------------------------------------
 # UIList
 # -----------------------------------------------------------------------------
@@ -534,7 +555,7 @@ class ModList(bpy.types.UIList):
             row.label(text=item.name)
             row.label(text=item.description)
 
-classes=[ResourcepackList,ColorToBlockList,ModList,MainPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
+classes=[ResourcepackList,ColorToBlockList,ModList,MainPanel,SkyPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
          Ability]
 
 

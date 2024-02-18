@@ -54,6 +54,11 @@ if "map" in locals():
 	importlib.reload(map)
 else:
 	from .codes.unuse import map
+
+if "WXR_Sky" in locals():
+	importlib.reload(WXR_Sky)
+else:
+	from .codes.unuse import WXR_Sky
 	
 if "ui" in locals():
 	importlib.reload(ui)
@@ -66,6 +71,7 @@ module_list = (
 	BaiGave_Rig,
 	surface_optimization,
 	map,
+	WXR_Sky,
 	search_file,
 	merge_images,
 	importfile,
