@@ -26,52 +26,57 @@ class ImportBlock(bpy.types.Operator):
     filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
     # 定义一个属性来过滤文件类型，只显示.json文件
     filter_glob: bpy.props.StringProperty(default="*.json", options={'HIDDEN'}) # type: ignore
+
+    files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup) # type: ignore
     def execute(self, context):
-        namespace=os.path.basename(os.path.dirname(os.path.dirname(self.filepath)))+":"
-        # 读取JSON文件
-        with open(self.filepath, 'r') as file:
-            data = json.load(file)
-        
-        # 提取所需内容
-        variants = data.get("variants", {})
-        # 提取所需内容
-        multipart = data.get("multipart", [])
-        
-        id_list = []
-        if variants != {}:
-            for key, value in variants.items():
-                if key !="":
-                    id_list.append(namespace+os.path.basename(self.filepath).replace(".json","") + "[" + key + "]")
-                else:
-                    id_list.append(namespace+os.path.basename(self.filepath).replace(".json",""))
-        if multipart !=[]:
-            # 获取所有when可能的属性
-            all_when_keys = set()
-            for entry in multipart:
-                when_data = entry.get("when", {})
-                all_when_keys.update(when_data.keys())
+        for f in self.files:
+            # 从文件路径中提取文件名            
+            self.filepath=str(str(os.path.dirname(self.filepath))+"\\"+str(f.name))
+            namespace=os.path.basename(os.path.dirname(os.path.dirname(self.filepath)))+":"
+            # 读取JSON文件
+            with open(self.filepath, 'r') as file:
+                data = json.load(file)
+            
+            # 提取所需内容
+            variants = data.get("variants", {})
+            # 提取所需内容
+            multipart = data.get("multipart", [])
+            
+            id_list = []
+            if variants != {}:
+                for key, value in variants.items():
+                    if key !="":
+                        id_list.append(namespace+os.path.basename(self.filepath).replace(".json","") + "[" + key + "]")
+                    else:
+                        id_list.append(namespace+os.path.basename(self.filepath).replace(".json",""))
+            if multipart !=[]:
+                # 获取所有when可能的属性
+                all_when_keys = set()
+                for entry in multipart:
+                    when_data = entry.get("when", {})
+                    all_when_keys.update(when_data.keys())
 
-            # 遍历multipart数组
-            for i, entry in enumerate(multipart):
-                when_data = entry.get("when", {})
+                # 遍历multipart数组
+                for i, entry in enumerate(multipart):
+                    when_data = entry.get("when", {})
 
-                # 补充默认为False的属性
-                for key in all_when_keys:
-                    if key not in when_data:
-                        when_data[key] = "false"
+                    # 补充默认为False的属性
+                    for key in all_when_keys:
+                        if key not in when_data:
+                            when_data[key] = "false"
 
-                # 将when数据按字母顺序排序
-                sorted_when_data = dict(sorted(when_data.items()))
+                    # 将when数据按字母顺序排序
+                    sorted_when_data = dict(sorted(when_data.items()))
 
-                # 生成[]内的字符串
-                when_string = ','.join([f'{key}={value}' for key, value in sorted_when_data.items()])
+                    # 生成[]内的字符串
+                    when_string = ','.join([f'{key}={value}' for key, value in sorted_when_data.items()])
 
-                # 构建文件名
-                filename = os.path.basename(self.filepath).replace(".json","") + "[" + when_string + "]"
+                    # 构建文件名
+                    filename = os.path.basename(self.filepath).replace(".json","") + "[" + when_string + "]"
 
-                # 添加到结果列表
-                id_list.append(namespace+filename)
-        register_blocks(id_list)
+                    # 添加到结果列表
+                    id_list.append(namespace+filename)
+            register_blocks(id_list)
 
 
             
@@ -89,58 +94,55 @@ class ImportNBT(bpy.types.Operator):
     filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
     # 定义一个属性来过滤文件类型，只显示.nbt文件
     filter_glob: bpy.props.StringProperty(default="*.nbt", options={'HIDDEN'}) # type: ignore
-
+    files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup) # type: ignore
     # 定义操作的执行函数
     def execute(self, context):
-        # 获取文件路径
-        filepath = self.filepath
-        filename = os.path.basename(filepath)
-        start_time = time.time()
-        data = amulet_nbt.load(filepath)
-        
-        blocks =data["blocks"]
-        entities = data["entities"]
-        if "palette" in data:
-            palette = data["palette"]
-        elif "palettes" in data:
-            palette = data["palettes"][0]
-           
+        for f in self.files:
+            # 从文件路径中提取文件名            
+            self.filepath=str(str(os.path.dirname(self.filepath))+"\\"+str(f.name))
+            # 获取文件路径
+            filepath = self.filepath
+            filename = os.path.basename(filepath)
+            data = amulet_nbt.load(filepath)
+            
+            blocks =data["blocks"]
+            entities = data["entities"]
+            if "palette" in data:
+                palette = data["palette"]
+            elif "palettes" in data:
+                palette = data["palettes"][0]
+            
 
-        size = data["size"]
-        d = {}  
+            size = data["size"]
+            d = {}  
 
-        for block in blocks:
-            pos_tags = block['pos']  
-            pos = tuple(tag.value for tag in pos_tags)  
-            state = block['state'].value 
-            block_name = palette[state]['Name'].value if 'Name' in palette[state] else palette[state]['nbt']['name'].value
-            if 'Properties' in palette[state]:
-                block_state = palette[state]['Properties'].value
-                block_state = ', '.join([f'{k}={v}' for k, v in block_state.items()])
-            elif 'nbt' in palette[state] and 'name' in palette[state]['nbt']:
-                block_state = palette[state]['nbt']['name'].value
-                block_state = ', '.join([f'{k}={v}' for k, v in block_state.items()])
-            else:
-                block_state = None
-            if block_name !="minecraft:air":
-                if block_state is not None:
-                    d[(pos[0],pos[2],pos[1])] = str(block_name)+"["+block_state+"]"
+            for block in blocks:
+                pos_tags = block['pos']  
+                pos = tuple(tag.value for tag in pos_tags)  
+                state = block['state'].value 
+                block_name = palette[state]['Name'].value if 'Name' in palette[state] else palette[state]['nbt']['name'].value
+                if 'Properties' in palette[state]:
+                    block_state = palette[state]['Properties'].value
+                    block_state = ', '.join([f'{k}={v}' for k, v in block_state.items()])
+                elif 'nbt' in palette[state] and 'name' in palette[state]['nbt']:
+                    block_state = palette[state]['nbt']['name'].value
+                    block_state = ', '.join([f'{k}={v}' for k, v in block_state.items()])
                 else:
-                    d[(pos[0],pos[2],pos[1])] = block_name
-        end_time = time.time()
-        print("代码块执行时间：", end_time - start_time, "秒")
+                    block_state = None
+                if block_name !="minecraft:air":
+                    if block_state is not None:
+                        d[(pos[0],pos[2],pos[1])] = str(block_name)+"["+block_state+"]"
+                    else:
+                        d[(pos[0],pos[2],pos[1])] = block_name
 
-        #普通方法，有面剔除，速度较慢。
-        # start_time = time.time()
-        # nbt(d,filename)
-        # end_time = time.time()
-        #print("代码块执行时间：", end_time - start_time, "秒")
+            #普通方法，有面剔除，速度较慢。
+            # start_time = time.time()
+            # nbt(d,filename)
+            # end_time = time.time()
+            #print("代码块执行时间：", end_time - start_time, "秒")
 
-        #py+几何节点做法，无面剔除，但速度快。
-        start_time = time.time()
-        create_mesh_from_dictionary(d,filename.replace(".nbt",""))
-        end_time = time.time()
-        print("代码块执行时间：", end_time - start_time, "秒")
+            #py+几何节点做法，无面剔除，但速度快。
+            create_mesh_from_dictionary(d,filename.replace(".nbt",""))
         return {'FINISHED'}
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
@@ -156,134 +158,138 @@ class ImportSchem(bpy.types.Operator):
     filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
     # 定义一个属性来过滤文件类型，只显示.schem文件
     filter_glob: bpy.props.StringProperty(default="*.schem", options={'HIDDEN'}) # type: ignore
+    files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup) # type: ignore
 
     # 定义操作的执行函数
     def execute(self, context):
-        name=os.path.basename(self.filepath)
-        #清空缓存文件夹
-        start_time = time.time()
-        folder_path = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache"
-        file_names = os.listdir(folder_path)
-        for file_name in file_names:
-            file_path = os.path.join(folder_path, file_name)
-            os.remove(file_path)
-        level = amulet.load_level(self.filepath)
-        all_chunks=sorted(level.all_chunk_coords("main"))
-        chunks = [list(point) for point in level.bounds("main").bounds]
-        nbt_data = amulet_nbt._load_nbt.load(self.filepath)
-        
-        #data=nbt_data["BlockEntities"][0]["data"]["data"]
-        # 解析数据为坐标点
-        # coordinates = []
-        # for i in range(0, len(data), 3):
-        #     x = data[i]
-        #     y = data[i + 1]
-        #     z = data[i + 2]
-        #     coordinates.append((x, y, z))
+        for f in self.files:
+            # 从文件路径中提取文件名            
+            self.filepath=str(str(os.path.dirname(self.filepath))+"\\"+str(f.name))
+            name=os.path.basename(self.filepath)
+            #清空缓存文件夹
+            start_time = time.time()
+            folder_path = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache"
+            file_names = os.listdir(folder_path)
+            for file_name in file_names:
+                file_path = os.path.join(folder_path, file_name)
+                os.remove(file_path)
+            level = amulet.load_level(self.filepath)
+            all_chunks=sorted(level.all_chunk_coords("main"))
+            chunks = [list(point) for point in level.bounds("main").bounds]
+            nbt_data = amulet_nbt._load_nbt.load(self.filepath)
+            
+            #data=nbt_data["BlockEntities"][0]["data"]["data"]
+            # 解析数据为坐标点
+            # coordinates = []
+            # for i in range(0, len(data), 3):
+            #     x = data[i]
+            #     y = data[i + 1]
+            #     z = data[i + 2]
+            #     coordinates.append((x, y, z))
 
-        # # 构建字典
-        # coordinates_dict = {f"Point {index + 1}": point for index, point in enumerate(coordinates)}
+            # # 构建字典
+            # coordinates_dict = {f"Point {index + 1}": point for index, point in enumerate(coordinates)}
 
-        # 打印字典
-        #print(data)
-        #print(len(data))
-        size = {
-            "x":int(nbt_data["Width"]),
-            "y":int(nbt_data["Height"]),
-            "z":int(nbt_data["Length"])
-        }
-        
-        # 设置图片的大小和颜色
-        image_width = int(size["z"])
-        image_height = int(size["x"])
-        default_color = (0.47, 0.75, 0.35, 1.0)  # RGBA颜色，对应#79c05a
+            # 打印字典
+            #print(data)
+            #print(len(data))
+            size = {
+                "x":int(nbt_data["Width"]),
+                "y":int(nbt_data["Height"]),
+                "z":int(nbt_data["Length"])
+            }
+            
+            # 设置图片的大小和颜色
+            image_width = int(size["z"])
+            image_height = int(size["x"])
+            default_color = (0.47, 0.75, 0.35, 1.0)  # RGBA颜色，对应#79c05a
 
-        # 创建一个新的图片
-        filename = os.path.basename(self.filepath)
-        image = bpy.data.images.new("colormap", width=image_width, height=image_height)
-        image.use_fake_user = True
+            # 创建一个新的图片
+            filename = os.path.basename(self.filepath)
+            image = bpy.data.images.new("colormap", width=image_width, height=image_height)
+            image.use_fake_user = True
 
-        def set_default_color(image, image_width, image_height, default_color):
-            # 设置默认颜色
-            for y in range(image_height):
-                for x in range(image_width):
-                    pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
-                    image.pixels[pixel_index : pixel_index + 4] = default_color
-        # 创建一个新的线程来执行 set_default_color 函数
-        thread = threading.Thread(target=set_default_color, args=(image, image_width, image_height, default_color))
-        # 启动新的线程
-        thread.start()
-        processnum = bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_processnumber
-        #小模型，直接导入
-        if True:
-        #if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2]) < bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_minsize:
-            #几何节点+py方法
-            schem(level,chunks,False,name)
-            schem_liquid(level,chunks)
-            materials = bpy.data.materials
-            for material in materials:
-                try:
-                    node_tree = material.node_tree
-                    nodes = node_tree.nodes
-                    for node in nodes:
-                        if node.type == 'TEX_IMAGE':
-                            if node.name == '色图':
-                                node.image = bpy.data.images.get("colormap")
-                except Exception as e:
-                    print("材质出错了:", e)
-
-        #大模型，分块导入
-        else:
-            x_cut = (chunks[1][0]-chunks[0][0]+1)//processnum
-            x_list = [[chunks[0][0]+i*x_cut+1, chunks[0][0]+(i+1)*x_cut+1] for i in range(processnum)]
-            x_list[0][0] = chunks[0][0]
-            x_list[-1][1] = chunks[1][0]
-            VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
-            with open(VarCachePath, 'wb') as file:
-                pickle.dump((self.filepath,chunks,name,x_list,processnum),file)
-
-            blender_path = bpy.app.binary_path
-            ImportPath = bpy.utils.script_path_user()
-            MultiprocessPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_mp.py"
-            MPliquidPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_liquid_mp.py"
-            #多进程实现方法：后台启动headless blender(-b)，只运行python代码(-P)，不显示界面
-            for num in range(processnum):
-                ChunkIndex = f"import bpy;bpy.context.scene.frame_current = {num}"
-                subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
-            end_time = time.time()
-            print("预处理时间：", end_time - start_time, "秒")
-            try:
+            def set_default_color(image, image_width, image_height, default_color):
+                # 设置默认颜色
+                for y in range(image_height):
+                    for x in range(image_width):
+                        pixel_index = (y * image_width + x) * 4  # RGBA每个通道都是4个值
+                        image.pixels[pixel_index : pixel_index + 4] = default_color
+            # 创建一个新的线程来执行 set_default_color 函数
+            thread = threading.Thread(target=set_default_color, args=(image, image_width, image_height, default_color))
+            # 启动新的线程
+            thread.start()
+            processnum = bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_processnumber
+            #小模型，直接导入
+            if True:
+            #if (chunks[1][0]-chunks[0][0])*(chunks[1][1]-chunks[0][1])*(chunks[1][2]-chunks[0][2]) < bpy.context.preferences.addons['BaiGave_Plugin'].preferences.sna_minsize:
+                #几何节点+py方法
+                schem(level,chunks,False,name)
                 schem_liquid(level,chunks)
-            except Exception as e:
-                print("流体出错了:", e)
+                materials = bpy.data.materials
+                for material in materials:
+                    try:
+                        node_tree = material.node_tree
+                        nodes = node_tree.nodes
+                        for node in nodes:
+                            if node.type == 'TEX_IMAGE':
+                                if node.name == '色图':
+                                    node.image = bpy.data.images.get("colormap")
+                    except Exception as e:
+                        print("材质出错了:", e)
 
-            CacheFolder = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/"
-            # 检查所有的文件是否都存在
-            while not all(os.path.exists(os.path.join(CacheFolder, f'chunk{i}.pkl')) for i in range(processnum)):
-                time.sleep(0.5)
-            merged_dict = {}
-            merged_vertices = []
-            merged_ids = []
-            counter = 0
-            # 获取所有的缓存文件
-            for i in range(processnum):
-                # 加载每个文件中的字典
-                with open(os.path.join(CacheFolder, f'chunk{i}.pkl'), 'rb') as f:
-                    vertices,ids,id_map = pickle.load(f)
-                # 将字典合并到大字典中
-                for key, value in id_map.items():
-                    if key not in merged_dict:
-                        merged_dict[key] = counter
-                        counter += 1
-                # 将列表合并到大列表中
-                merged_vertices.extend(vertices)
-                merged_ids.extend(ids)
+            #大模型，分块导入
+            else:
+                x_cut = (chunks[1][0]-chunks[0][0]+1)//processnum
+                x_list = [[chunks[0][0]+i*x_cut+1, chunks[0][0]+(i+1)*x_cut+1] for i in range(processnum)]
+                x_list[0][0] = chunks[0][0]
+                x_list[-1][1] = chunks[1][0]
+                VarCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/var.pkl"
+                with open(VarCachePath, 'wb') as file:
+                    pickle.dump((self.filepath,chunks,name,x_list,processnum),file)
 
-            IDCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/id_map.pkl"
-            with open(IDCachePath, 'wb') as f:
-                pickle.dump((merged_vertices,merged_ids,merged_dict), f)
+                blender_path = bpy.app.binary_path
+                ImportPath = bpy.utils.script_path_user()
+                MultiprocessPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_mp.py"
+                MPliquidPath = ImportPath + "/addons/BaiGave_Plugin/multiprocess/schem_liquid_mp.py"
+                #多进程实现方法：后台启动headless blender(-b)，只运行python代码(-P)，不显示界面
+                for num in range(processnum):
+                    ChunkIndex = f"import bpy;bpy.context.scene.frame_current = {num}"
+                    subprocess.Popen([blender_path,"-b","--python-expr",ChunkIndex,"-P",MultiprocessPath])
+                end_time = time.time()
+                print("预处理时间：", end_time - start_time, "秒")
+                try:
+                    schem_liquid(level,chunks)
+                except Exception as e:
+                    print("流体出错了:", e)
 
-            bpy.ops.baigave.multiprocess_import()
+                CacheFolder = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/"
+                # 检查所有的文件是否都存在
+                while not all(os.path.exists(os.path.join(CacheFolder, f'chunk{i}.pkl')) for i in range(processnum)):
+                    time.sleep(0.5)
+                merged_dict = {}
+                merged_vertices = []
+                merged_ids = []
+                counter = 0
+                # 获取所有的缓存文件
+                for i in range(processnum):
+                    # 加载每个文件中的字典
+                    with open(os.path.join(CacheFolder, f'chunk{i}.pkl'), 'rb') as f:
+                        vertices,ids,id_map = pickle.load(f)
+                    # 将字典合并到大字典中
+                    for key, value in id_map.items():
+                        if key not in merged_dict:
+                            merged_dict[key] = counter
+                            counter += 1
+                    # 将列表合并到大列表中
+                    merged_vertices.extend(vertices)
+                    merged_ids.extend(ids)
+
+                IDCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/id_map.pkl"
+                with open(IDCachePath, 'wb') as f:
+                    pickle.dump((merged_vertices,merged_ids,merged_dict), f)
+
+                bpy.ops.baigave.multiprocess_import()
 
         return {'FINISHED'}
     

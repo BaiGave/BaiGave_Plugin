@@ -360,21 +360,26 @@ class AddModOperator(bpy.types.Operator):
     # 定义一个属性来过滤文件类型，只显示.jar文件
     filter_glob: bpy.props.StringProperty(default="*.jar", options={'HIDDEN'}) # type: ignore
 
-    def execute(self, context):
-        source_file = self.filepath
-        destination_folder = bpy.context.scene.jars_dir  # 获取指定文件夹路径
+    files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup) # type: ignore
 
-        if source_file and destination_folder:
-            try:
-                shutil.copy(source_file, destination_folder)
-                threading.Thread(target=unzip_mods_files).start()
-                return {'FINISHED'}
-            except Exception as e:
-                self.report({'ERROR'}, f"Failed to copy file: {e}")
-                return {'CANCELLED'}
-        else:
-            self.report({'ERROR'}, "File or destination folder not specified")
-            return {'CANCELLED'}
+    def execute(self, context):
+        for f in self.files:
+            # 从文件路径中提取文件名            
+            self.filepath=str(str(os.path.dirname(self.filepath))+"\\"+str(f.name))
+            source_file = self.filepath
+            destination_folder = bpy.context.scene.jars_dir  # 获取指定文件夹路径
+
+            if source_file and destination_folder:
+                try:
+                    shutil.copy(source_file, destination_folder)
+                    threading.Thread(target=unzip_mods_files).start()
+                    continue
+                except Exception as e:
+                    self.report({'ERROR'}, f"Failed to copy file: {e}")
+                    continue
+            else:
+                continue
+        return {'FINISHED'}
 
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
@@ -433,22 +438,27 @@ class AddResourcepackOperator(bpy.types.Operator):
     # 定义一个属性来过滤文件类型，只显示.zip文件
     filter_glob: bpy.props.StringProperty(default="*.zip", options={'HIDDEN'}) # type: ignore
 
+    files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup) # type: ignore
+
     def execute(self, context):
-        source_file = self.filepath
-        destination_folder = bpy.context.scene.zips_dir  # 获取指定文件夹路径
+        for f in self.files:
+            # 从文件路径中提取文件名            
+            self.filepath=str(str(os.path.dirname(self.filepath))+"\\"+str(f.name))
+            source_file = self.filepath
+            destination_folder = bpy.context.scene.zips_dir  # 获取指定文件夹路径
 
-        if source_file and destination_folder:
-            try:
-                shutil.copy(source_file, destination_folder)
-                threading.Thread(target=unzip_resourcepacks_files).start()
-                return {'FINISHED'}
-            except Exception as e:
-                self.report({'ERROR'}, f"Failed to copy file: {e}")
-                return {'CANCELLED'}
-        else:
-            self.report({'ERROR'}, "File or destination folder not specified")
-            return {'CANCELLED'}
-
+            if source_file and destination_folder:
+                try:
+                    shutil.copy(source_file, destination_folder)
+                    threading.Thread(target=unzip_resourcepacks_files).start()
+                    
+                except Exception as e:
+                    self.report({'ERROR'}, f"Failed to copy file: {e}")
+                    continue
+            else:
+                self.report({'ERROR'}, "File or destination folder not specified")
+                continue
+        return {'FINISHED'}
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
@@ -513,7 +523,6 @@ class AddColorToBlockOperator(bpy.types.Operator):
         source_file = os.path.dirname(self.filepath) 
         
         for f in self.files:
-
             # 从文件路径中提取文件名
             filename = f.name.replace(".json","")
 
