@@ -3,7 +3,7 @@ import bmesh
 from .model import create_mesh,add_mesh_to_collection,get_or_create_material,set_uv
 from .blockstates import blockstates
 import amulet
-from .classification_files.block_type import liquid,exclude,sea_plants
+from .classification_files.block_type import liquid,exclude
 import numpy as np
 import os
 from .register import create_or_clear_collection,register_blocks,registered_blocks
@@ -43,7 +43,7 @@ def schem(level,chunks,cached,filename="schem",position=(0,0,0)):
     collection_name="Blocks"
     create_or_clear_collection(collection_name)
     collection =bpy.data.collections.get(collection_name)
-    nodetree_target = "SchemToBlocks"
+    nodetree_target = "Schem"
 
     #导入几何节点
     try:
@@ -107,12 +107,12 @@ def schem(level,chunks,cached,filename="schem",position=(0,0,0)):
             has_nodes_modifier = True
             break
     if not has_nodes_modifier:
-        obj.modifiers.new(name="SchemToBlocks",type="NODES")
+        obj.modifiers.new(name="Schem",type="NODES")
     nodes_modifier=obj.modifiers[0]
     
-    # 复制 SchemToBlocks 节点组并重命名为 CollectionName
+    # 复制 Schem 节点组并重命名为 CollectionName
     try:
-        original_node_group = bpy.data.node_groups['SchemToBlocks']
+        original_node_group = bpy.data.node_groups['Schem']
         new_node_group = original_node_group.copy()
         new_node_group.name = collection_name
     except KeyError:
@@ -211,7 +211,7 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                 if isinstance(id,amulet.api.block.Block):
                     if id.extra_blocks !=():
                         try:
-                            id=str(level.translation_manager.get_("java", (1, 20, 4)).block.from_universal(id.extra_blocks[0])[0]).replace('"', '')
+                            id=str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(id.extra_blocks[0])[0]).replace('"', '')
                         except:
                             continue
                     else:
@@ -239,28 +239,18 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                                 continue
                             if isinstance(name,amulet.api.block.Block):
                                 if name.extra_blocks !=():
-                                    extra_blocks=str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(name.extra_blocks[0])[0]).replace('"', '')
-                                    # 找到等号的位置
-                                    equal_index = extra_blocks.find('[')
-
-                                    # 分离出 water 和 level=0
-                                    if equal_index != -1:
-                                        extra_blocks = extra_blocks[:equal_index]
-                                    if extra_blocks in liquid:
-                                        has_air[i] = False
+                                    name=str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(name.extra_blocks[0])[0]).replace('"', '')
+                                else:
+                                    try:
+                                        name =str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(name)[0]).replace('"', '')
+                                    except:
                                         continue
-                                try:
-                                    name =str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(name)[0]).replace('"', '')
-                                except:
-                                    continue
                                 # 找到等号的位置
                                 equal_index = name.find('[')
 
                                 # 分离出 water 和 level=0
                                 if equal_index != -1:
                                     name = name[:equal_index]
-                                    #level = name[equal_index:]
-                                # 如果 parent 是 "block/cube"，将 has_air 设为 False
                                 if name in liquid:
                                     has_air[i] = False
 
@@ -273,123 +263,119 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                         faces_to_generate = [i for i, has_air_face in enumerate(has_air) if has_air_face]
 
                         if faces_to_generate:
-                            result = remove_brackets(id)
-                            if result in sea_plants:
-                                result="minecraft:water"
-                                id ="minecraft:water[level=0]"
-                            if result in liquid:
-                                water_level = water_levels.get(id, 0)
-                                z_offset = water_level / 16 
-                                key = (key[0], -key[1]-1, key[2])
-                                for face_index in faces_to_generate:
-                                    if face_index == 5:
-                                        coords = np.array([
-                                            (key[0], key[1], key[2]), #0
-                                            (key[0]+1, key[1], key[2]), #1
-                                            (key[0]+1, key[1]+1, key[2]), #2
-                                            (key[0], key[1]+1, key[2]) #3
-                                        ])
-                                        for coord in coords:
-                                            coord = tuple(coord)
-                                            if coord not in vertices_dict:
-                                                vertices_dict[coord] = len(vertices_dict)
-                                                vertices.append(coord)
-                                        faces.append([
-                                            vertices_dict[tuple(coords[0])],
-                                            vertices_dict[tuple(coords[1])],
-                                            vertices_dict[tuple(coords[2])],
-                                            vertices_dict[tuple(coords[3])]
-                                        ])
-                                    elif face_index == 0:
-                                        coords = np.array([
-                                            (key[0], key[1]+1, key[2]), #3
-                                            (key[0], key[1]+1, key[2]+z_offset),#7
-                                            (key[0], key[1], key[2]+z_offset), #4
-                                            (key[0], key[1], key[2]) #0
-                                        ])
-                                        for coord in coords:
-                                            coord = tuple(coord)
-                                            if coord not in vertices_dict:
-                                                vertices_dict[coord] = len(vertices_dict)
-                                                vertices.append(coord)
-                                        faces.append([
-                                            vertices_dict[tuple(coords[0])],
-                                            vertices_dict[tuple(coords[1])],
-                                            vertices_dict[tuple(coords[2])],
-                                            vertices_dict[tuple(coords[3])]
-                                        ])
-                                    elif face_index == 3:
-                                        coords = np.array([
-                                            (key[0], key[1], key[2]), #0
-                                            (key[0], key[1], key[2]+z_offset), #4
-                                            (key[0]+1, key[1], key[2]+z_offset), #5
-                                            (key[0]+1, key[1], key[2]) #1
-                                        ])
-                                        for coord in coords:
-                                            coord = tuple(coord)
-                                            if coord not in vertices_dict:
-                                                vertices_dict[coord] = len(vertices_dict)
-                                                vertices.append(coord)
-                                        faces.append([
-                                            vertices_dict[tuple(coords[0])],
-                                            vertices_dict[tuple(coords[1])],
-                                            vertices_dict[tuple(coords[2])],
-                                            vertices_dict[tuple(coords[3])]
-                                        ])
-                                    elif face_index == 1:
-                                        coords = np.array([
-                                            (key[0]+1, key[1], key[2]), #1
-                                            (key[0]+1, key[1], key[2]+z_offset), #5
-                                            (key[0]+1, key[1]+1, key[2]+z_offset), #6
-                                            (key[0]+1, key[1]+1, key[2]) #2
-                                        ])
-                                        for coord in coords:
-                                            coord = tuple(coord)
-                                            if coord not in vertices_dict:
-                                                vertices_dict[coord] = len(vertices_dict)
-                                                vertices.append(coord)
-                                        faces.append([
-                                            vertices_dict[tuple(coords[0])],
-                                            vertices_dict[tuple(coords[1])],
-                                            vertices_dict[tuple(coords[2])],
-                                            vertices_dict[tuple(coords[3])]
-                                        ])
-                                    elif face_index == 2:
-                                        coords = np.array([
-                                            (key[0]+1, key[1]+1, key[2]), #2
-                                            (key[0], key[1]+1, key[2]), #3
-                                            (key[0], key[1]+1, key[2]+z_offset),#7
-                                            (key[0]+1, key[1]+1, key[2]+z_offset)#5
-                                        ])
-                                        for coord in coords:
-                                            coord = tuple(coord)
-                                            if coord not in vertices_dict:
-                                                vertices_dict[coord] = len(vertices_dict)
-                                                vertices.append(coord)
-                                        faces.append([
-                                            vertices_dict[tuple(coords[0])],
-                                            vertices_dict[tuple(coords[1])],
-                                            vertices_dict[tuple(coords[2])],
-                                            vertices_dict[tuple(coords[3])]
-                                        ])
-                                    elif face_index == 4:
-                                        coords = np.array([
-                                            (key[0]+1, key[1]+1, key[2]+z_offset),#6
-                                            (key[0]+1, key[1], key[2]+z_offset), #5
-                                            (key[0], key[1], key[2]+z_offset), #4
-                                            (key[0], key[1]+1, key[2]+z_offset)#7
-                                        ])
-                                        for coord in coords:
-                                            coord = tuple(coord)
-                                            if coord not in vertices_dict:
-                                                vertices_dict[coord] = len(vertices_dict)
-                                                vertices.append(coord)
-                                        faces.append([
-                                            vertices_dict[tuple(coords[0])],
-                                            vertices_dict[tuple(coords[1])],
-                                            vertices_dict[tuple(coords[2])],
-                                            vertices_dict[tuple(coords[3])]
-                                        ])
+
+                            water_level = water_levels.get(id, 0)
+                            z_offset = water_level / 16 
+                            key = (key[0], -key[1]-1, key[2])
+                            for face_index in faces_to_generate:
+                                if face_index == 5:
+                                    coords = np.array([
+                                        (key[0], key[1], key[2]), #0
+                                        (key[0]+1, key[1], key[2]), #1
+                                        (key[0]+1, key[1]+1, key[2]), #2
+                                        (key[0], key[1]+1, key[2]) #3
+                                    ])
+                                    for coord in coords:
+                                        coord = tuple(coord)
+                                        if coord not in vertices_dict:
+                                            vertices_dict[coord] = len(vertices_dict)
+                                            vertices.append(coord)
+                                    faces.append([
+                                        vertices_dict[tuple(coords[0])],
+                                        vertices_dict[tuple(coords[1])],
+                                        vertices_dict[tuple(coords[2])],
+                                        vertices_dict[tuple(coords[3])]
+                                    ])
+                                elif face_index == 0:
+                                    coords = np.array([
+                                        (key[0], key[1]+1, key[2]), #3
+                                        (key[0], key[1]+1, key[2]+z_offset),#7
+                                        (key[0], key[1], key[2]+z_offset), #4
+                                        (key[0], key[1], key[2]) #0
+                                    ])
+                                    for coord in coords:
+                                        coord = tuple(coord)
+                                        if coord not in vertices_dict:
+                                            vertices_dict[coord] = len(vertices_dict)
+                                            vertices.append(coord)
+                                    faces.append([
+                                        vertices_dict[tuple(coords[0])],
+                                        vertices_dict[tuple(coords[1])],
+                                        vertices_dict[tuple(coords[2])],
+                                        vertices_dict[tuple(coords[3])]
+                                    ])
+                                elif face_index == 3:
+                                    coords = np.array([
+                                        (key[0], key[1], key[2]), #0
+                                        (key[0], key[1], key[2]+z_offset), #4
+                                        (key[0]+1, key[1], key[2]+z_offset), #5
+                                        (key[0]+1, key[1], key[2]) #1
+                                    ])
+                                    for coord in coords:
+                                        coord = tuple(coord)
+                                        if coord not in vertices_dict:
+                                            vertices_dict[coord] = len(vertices_dict)
+                                            vertices.append(coord)
+                                    faces.append([
+                                        vertices_dict[tuple(coords[0])],
+                                        vertices_dict[tuple(coords[1])],
+                                        vertices_dict[tuple(coords[2])],
+                                        vertices_dict[tuple(coords[3])]
+                                    ])
+                                elif face_index == 1:
+                                    coords = np.array([
+                                        (key[0]+1, key[1], key[2]), #1
+                                        (key[0]+1, key[1], key[2]+z_offset), #5
+                                        (key[0]+1, key[1]+1, key[2]+z_offset), #6
+                                        (key[0]+1, key[1]+1, key[2]) #2
+                                    ])
+                                    for coord in coords:
+                                        coord = tuple(coord)
+                                        if coord not in vertices_dict:
+                                            vertices_dict[coord] = len(vertices_dict)
+                                            vertices.append(coord)
+                                    faces.append([
+                                        vertices_dict[tuple(coords[0])],
+                                        vertices_dict[tuple(coords[1])],
+                                        vertices_dict[tuple(coords[2])],
+                                        vertices_dict[tuple(coords[3])]
+                                    ])
+                                elif face_index == 2:
+                                    coords = np.array([
+                                        (key[0]+1, key[1]+1, key[2]), #2
+                                        (key[0], key[1]+1, key[2]), #3
+                                        (key[0], key[1]+1, key[2]+z_offset),#7
+                                        (key[0]+1, key[1]+1, key[2]+z_offset)#5
+                                    ])
+                                    for coord in coords:
+                                        coord = tuple(coord)
+                                        if coord not in vertices_dict:
+                                            vertices_dict[coord] = len(vertices_dict)
+                                            vertices.append(coord)
+                                    faces.append([
+                                        vertices_dict[tuple(coords[0])],
+                                        vertices_dict[tuple(coords[1])],
+                                        vertices_dict[tuple(coords[2])],
+                                        vertices_dict[tuple(coords[3])]
+                                    ])
+                                elif face_index == 4:
+                                    coords = np.array([
+                                        (key[0]+1, key[1]+1, key[2]+z_offset),#6
+                                        (key[0]+1, key[1], key[2]+z_offset), #5
+                                        (key[0], key[1], key[2]+z_offset), #4
+                                        (key[0], key[1]+1, key[2]+z_offset)#7
+                                    ])
+                                    for coord in coords:
+                                        coord = tuple(coord)
+                                        if coord not in vertices_dict:
+                                            vertices_dict[coord] = len(vertices_dict)
+                                            vertices.append(coord)
+                                    faces.append([
+                                        vertices_dict[tuple(coords[0])],
+                                        vertices_dict[tuple(coords[1])],
+                                        vertices_dict[tuple(coords[2])],
+                                        vertices_dict[tuple(coords[3])]
+                                    ])
 
     collection = bpy.context.collection
     mesh_name = filename

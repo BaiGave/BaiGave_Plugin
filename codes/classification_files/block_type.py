@@ -8,7 +8,5 @@ leaves =["vine","minecraft:spruce_leaves","minecraft:acacia_leaves","minecraft:b
 
 liquid = ["minecraft:water","minecraft:lava"]
 
-sea_plants = ["minecraft:seagrass","minecraft:tall_seagrass","minecraft:kelp_plant","minecraft:kelp"]
-
 exclude = ["minecraft:water","minecraft:lava", "minecraft:air"]
 

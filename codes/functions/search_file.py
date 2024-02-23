@@ -4,7 +4,7 @@ import bpy
 import os
 import re
 
-from ..property import unzip_mods_files,unzip_resourcepacks_files
+from ..property import unzip_mods_files,unzip_resourcepacks_files,calculate_average_color
 
 class Read_mods_dir(bpy.types.Operator):
     """读取目录"""
@@ -556,7 +556,6 @@ class DeleteColorToBlockOperator(bpy.types.Operator):
 
         return {'FINISHED'}
 
-from ..property import calculate_average_color
 
 class GetAverageColor(bpy.types.Operator):
     bl_idname = "baigave.get_average_color"

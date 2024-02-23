@@ -187,6 +187,7 @@ def get_parent(id):
         return parent
 
     except Exception as e:
+        
         print(f"An error occurred: {e}")
         return None
 
@@ -272,10 +273,10 @@ def get_model(id):
                             else:
                                 t, e, _ = get_all_data(dirname, filename)
                             if "uvlock" in apply:
-                                uvlock =value["uvlock"]
+                                uvlock =apply["uvlock"]
                             textures.update(t)
                             elements.extend(e)
-                        
+                        continue
                     elif "when" not in part:
                         apply = part["apply"]
                         filepath = apply["model"] if "model" in apply else ""
@@ -285,7 +286,6 @@ def get_model(id):
                         t, e, _ = get_all_data(dirname, filename)
                         textures.update(t)
                         elements.extend(e)
-                
             if filepath == "":
                 print(id)
                 print("No matching model found")
@@ -297,7 +297,7 @@ def get_model(id):
 
         # 将模型数据缓存起来
         cached_models[id] = (textures, elements, rotation,uvlock)
-        return textures, elements, rotation , uvlock
+        return textures, elements, rotation,uvlock
 
     except Exception as e:
         print(f"An error occurred: {e}")

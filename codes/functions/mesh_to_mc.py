@@ -83,7 +83,7 @@ def create_mesh_from_dictionary(d,name):
     collection_name="Blocks"
     create_or_clear_collection(collection_name)
     collection =bpy.data.collections.get(collection_name)
-    nodetree_target = "SchemToBlocks"
+    nodetree_target = "Schem"
 
     #导入几何节点
     try:
@@ -124,12 +124,12 @@ def create_mesh_from_dictionary(d,name):
             has_nodes_modifier = True
             break
     if not has_nodes_modifier:
-        obj.modifiers.new(name="SchemToBlocks",type="NODES")
+        obj.modifiers.new(name="Schem",type="NODES")
     nodes_modifier=obj.modifiers[0]
     
-    # 复制 SchemToBlocks 节点组并重命名为 CollectionName
+    # 复制 Schem 节点组并重命名为 CollectionName
     try:
-        original_node_group = bpy.data.node_groups['SchemToBlocks']
+        original_node_group = bpy.data.node_groups['Schem']
         new_node_group = original_node_group.copy()
         new_node_group.name = collection_name
     except KeyError:
