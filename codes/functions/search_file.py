@@ -556,10 +556,33 @@ class DeleteColorToBlockOperator(bpy.types.Operator):
 
         return {'FINISHED'}
 
+from ..property import calculate_average_color
 
+class GetAverageColor(bpy.types.Operator):
+    bl_idname = "baigave.get_average_color"
+    bl_label = "获得图片平均颜色"
+
+    # 定义一个属性来存储文件路径
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore
+    # 定义一个属性来过滤文件类型，只显示.jar文件
+    filter_glob: bpy.props.StringProperty(default="*.png", options={'HIDDEN'}) # type: ignore
+
+    files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup) # type: ignore
+
+    def execute(self, context):
+        for f in self.files:
+            # 从文件路径中提取文件名            
+            self.filepath=str(str(os.path.dirname(self.filepath))+"\\"+str(f.name))
+            color = calculate_average_color(self.filepath)
+            self.report({'INFO'}, str(color)) # 使用消息系统显示颜色信息
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
 classes=[Read_resourcepacks_dir,Read_mods_dir, Read_versions_dir,Read_saves_dir,Read_colors_dir,Read_schems_dir,MoveModItem,MoveResourcepackItem,
-         AddModOperator,DeleteModOperator,AddResourcepackOperator,DeleteResourcepackOperator,AddColorToBlockOperator,DeleteColorToBlockOperator]
+         AddModOperator,DeleteModOperator,AddResourcepackOperator,DeleteResourcepackOperator,AddColorToBlockOperator,DeleteColorToBlockOperator,GetAverageColor]
 
 
 def register():

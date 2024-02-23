@@ -252,6 +252,8 @@ class EditPanel(bpy.types.Panel):
         row = layout.row()
         row.operator("baigave.make_color_dict", text="制作颜色-方块字典")
         row = layout.row()
+        row.operator("baigave.get_average_color", text="得到图片平均颜色值")
+        row = layout.row()
         row.operator("baigave.objtoblocks", text="生成点云(转楼梯/台阶方块所需)")
         row = layout.row()
         row.operator("baigave.blockblender", text="转换网格体(方块)")
