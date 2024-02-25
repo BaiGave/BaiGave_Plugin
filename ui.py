@@ -22,6 +22,8 @@ class MainPanel(bpy.types.Panel):
         layout = self.layout
         row = layout.row()
         row.label(text = "白给的工具",icon='BOLD')
+
+        
 #人模绑定面板        
 class RigPanel(bpy.types.Panel):
     bl_label ="人模"
@@ -532,11 +534,46 @@ class SkyPanel(bpy.types.Panel):
         row.label(text="WXR的天空",icon="EVENT_W")
         row = layout.row()
         row.operator("baigave.sky_import", text="导入WXR的天空")
+
+
+#创建编辑面板
+class InformationPanel(bpy.types.Panel):
+    bl_label ="更多信息"
+    bl_idname ="InformationPanel"
+    bl_space_type ='VIEW_3D'
+    bl_region_type ='UI'
+    bl_category ='BaiGave'
+    bl_parent_id ='MainPanel'
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene
+        
+        box = layout.box()
+        row = box.row(align=True)
+        row.label(text="qq群号:")
+        row.prop(scene, "qq_number", text="")
+        box.label(text="(插件最新版会第一时间放在群里)")
+
+        box = layout.box()
+        box.label(text="插件下载路径：")
+        box.prop(scene, "download_path",text="")
+        box.label(text="(请确定自己使用的是最新版)")
+
+        box = layout.box()
+        box.label(text="相关教程：")
+        box.prop(scene, "bilbil_space",text="")
+
+        
+        
+        
 # -----------------------------------------------------------------------------
 # UIList
 # -----------------------------------------------------------------------------
 
 # 定义 UIList 类 ResourcepackList
+        
 class ResourcepackList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
@@ -557,7 +594,7 @@ class ModList(bpy.types.UIList):
             row.label(text=item.name)
             row.label(text=item.description)
 
-classes=[ResourcepackList,ColorToBlockList,ModList,MainPanel,SkyPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
+classes=[ResourcepackList,ColorToBlockList,ModList,MainPanel,SkyPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,InformationPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
          Ability]
 
 

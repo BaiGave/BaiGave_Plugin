@@ -116,6 +116,21 @@ class Property(bpy.types.PropertyGroup):
 
 
     bpy.types.Scene.schem_filename = bpy.props.StringProperty(name=".schem文件名", default="file")
+    bpy.types.Scene.download_path = bpy.props.StringProperty(
+        name="插件路径",
+        default="https://github.com/BaiGave/BaiGave_Plugin/releases",
+        description="插件路径"
+    )
+    bpy.types.Scene.qq_number = bpy.props.StringProperty(
+        name="qq群号",
+        default="878232347",
+        description="qq群号"
+    )
+    bpy.types.Scene.bilbil_space = bpy.props.StringProperty(
+        name="bilbil空间",
+        default="https://space.bilibili.com/3461563635731405/video",
+        description="bilbil空间"
+    )
 
     bpy.types.Scene.world_name = bpy.props.StringProperty(name="World Name", default="World1")
     bpy.types.Scene.spawn_x = bpy.props.IntProperty(name="Spawn X", default=0)

@@ -65,7 +65,10 @@ class ExportSchem(bpy.types.Operator):
                         continue
 
                     # 获取顶点属性值（blockid）
-                    blockid = obj.data.attributes['blockid'].data[vertex.index].value
+                    try:
+                        blockid = obj.data.attributes['blockid'].data[vertex.index].value
+                    except:
+                        blockid = 0
                     if blockid == 0:
                         continue
                     # 将顶点坐标与属性值关联存储到字典中
@@ -161,9 +164,7 @@ class Calculate_Size(bpy.types.Operator):
                         continue
 
                     # 获取顶点属性值（blockid）
-                    blockid = obj.data.attributes['blockid'].data[vertex.index].value
-                    if blockid == 0:
-                        continue
+                    blockid =1
 
                     # 更新最小和最大坐标
                     min_coords = [min(min_coords[i], coord[i]) for i in range(3)]
@@ -171,7 +172,6 @@ class Calculate_Size(bpy.types.Operator):
 
                     # 将顶点坐标与属性值关联存储到字典中
                     self.vertex_dict[coord] = blockid
-        self.vertex_dict = {} 
         # 将浮点数坐标转换为整数
         min_coords = [int(coord) for coord in min_coords]
         max_coords = [int(coord) for coord in max_coords]
@@ -220,7 +220,10 @@ class ExportToSave(bpy.types.Operator):
                         continue
 
                     # 获取顶点属性值（blockid）
-                    blockid = obj.data.attributes['blockid'].data[vertex.index].value
+                    try:
+                        blockid = obj.data.attributes['blockid'].data[vertex.index].value
+                    except:
+                        blockid = 0
                     if blockid == 0:
                         continue
 
