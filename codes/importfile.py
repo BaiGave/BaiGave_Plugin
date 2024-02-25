@@ -508,7 +508,6 @@ class ImportWorld(bpy.types.Operator):
         # 创建顶点和顶点索引
         vertices = []
         ids = []  # 存储顶点id
-
         # 遍历范围内所有的坐标
         for x in range(min_coords[0], max_coords[0] + 1):
             for y in range(min_coords[1], max_coords[1] + 1):

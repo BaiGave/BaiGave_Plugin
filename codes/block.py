@@ -116,7 +116,6 @@ def block(textures,elements,position,rot,filename,has_air,collection=None,uvlock
 
         if texture_list[face_index] == "None":
             continue
-
         mat = get_or_create_material(texture_list[face_index],filename)
         if mat.name not in obj.data.materials:
             obj.data.materials.append(mat)
