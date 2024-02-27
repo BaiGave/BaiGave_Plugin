@@ -5,6 +5,7 @@ from amulet.api.block import Block
 from amulet_nbt import TAG_Compound, TAG_Int, ByteArrayTag ,IntArrayTag,ShortTag,TAG_String
 from .functions.tip import ShowMessageBox
 
+
 class OpenSaves_FileManagerOperator(bpy.types.Operator):
     bl_idname = "baigave.open_saves_folder_s"
     bl_label = "打开文件管理器"
@@ -54,25 +55,61 @@ class ExportSchem(bpy.types.Operator):
 
         for obj in selected_objects:
             if obj.type == 'MESH':
-                mesh = obj.data
-                vertices = mesh.vertices
+                # 检查是否存在名为“模型转换”的修改器
+                has_modifier = False
+                for modifier in obj.modifiers:
+                    if modifier.name == '模型转换':
+                        has_modifier = True
+                        break
 
-                for vertex in vertices:
-                    coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
+                if has_modifier:
+                    depsgraph = bpy.context.evaluated_depsgraph_get()
+                    obj_evaluated = bpy.context.active_object.evaluated_get(depsgraph)
 
-                    # 如果顶点坐标已经存在于字典中，则跳过
-                    if coord in self.vertex_dict:
-                        continue
+                    # 检查 'blockid' 属性是否存在并且不为空
+                    if 'blockid' in obj_evaluated.data.attributes and obj_evaluated.data.attributes['blockid'].data:
+                        # 获取 'blockid' 属性列表
+                        blockid_attr = obj_evaluated.data.attributes['blockid'].data
 
-                    # 获取顶点属性值（blockid）
-                    try:
-                        blockid = obj.data.attributes['blockid'].data[vertex.index].value
-                    except:
-                        blockid = 0
-                    if blockid == 0:
-                        continue
-                    # 将顶点坐标与属性值关联存储到字典中
-                    self.vertex_dict[coord] = blockid
+                        # 获取顶点坐标并将其转换为整数世界坐标
+                        coords = []
+                        for vertex in obj_evaluated.data.vertices:
+                            coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
+                            if coord in self.vertex_dict:
+                                continue
+                            coords.append(coord)
+
+                        # 将坐标和颜色值对应存储在字典中
+                        for i, item in enumerate(blockid_attr):
+                            try:
+                                blockid = item.value  # 获取blockid属性值
+                            except:
+                                blockid = 0
+                            if blockid == 0:
+                                continue
+                            self.vertex_dict[coords[i]] = blockid
+
+                    continue
+                elif not has_modifier:
+                    mesh = obj.data
+                    vertices = mesh.vertices
+
+                    for vertex in vertices:
+                        coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
+
+                        # 如果顶点坐标已经存在于字典中，则跳过
+                        if coord in self.vertex_dict:
+                            continue
+
+                        # 获取顶点属性值（blockid）
+                        try:
+                            blockid = obj.data.attributes['blockid'].data[vertex.index].value
+                        except:
+                            blockid = 0
+                        if blockid == 0:
+                            continue
+                        # 将顶点坐标与属性值关联存储到字典中
+                        self.vertex_dict[coord] = blockid
         self.export_schem(context)
         ShowMessageBox("文件导出成功！","白给的插件",link_text="点击这里前往导出文件夹", link_operator=OpenFileManagerOperator)
         return {'FINISHED'}
@@ -154,24 +191,51 @@ class Calculate_Size(bpy.types.Operator):
 
         for obj in selected_objects:
             if obj.type == 'MESH':
-                mesh = obj.data
-                vertices = mesh.vertices
+                # 检查是否存在名为“模型转换”的修改器
+                has_modifier = False
+                for modifier in obj.modifiers:
+                    if modifier.name == '模型转换':
+                        has_modifier = True
+                        break
 
-                for vertex in vertices:
-                    coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
-                    # 如果顶点坐标已经存在于字典中，则跳过
-                    if coord in self.vertex_dict:
-                        continue
+                if has_modifier:
+                    depsgraph = bpy.context.evaluated_depsgraph_get()
+                    obj_evaluated = bpy.context.active_object.evaluated_get(depsgraph)
 
-                    # 获取顶点属性值（blockid）
-                    blockid =1
+                    # 检查 'blockid' 属性是否存在并且不为空
+                    if 'blockid' in obj_evaluated.data.attributes and obj_evaluated.data.attributes['blockid'].data:
+                        for vertex in obj_evaluated.data.vertices:
+                            coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
+                            if coord in self.vertex_dict:
+                                continue
 
-                    # 更新最小和最大坐标
-                    min_coords = [min(min_coords[i], coord[i]) for i in range(3)]
-                    max_coords = [max(max_coords[i], coord[i]) for i in range(3)]
+                            blockid =1
 
-                    # 将顶点坐标与属性值关联存储到字典中
-                    self.vertex_dict[coord] = blockid
+                            # 更新最小和最大坐标
+                            min_coords = [min(min_coords[i], coord[i]) for i in range(3)]
+                            max_coords = [max(max_coords[i], coord[i]) for i in range(3)]
+                            self.vertex_dict[coord] = blockid
+
+                    continue
+                elif not has_modifier:
+                    mesh = obj.data
+                    vertices = mesh.vertices
+
+                    for vertex in vertices:
+                        coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
+                        # 如果顶点坐标已经存在于字典中，则跳过
+                        if coord in self.vertex_dict:
+                            continue
+
+                        # 获取顶点属性值（blockid）
+                        blockid =1
+
+                        # 更新最小和最大坐标
+                        min_coords = [min(min_coords[i], coord[i]) for i in range(3)]
+                        max_coords = [max(max_coords[i], coord[i]) for i in range(3)]
+
+                        # 将顶点坐标与属性值关联存储到字典中
+                        self.vertex_dict[coord] = blockid
         # 将浮点数坐标转换为整数
         min_coords = [int(coord) for coord in min_coords]
         max_coords = [int(coord) for coord in max_coords]
@@ -211,24 +275,60 @@ class ExportToSave(bpy.types.Operator):
         self.block_id_name_map = eval(text_data.as_string())
         for obj in selected_objects:
             if obj.type == 'MESH':
-                mesh = obj.data
-                vertices = mesh.vertices
-                for vertex in vertices:
-                    coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
-                    # 如果顶点坐标已经存在于字典中，则跳过
-                    if coord in self.vertex_dict:
-                        continue
+                # 检查是否存在名为“模型转换”的修改器
+                has_modifier = False
+                for modifier in obj.modifiers:
+                    if modifier.name == '模型转换':
+                        has_modifier = True
+                        break
 
-                    # 获取顶点属性值（blockid）
-                    try:
-                        blockid = obj.data.attributes['blockid'].data[vertex.index].value
-                    except:
-                        blockid = 0
-                    if blockid == 0:
-                        continue
+                if has_modifier:
+                    depsgraph = bpy.context.evaluated_depsgraph_get()
+                    obj_evaluated = bpy.context.active_object.evaluated_get(depsgraph)
 
-                    # 将顶点坐标与属性值关联存储到字典中
-                    self.vertex_dict[coord] = blockid
+                    # 检查 'blockid' 属性是否存在并且不为空
+                    if 'blockid' in obj_evaluated.data.attributes and obj_evaluated.data.attributes['blockid'].data:
+                        # 获取 'blockid' 属性列表
+                        blockid_attr = obj_evaluated.data.attributes['blockid'].data
+
+                        # 获取顶点坐标并将其转换为整数世界坐标
+                        coords = []
+                        for vertex in obj_evaluated.data.vertices:
+                            coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
+                            if coord in self.vertex_dict:
+                                continue
+                            coords.append(coord)
+
+                        # 将坐标和颜色值对应存储在字典中
+                        for i, item in enumerate(blockid_attr):
+                            try:
+                                blockid = item.value  # 获取blockid属性值
+                            except:
+                                blockid = 0
+                            if blockid == 0:
+                                continue
+                            self.vertex_dict[coords[i]] = blockid
+
+                    continue
+                elif not has_modifier:
+                    mesh = obj.data
+                    vertices = mesh.vertices
+                    for vertex in vertices:
+                        coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
+                        # 如果顶点坐标已经存在于字典中，则跳过
+                        if coord in self.vertex_dict:
+                            continue
+
+                        # 获取顶点属性值（blockid）
+                        try:
+                            blockid = obj.data.attributes['blockid'].data[vertex.index].value
+                        except:
+                            blockid = 0
+                        if blockid == 0:
+                            continue
+
+                        # 将顶点坐标与属性值关联存储到字典中
+                        self.vertex_dict[coord] = blockid
 
         # 遍历坐标表
         for coordinates, block_id in self.vertex_dict.items():
