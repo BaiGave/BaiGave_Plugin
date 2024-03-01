@@ -99,7 +99,7 @@ class ImportPanel(bpy.types.Panel):
         # 创建一个框
         box = layout.box()
         box.label(text="导入.schem文件")
-        box.operator("baigave.import_schem", text="导入.schem文件")
+        box.operator("baigave.schem_panel", text="导入.schem文件")
 
         split_8D70F = box.split(factor=0.15, align=True)
         split_8D70F.enabled = True
@@ -154,6 +154,9 @@ class ImportPanel(bpy.types.Panel):
         row = layout.row()
         row.operator("baigave.image_merger", text="合并图片")
         
+        box = layout.box()
+        row=box.row()
+        row.operator("baigave.merge_overlapping_faces", text="合并重叠面")
         
         # row = layout.row()
         # row.operator("baigave.select", text="选择区域")
@@ -593,8 +596,33 @@ class ModList(bpy.types.UIList):
             row = layout.row(align=True)
             row.label(text=item.name)
             row.label(text=item.description)
+#弹出对话框
+class SchemPanel(bpy.types.Operator):
+    bl_idname = "baigave.schem_panel"
+    bl_label = "导入Schem文件二级界面"
 
-classes=[ResourcepackList,ColorToBlockList,ModList,MainPanel,SkyPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,InformationPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
+    my_string_prop: bpy.props.StringProperty(name="String Prop") # type: ignore
+
+    def execute(self, context):
+        
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        # 弹出界面
+        return context.window_manager.invoke_popup(self)
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene
+        
+        row = layout.row(align=True)    
+        row.label(text="导入.schem选项界面",icon="EVENT_S")
+        row = layout.row()    
+        row.prop(scene, "separate_vertices_by_blockid",text="是否按照方块状态分离？")
+        row = layout.row()
+        row.operator("baigave.import_schem", text="导入.schem文件")
+
+
+classes=[SchemPanel,ResourcepackList,ColorToBlockList,ModList,MainPanel,SkyPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,InformationPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
          Ability]
 
 

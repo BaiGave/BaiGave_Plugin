@@ -1,5 +1,6 @@
 import os
 import bpy
+import bmesh
 import numpy as np
 from .tip import ShowMessageBox
 from ..register import register_blocks,create_or_clear_collection
@@ -568,7 +569,58 @@ class BlockBlender(bpy.types.Operator):
             
         return {'FINISHED'}
 
-classes=[ObjToBlocks,BlockBlender]
+
+
+class MergeOverlappingFaces(bpy.types.Operator):
+    bl_idname = "baigave.merge_overlapping_faces"
+    bl_label = "合并重叠面"
+
+    @classmethod
+    def poll(cls, context):
+        return context.selected_objects and all(obj.type == 'MESH' for obj in context.selected_objects)
+
+    def execute(self, context):
+        # 创建一个集合用于存储面的数据
+        face_data = {}
+        
+        # 遍历所有选中的网格体
+        for obj in context.selected_objects:
+            if obj.type == 'MESH':
+                mesh = obj.data
+                bpy.context.view_layer.objects.active = obj
+                bpy.ops.object.mode_set(mode='EDIT')  # 切换到编辑模式
+
+                bm = bmesh.from_edit_mesh(mesh)
+                bm.faces.ensure_lookup_table()
+                
+                # 遍历所有的面，将面的数据存储在字典中
+                for face in bm.faces:
+                    vertices = tuple(sorted((v.co.copy().freeze() for v in face.verts)))
+                    if vertices not in face_data:
+                        face_data[vertices] = {'faces': []}
+                    face_data[vertices]['faces'].append((face, bm))
+
+        # 遍历面数据字典，找到所有顶点都重合的面
+        for vertices, data in face_data.items():
+            if len(data['faces']) > 1:
+                # 如果出现重复的面，则选择这些面
+                for face in data['faces']:
+                    bm =face[1]
+                    bm.faces[face[0].index].select_set(True)
+
+        # 删除重叠的面
+        bpy.ops.mesh.delete(type='FACE')
+
+        # 更新网格
+        bmesh.update_edit_mesh(mesh)
+
+        bpy.ops.object.mode_set(mode='OBJECT')  # 切换回对象模式
+
+        return {'FINISHED'}
+
+
+
+classes=[ObjToBlocks,BlockBlender,MergeOverlappingFaces]
 
 
 def register():

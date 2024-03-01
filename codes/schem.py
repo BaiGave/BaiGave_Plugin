@@ -121,7 +121,7 @@ def schem(level,chunks,cached,filename="schem",position=(0,0,0)):
     nodes_modifier.node_group = bpy.data.node_groups[collection_name]
     bpy.data.node_groups[collection_name].nodes["集合信息"].inputs[0].default_value = collection
     nodes_modifier.show_viewport = True    
-
+    return obj
     
 
 def schem_chunk(level,chunks,x_list,filename="schem",position=(0,0,0)):
@@ -410,3 +410,62 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
     bm.to_mesh(mesh)
     bm.free()
 
+def separate_vertices_by_blockid(obj):
+    mesh = obj.data
+    vertices = mesh.vertices
+
+    # 字典用于存储不同 blockid 的顶点
+    vertex_dict = {}
+
+    for vertex in vertices:
+        coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
+        
+        # 如果顶点坐标已经存在于字典中，则跳过
+        if coord in vertex_dict:
+            continue
+
+        # 获取顶点属性值（blockid）
+        try:
+            blockid = obj.data.attributes['blockid'].data[vertex.index].value
+        except:
+            blockid = 0
+
+        # 根据 blockid 将顶点添加到相应的列表中
+        if blockid not in vertex_dict:
+            vertex_dict[blockid] = [vertex]
+        else:
+            vertex_dict[blockid].append(vertex)
+
+    # 创建不同 blockid 的网格体
+    for blockid, vertices in vertex_dict.items():
+        # 创建新的网格对象和物体
+        new_mesh = bpy.data.meshes.new(name=f"BlockID_{blockid}_Mesh")
+        new_obj = bpy.data.objects.new(name=f"BlockID_{blockid}_Object", object_data=new_mesh)
+        bpy.context.collection.objects.link(new_obj)
+
+        # 复制修改器
+        for modifier in obj.modifiers:
+            new_modifier = new_obj.modifiers.new(modifier.name, modifier.type)
+            
+            # 复制节点修改器的设置
+            if modifier.type == 'NODES':
+                new_modifier.node_group = modifier.node_group
+
+        # 设置新网格的顶点和面
+        new_mesh.from_pydata([v.co for v in vertices], [], [])
+        new_mesh.update()
+
+        # 添加 blockid 属性到新网格体的顶点
+        blockid_attr = new_mesh.attributes.new(name='blockid', type="INT", domain="POINT")
+        biome_attr=new_mesh.attributes.new(name='biome', type="FLOAT_COLOR", domain="POINT")
+        for v_index, v in enumerate(vertices):
+            try:
+                blockid_attr.data[v_index].value = blockid
+                biome_attr.data[v_index].color  = (0.149,0.660,0.10,0.00)
+            except IndexError:
+                print(f"顶点索引 {v_index} 超出范围。")
+
+        # 将新物体移动到原始物体的位置
+        new_obj.matrix_world = obj.matrix_world
+    # 删除原始对象
+    bpy.data.objects.remove(obj, do_unlink=True)
