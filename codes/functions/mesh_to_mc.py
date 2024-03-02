@@ -589,7 +589,7 @@ class MergeOverlappingFaces(bpy.types.Operator):
                 mesh = obj.data
                 bpy.context.view_layer.objects.active = obj
                 bpy.ops.object.mode_set(mode='EDIT')  # 切换到编辑模式
-
+                bpy.ops.mesh.select_all(action='DESELECT')  # 取消选择所有面
                 bm = bmesh.from_edit_mesh(mesh)
                 bm.faces.ensure_lookup_table()
                 

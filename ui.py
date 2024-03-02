@@ -1,13 +1,17 @@
 import bpy
+from .codes.functions.translate import translate
+
 
 #主面板
 class MainPanel(bpy.types.Panel):
-    bl_label ="白给的工具"
+    bl_label = translate("mainpanel.bl_label")
     bl_idname ="MainPanel"
     bl_space_type ='VIEW_3D'
     bl_region_type = 'UI'
     bl_category ='白给的工具'
     bl_options = {'HEADER_LAYOUT_EXPAND'}
+
+    
 
     def __init__(self) -> None:
         bpy.ops.baigave.read_mods_dir()
@@ -21,7 +25,7 @@ class MainPanel(bpy.types.Panel):
     def draw(self,context):
         layout = self.layout
         row = layout.row()
-        row.label(text = "白给的工具",icon='BOLD')
+        row.label(text = translate("mainpanel.labal"),icon='BOLD')
 
         
 #人模绑定面板        
