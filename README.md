@@ -12,10 +12,12 @@
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
+![logo](https://github.com/BaiGave/BaiGave_Plugin/assets/107305554/f7eaf1a1-c216-4903-8c15-505592ba057c)
 <!-- PROJECT LOGO -->
 <br />
-
 <p align="center">
+
+  
 
   <h3 align="center">MC-Blender插件</h3>
   <p align="center">
