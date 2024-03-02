@@ -183,7 +183,7 @@ https://github.com/BaiGave/BaiGave_Plugin/assets/107305554/ddb95008-b957-4d31-a0
 
 几何节点支持：火锅料理（bilibili） 转模部分 , 抛瓦尔第（bilibili） CTM部分（未实装) ，暗影苦力怕（面优化） ，Piggestpig(Github)/冬猫夏羊工作室(bilibili) 植物的自动摇摆，荒芜新谷（bilbil) 几种延时建筑的样式（未实装）
 
-着色器节点支持：WangXinRui (bilbil) 动态材质（大部分借鉴） 更好的树叶半透着色器 
+着色器节点支持：WangXinRui (bilbil) 动态材质（大部分借鉴） 更好的树叶半透着色器 WXR的天空预设
 
 翻译支持：marshmallowlands (Github) 英语
 
