@@ -41,7 +41,7 @@
   - [导入.schem文件](#导入schem文件)
   - [导入.nbt文件](#导入nbt文件)
   - [导入存档文件](#导入存档文件)
-  - [导入blockstae文件夹内的.json文件](#导入blockstae文件夹内的json文件)
+  - [导入blockstate文件夹内的.json文件](#导入blockstae文件夹内的json文件)
 - [作者](#作者)
 
 ### 插件的基础配置
@@ -171,7 +171,7 @@ https://github.com/BaiGave/BaiGave_Plugin/assets/107305554/ddb95008-b957-4d31-a0
 
 ###### 导入存档文件
 
-###### 导入blockstae文件夹内的json文件
+###### 导入blockstate文件夹内的json文件
 
 
 
