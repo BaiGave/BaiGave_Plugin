@@ -11,8 +11,6 @@ class MainPanel(bpy.types.Panel):
     bl_category ='白给的工具'
     bl_options = {'HEADER_LAYOUT_EXPAND'}
 
-    
-
     def __init__(self) -> None:
         bpy.ops.baigave.read_mods_dir()
         bpy.ops.baigave.read_resourcepacks_dir()
@@ -103,7 +101,7 @@ class ImportPanel(bpy.types.Panel):
         # 创建一个框
         box = layout.box()
         box.label(text="导入.schem文件")
-        box.operator("baigave.schem_panel", text="导入.schem文件")
+        box.operator("baigave.schem_import_panel", text="导入.schem文件")
 
         split_8D70F = box.split(factor=0.15, align=True)
         split_8D70F.enabled = True
@@ -246,20 +244,11 @@ class EditPanel(bpy.types.Panel):
     def draw(self,context):
         layout = self.layout
         scene = context.scene
-        my_properties = scene.my_properties 
         
         row = layout.row()
         row.prop(scene, "color_list",text="对照表")
         row = layout.row()
-        row.label(text="生成方块颜色对照表：")
-        row = layout.row()
-        
-        row.template_list("ColorToBlockList", "", my_properties, "color_to_block_list", my_properties, "color_to_block_list_index")
-        col = row.column()
-        col.operator("baigave.add_color_to_block_operator",text="", icon='ADD')
-        col.operator("baigave.delete_color_to_block_operator",text="", icon='REMOVE')
-        row = layout.row()
-        row.operator("baigave.make_color_dict", text="制作颜色-方块字典")
+        row.operator("baigave.color_to_block_panel", text="制作颜色-方块字典")
         row = layout.row()
         row.operator("baigave.get_average_color", text="得到图片平均颜色值")
         row = layout.row()
@@ -600,12 +589,10 @@ class ModList(bpy.types.UIList):
             row = layout.row(align=True)
             row.label(text=item.name)
             row.label(text=item.description)
-#弹出对话框
-class SchemPanel(bpy.types.Operator):
-    bl_idname = "baigave.schem_panel"
-    bl_label = "导入Schem文件二级界面"
 
-    my_string_prop: bpy.props.StringProperty(name="String Prop") # type: ignore
+class SchemImportPanel(bpy.types.Operator):
+    bl_idname = "baigave.schem_import_panel"
+    bl_label = "导入Schem文件二级界面"
 
     def execute(self, context):
         
@@ -625,8 +612,35 @@ class SchemPanel(bpy.types.Operator):
         row = layout.row()
         row.operator("baigave.import_schem", text="导入.schem文件")
 
+class ColorToBlockPanel(bpy.types.Operator):
+    bl_idname = "baigave.color_to_block_panel"
+    bl_label = "颜色方块对照表制作界面"
 
-classes=[SchemPanel,ResourcepackList,ColorToBlockList,ModList,MainPanel,SkyPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,InformationPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
+    def execute(self, context):
+        
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        # 弹出界面
+        return context.window_manager.invoke_popup(self)
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene
+        my_properties = scene.my_properties 
+        
+        
+        row = layout.row()
+        row.label(text="生成方块颜色对照表：")
+        row = layout.row()
+        row.template_list("ColorToBlockList", "", my_properties, "color_to_block_list", my_properties, "color_to_block_list_index")
+        col = row.column()
+        col.operator("baigave.add_color_to_block_operator",text="", icon='ADD')
+        col.operator("baigave.delete_color_to_block_operator",text="", icon='REMOVE')
+        row = layout.row()
+        row.operator("baigave.make_color_dict", text="制作颜色-方块字典")
+        row = layout.row()
+
+classes=[SchemImportPanel,ColorToBlockPanel,ResourcepackList,ColorToBlockList,ModList,MainPanel,SkyPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,InformationPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
          Ability]
 
 

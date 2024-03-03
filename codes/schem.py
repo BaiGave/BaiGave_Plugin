@@ -263,7 +263,6 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                         faces_to_generate = [i for i, has_air_face in enumerate(has_air) if has_air_face]
 
                         if faces_to_generate:
-
                             water_level = water_levels.get(id, 0)
                             z_offset = water_level / 16 
                             key = (key[0], -key[1]-1, key[2])
@@ -286,6 +285,7 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                                         vertices_dict[tuple(coords[2])],
                                         vertices_dict[tuple(coords[3])]
                                     ])
+                                    direction.append('down')
                                 elif face_index == 0:
                                     coords = np.array([
                                         (key[0], key[1]+1, key[2]), #3
@@ -304,6 +304,7 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                                         vertices_dict[tuple(coords[2])],
                                         vertices_dict[tuple(coords[3])]
                                     ])
+                                    direction.append('east') #x-
                                 elif face_index == 3:
                                     coords = np.array([
                                         (key[0], key[1], key[2]), #0
@@ -322,6 +323,7 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                                         vertices_dict[tuple(coords[2])],
                                         vertices_dict[tuple(coords[3])]
                                     ])
+                                    direction.append('north')
                                 elif face_index == 1:
                                     coords = np.array([
                                         (key[0]+1, key[1], key[2]), #1
@@ -340,6 +342,7 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                                         vertices_dict[tuple(coords[2])],
                                         vertices_dict[tuple(coords[3])]
                                     ])
+                                    direction.append('west')
                                 elif face_index == 2:
                                     coords = np.array([
                                         (key[0]+1, key[1]+1, key[2]), #2
@@ -358,6 +361,7 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                                         vertices_dict[tuple(coords[2])],
                                         vertices_dict[tuple(coords[3])]
                                     ])
+                                    direction.append('south')
                                 elif face_index == 4:
                                     coords = np.array([
                                         (key[0]+1, key[1]+1, key[2]+z_offset),#6
@@ -376,6 +380,7 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
                                         vertices_dict[tuple(coords[2])],
                                         vertices_dict[tuple(coords[3])]
                                     ])
+                                    direction.append('up')
 
     collection = bpy.context.collection
     mesh_name = filename
@@ -403,6 +408,24 @@ def schem_liquid(level,chunks, filename="liquid", position=(0, 0, 0)):
             face = bm.faces.new(verts_list)
         else:
             continue
+
+        first_uv = None
+
+        for loop in face.loops:
+            vertex = loop.vert
+            uv = (vertex.co.y, vertex.co.z) if direction[face_index] in ['west', 'east'] \
+                else (vertex.co.x, vertex.co.z) if direction[face_index] in ['north', 'south'] \
+                else (vertex.co.x, vertex.co.y)
+            
+            # 计算第一个顶点的 UV 坐标并记录
+            if first_uv is None:
+                first_uv = uv
+            
+            # 计算相对于第一个顶点的 UV 坐标偏移
+            relative_uv = (uv[0] - first_uv[0], uv[1] - first_uv[1])
+            
+            loop[uv_layer].uv = relative_uv
+
 
 
     bm.faces.ensure_lookup_table()

@@ -5,7 +5,6 @@ import os
 def load_translations(language_code):
     # 根据语言代码加载相应的翻译文件
     file_path = os.path.join(os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "lang"),str(f"{language_code}.json"))
-    print(file_path)
     with open(file_path, "r", encoding="utf-8") as file:
         translations = json.load(file)
     return translations

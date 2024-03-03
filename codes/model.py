@@ -386,13 +386,13 @@ def fac(origin, position, element, vertices, faces, vertices_dict, directions, h
             (from_coord[0], to_coord[1], from_coord[2]), 
             (to_coord[0], to_coord[1], from_coord[2])
         ],
-        "east": [
+        "west": [
             (from_coord[0], from_coord[1], from_coord[2]),
             (from_coord[0], from_coord[1], to_coord[2]),
             (from_coord[0], to_coord[1], from_coord[2]),
             (from_coord[0], to_coord[1], to_coord[2])
         ],
-        "west": [
+        "east": [
             (to_coord[0], from_coord[1], from_coord[2]),
             (to_coord[0], from_coord[1], to_coord[2]),
             (to_coord[0], to_coord[1], from_coord[2]),
