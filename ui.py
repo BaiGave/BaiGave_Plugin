@@ -23,7 +23,7 @@ class MainPanel(bpy.types.Panel):
     def draw(self,context):
         layout = self.layout
         row = layout.row()
-        row.label(text = translate("mainpanel.labal"),icon='BOLD')
+        row.label(text = "白给的工具" ,icon='BOLD')
 
         
 #人模绑定面板        
@@ -607,8 +607,12 @@ class SchemImportPanel(bpy.types.Operator):
         
         row = layout.row(align=True)    
         row.label(text="导入.schem选项界面",icon="EVENT_S")
-        row = layout.row()    
-        row.prop(scene, "separate_vertices_by_blockid",text="是否按照方块状态分离？")
+        if context.scene.separate_vertices_by_chunk ==False:
+            row = layout.row()    
+            row.prop(scene, "separate_vertices_by_blockid",text="是否按照方块状态分离？")
+        if context.scene.separate_vertices_by_blockid ==False:
+            row = layout.row()    
+            row.prop(scene, "separate_vertices_by_chunk",text="是否按照区块分离？")
         row = layout.row()
         row.operator("baigave.import_schem", text="导入.schem文件")
 

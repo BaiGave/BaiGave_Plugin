@@ -114,6 +114,7 @@ class Property(bpy.types.PropertyGroup):
         items=(),
     )
     bpy.types.Scene.separate_vertices_by_blockid = bpy.props.BoolProperty(name="separate_vertices_by_blockid", default=False)
+    bpy.types.Scene.separate_vertices_by_chunk = bpy.props.BoolProperty(name="separate_vertices_by_blockid", default=False)
     bpy.types.Scene.schem_filename = bpy.props.StringProperty(name=".schem文件名", default="file")
     bpy.types.Scene.download_path = bpy.props.StringProperty(
         name="插件路径",

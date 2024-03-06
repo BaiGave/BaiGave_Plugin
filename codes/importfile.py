@@ -8,7 +8,7 @@ import subprocess
 from .block import block
 from .functions.get_data import get_all_data
 from .classification_files.block_type import exclude
-from .schem import schem_chunk,schem_liquid,schem,remove_brackets,separate_vertices_by_blockid
+from .schem import schem_chunk,schem_liquid,schem,remove_brackets,separate_vertices_by_blockid,separate_vertices_by_chunk
 from .functions.mesh_to_mc import create_mesh_from_dictionary,create_or_clear_collection
 from .register import register_blocks
 import json
@@ -211,11 +211,19 @@ class ImportSchem(bpy.types.Operator):
             thread = threading.Thread(target=set_default_color, args=(image, image_width, image_height, default_color))
             # 启动新的线程
             thread.start()
+            start_time = time.time()
 
             obj=schem(level,chunks,False,name)
             if context.scene.separate_vertices_by_blockid ==True:
                 separate_vertices_by_blockid(obj)
+            elif context.scene.separate_vertices_by_chunk ==True:
+                separate_vertices_by_chunk(obj)
             schem_liquid(level,chunks)
+
+            end_time = time.time()
+            execution_time = end_time - start_time
+
+            print("程序运行时间为：", execution_time, "秒")
             materials = bpy.data.materials
             for material in materials:
                 try:

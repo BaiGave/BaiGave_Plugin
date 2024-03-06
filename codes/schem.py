@@ -1,4 +1,5 @@
 import bpy
+import math
 import bmesh
 from .model import create_mesh,add_mesh_to_collection,get_or_create_material,set_uv
 from .blockstates import blockstates
@@ -33,6 +34,7 @@ def schem(level,chunks,cached,filename="schem",position=(0,0,0)):
     # 创建一个新的网格对象
     mesh = bpy.data.meshes.new(name=filename)
     mesh.attributes.new(name='blockid', type="INT", domain="POINT")
+    mesh.attributes.new(name='waterlogged', type="INT", domain="POINT")
     mesh.attributes.new(name='biome', type="FLOAT_COLOR", domain="POINT")
     obj = bpy.data.objects.new(filename, mesh)
 
@@ -62,25 +64,31 @@ def schem(level,chunks,cached,filename="schem",position=(0,0,0)):
         # 创建顶点和顶点索引
         vertices = []
         ids = []  # 存储顶点id
-
+        waterlogged=[]
         # 遍历范围内所有的坐标
         for x in range(min_coords[0], max_coords[0] + 1):
             for y in range(min_coords[1], max_coords[1] + 1):
                 for z in range(min_coords[2], max_coords[2] + 1):
                     try:
-                        # 获取坐标处的方块       
-                        blc =level.get_version_block(x, y, z, "main",("java", (1, 20, 4)))
-                        id =blc[0]
-                        if isinstance(id,amulet.api.block.Block):
-                            id = str(id).replace('"', '')
+                        id = level.get_block(x, y, z, "main")
+                    except:
+                        pass
+                    if isinstance(id,amulet.api.block.Block):
+                        
+                        if id.extra_blocks !=():
+                            w=1
+                        else:
+                            w=0
+                        id =str(level.translation_manager.get_version("java", (1, 20, 4)).block.from_universal(id)[0]).replace('"', '')
+                        try:
                             result = remove_brackets(id) 
                             if result not in exclude:  
                                 vertices.append((x-min_coords[0],-(z-min_coords[2]),y-min_coords[1]))
                                 # 将字符串id转换为相应的数字id
                                 ids.append(id)
-                    except:
-                        pass
-
+                                waterlogged.append(w)
+                        except:
+                            pass
         id_map=register_blocks(list(set(ids)))
     else:
         IDCachePath = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache/id_map.pkl"
@@ -94,6 +102,9 @@ def schem(level,chunks,cached,filename="schem",position=(0,0,0)):
     for i, item in enumerate(obj.data.attributes['blockid'].data):
         item.value=id_map[ids[i]]
         #print(item.value)
+    #给予水属性
+    for i, item in enumerate(obj.data.attributes['waterlogged'].data):
+        item.value = waterlogged[i]
     #群系上色
     for i, item in enumerate(obj.data.attributes['biome'].data):
         item.color[:]=(0.149,0.660,0.10,0.00)
@@ -439,6 +450,7 @@ def separate_vertices_by_blockid(obj):
 
     # 字典用于存储不同 blockid 的顶点
     vertex_dict = {}
+    waterlogged_dict = {}
 
     for vertex in vertices:
         coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
@@ -450,14 +462,17 @@ def separate_vertices_by_blockid(obj):
         # 获取顶点属性值（blockid）
         try:
             blockid = obj.data.attributes['blockid'].data[vertex.index].value
+            waterlogged = obj.data.attributes['waterlogged'].data[vertex.index].value
         except:
             blockid = 0
-
+            waterlogged = False
         # 根据 blockid 将顶点添加到相应的列表中
         if blockid not in vertex_dict:
             vertex_dict[blockid] = [vertex]
+            waterlogged_dict[blockid] = [waterlogged]
         else:
             vertex_dict[blockid].append(vertex)
+            waterlogged_dict[blockid].append(waterlogged)
 
     # 创建不同 blockid 的网格体
     for blockid, vertices in vertex_dict.items():
@@ -480,15 +495,81 @@ def separate_vertices_by_blockid(obj):
 
         # 添加 blockid 属性到新网格体的顶点
         blockid_attr = new_mesh.attributes.new(name='blockid', type="INT", domain="POINT")
+        waterlogged_attr = new_mesh.attributes.new(name='waterlogged', type="INT", domain="POINT")
         biome_attr=new_mesh.attributes.new(name='biome', type="FLOAT_COLOR", domain="POINT")
         for v_index, v in enumerate(vertices):
             try:
                 blockid_attr.data[v_index].value = blockid
+                waterlogged_attr.data[v_index].value = waterlogged_dict[blockid][v_index]
                 biome_attr.data[v_index].color  = (0.149,0.660,0.10,0.00)
             except IndexError:
                 print(f"顶点索引 {v_index} 超出范围。")
 
         # 将新物体移动到原始物体的位置
         new_obj.matrix_world = obj.matrix_world
+    # 删除原始对象
+    bpy.data.objects.remove(obj, do_unlink=True)
+
+def separate_vertices_by_chunk(obj, chunk_size=16):
+    mesh = obj.data
+    vertices = mesh.vertices
+
+    # 字典用于存储不同 chunk 块的顶点
+    vertex_dict = {}
+
+    for vertex in vertices:
+        # 将顶点的世界坐标乘以物体的世界矩阵，以获得全局坐标
+        global_coord = obj.matrix_world @ vertex.co
+
+        # 计算顶点所在 chunk 的坐标，同时沿着正 y 轴平移 1 个单位
+        coord = (
+            math.floor(global_coord.x / chunk_size) * chunk_size,
+            math.floor((global_coord.y - 1) / chunk_size) * chunk_size,
+            math.floor(global_coord.z / chunk_size) * chunk_size
+        )
+
+        # 根据坐标将顶点添加到相应的列表中
+        if coord not in vertex_dict:
+            vertex_dict[coord] = [vertex]
+        else:
+            vertex_dict[coord].append(vertex)
+
+    # 创建不同 chunk 的网格体
+    for coord, vertices in vertex_dict.items():
+        # 创建新的网格对象和物体
+        new_mesh = bpy.data.meshes.new(name=f"Chunk_{coord}_Mesh")
+        new_obj = bpy.data.objects.new(name=f"Chunk_{coord}_Object", object_data=new_mesh)
+        bpy.context.collection.objects.link(new_obj)
+
+        # 复制修改器
+        for modifier in obj.modifiers:
+            new_modifier = new_obj.modifiers.new(modifier.name, modifier.type)
+            
+            # 复制节点修改器的设置
+            if modifier.type == 'NODES':
+                new_modifier.node_group = modifier.node_group
+
+        # 设置新网格的顶点和面
+        new_mesh.from_pydata([v.co for v in vertices], [], [])
+        new_mesh.update()
+
+        # 添加 blockid 和 biome 属性到新网格体的顶点，并复制原始网格体的属性值
+        blockid_attr = new_mesh.attributes.new(name='blockid', type="INT", domain="POINT")
+        waterlogged_attr = new_mesh.attributes.new(name='waterlogged', type="INT", domain="POINT")
+        biome_attr = new_mesh.attributes.new(name='biome', type="FLOAT_COLOR", domain="POINT")
+        for v_index, v in enumerate(vertices):
+            try:
+                # 复制原始网格体的 blockid 和 biome 属性值
+                blockid = obj.data.attributes['blockid'].data[v.index].value
+                waterlogged = obj.data.attributes['waterlogged'].data[v.index].value
+                biome = obj.data.attributes['biome'].data[v.index].color
+                blockid_attr.data[v_index].value = blockid
+                waterlogged_attr.data[v_index].value = waterlogged
+                biome_attr.data[v_index].color = biome
+            except IndexError:
+                print(f"顶点索引 {v_index} 超出范围。")
+        # 将新物体移动到原始物体的位置
+        new_obj.matrix_world = obj.matrix_world
+
     # 删除原始对象
     bpy.data.objects.remove(obj, do_unlink=True)

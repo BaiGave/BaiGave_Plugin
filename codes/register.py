@@ -1,5 +1,4 @@
 import bpy
-import os
 from .block import block
 from .blockstates import get_model
 
