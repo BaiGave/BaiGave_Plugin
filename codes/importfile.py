@@ -123,10 +123,10 @@ class ImportNBT(bpy.types.Operator):
                 block_name = palette[state]['Name'].value if 'Name' in palette[state] else palette[state]['nbt']['name'].value
                 if 'Properties' in palette[state]:
                     block_state = palette[state]['Properties'].value
-                    block_state = ', '.join([f'{k}={v}' for k, v in block_state.items()])
+                    block_state = ','.join([f'{k}={v}' for k, v in block_state.items()])
                 elif 'nbt' in palette[state] and 'name' in palette[state]['nbt']:
                     block_state = palette[state]['nbt']['name'].value
-                    block_state = ', '.join([f'{k}={v}' for k, v in block_state.items()])
+                    block_state = ','.join([f'{k}={v}' for k, v in block_state.items()])
                 else:
                     block_state = None
                 if block_name !="minecraft:air":

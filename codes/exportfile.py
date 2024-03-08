@@ -1,4 +1,5 @@
 import os
+import re
 import bpy
 import amulet
 from amulet.api.block import Block
@@ -314,7 +315,7 @@ class ExportToSave(bpy.types.Operator):
                     mesh = obj.data
                     vertices = mesh.vertices
                     for vertex in vertices:
-                        coord = tuple([int(coord) for coord in (obj.matrix_world @ vertex.co)])  # 将顶点坐标转换为元组，以便用作字典键
+                        coord = tuple([int(coord) for coord in vertex.co])  # 将顶点坐标转换为元组，以便用作字典键
                         # 如果顶点坐标已经存在于字典中，则跳过
                         if coord in self.vertex_dict:
                             continue
@@ -338,16 +339,18 @@ class ExportToSave(bpy.types.Operator):
             block_name = block_id_name_map[block_id]
             if block_name != "minecraft:air":
                 namespace, path = block_name.split(':')
+                properties = {}
+                match = re.search(r'([^[]*)\[.*\]', path)
                 # 处理带有方块属性的情况
-                if '[' in path and ']' in path:
-                    path, properties_str = path.split('[')
-                    properties_str = properties_str.rstrip(']')
-                    properties_list = properties_str.split(', ')
-                    properties = {prop.split('=')[0]: TAG_String(prop.split('=')[1]) for prop in reversed(properties_list)}
-                    block = Block(namespace, path, properties)
+                if match:
+                    path = match.group(1)
+                    properties_str = match.group(0)[len(path)+1:-1]
+                    for prop in properties_str.split(','):
+                        key, value = prop.split('=')
+                        properties[key] = TAG_String(value)
+                    block = Block(namespace,path,properties)
                 else:
                     block = Block(namespace, path)
-
                 # 在世界中放置方块
                 level.set_version_block(x,z,-y,"minecraft:overworld",("java", (1, 20, 4)),block)
 

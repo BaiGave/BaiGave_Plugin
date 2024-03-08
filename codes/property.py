@@ -945,6 +945,9 @@ def make_color_dict(filepaths,name):
                     variants = data['variants']
                     for variant_key, variant_value in variants.items():
                         if variant_key != "":
+                            # key_parts = variant_key.split(",")  # 将字符串按逗号分隔成列表
+                            # sorted_key_parts = sorted(key_parts)  # 对列表进行排序
+                            # variant_key = ",".join(sorted_key_parts[::-1])  # 将排序后的列表反向组合
                             id = str(dir + ":" + file.replace(".json", "") + "[" + variant_key + "]")
                             if variant_key =="type=bottom":
                                 get_color(variant_value,processed_models,slab_dict,id)
@@ -1028,6 +1031,7 @@ def make_color_dict(filepaths,name):
                         else:
                             id = str(dir + ":" + file.replace(".json", ""))
 
+                        print(id)
                         if 'model' in variant_value:
                             model = variant_value['model']
 
