@@ -29,6 +29,7 @@ class ImportBlock(bpy.types.Operator):
 
     files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup) # type: ignore
     def execute(self, context):
+        id_list = []
         for f in self.files:
             # 从文件路径中提取文件名            
             self.filepath=str(str(os.path.dirname(self.filepath))+"\\"+str(f.name))
@@ -42,7 +43,6 @@ class ImportBlock(bpy.types.Operator):
             # 提取所需内容
             multipart = data.get("multipart", [])
             
-            id_list = []
             if variants != {}:
                 for key, value in variants.items():
                     if key !="":
@@ -76,7 +76,7 @@ class ImportBlock(bpy.types.Operator):
 
                     # 添加到结果列表
                     id_list.append(namespace+filename)
-            register_blocks(id_list)
+        register_blocks(id_list)
 
 
             
