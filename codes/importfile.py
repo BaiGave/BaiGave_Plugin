@@ -33,7 +33,12 @@ class ImportBlock(bpy.types.Operator):
         for f in self.files:
             # 从文件路径中提取文件名            
             self.filepath=str(str(os.path.dirname(self.filepath))+"\\"+str(f.name))
-            namespace=os.path.basename(os.path.dirname(os.path.dirname(self.filepath)))+":"
+            # 使用 for 循环逐级向上查找，直到找到名为 'blockstates' 的目录
+            dir_name = os.path.dirname(self.filepath)
+            while os.path.basename(dir_name) != 'blockstates':
+                dir_name = os.path.dirname(dir_name)
+            # 获取 'blockstates' 目录的上一级目录名作为命名空间
+            namespace = os.path.basename(os.path.dirname(dir_name)) + ":"
             # 读取JSON文件
             with open(self.filepath, 'r') as file:
                 data = json.load(file)
@@ -76,6 +81,7 @@ class ImportBlock(bpy.types.Operator):
 
                     # 添加到结果列表
                     id_list.append(namespace+filename)
+        print(id_list)
         register_blocks(id_list)
 
 
