@@ -197,7 +197,7 @@ bilibili个人主页：https://space.bilibili.com/3461563635731405?spm_id_from=3
 
 ### 版权说明
 
-该项目签署了MIT 授权许可，详情请参阅 [LICENSE.txt](https://github.com/BaiGave/BaiGave_Plugin/blob/master/LICENSE.txt)
+该项目签署了AGPL-3.0授权许可，详情请参阅 [LICENSE](https://github.com/BaiGave/BaiGave_Plugin/blob/main/LICENSE)
 
 
 

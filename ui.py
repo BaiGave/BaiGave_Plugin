@@ -131,15 +131,15 @@ class ImportPanel(bpy.types.Panel):
         col=box.column()
         row.label(text="导入MC地图")
         row.operator("baigave.spawn_map", text="2D预览")
-        # 添加min [x, y, z]输入框
+        # 添加begin [x, y, z]输入框
         row = box.row()
-        row.label(text="最小坐标")
-        row.prop(context.scene, "min_coordinates", text="")
+        row.label(text="起始坐标")
+        row.prop(context.scene, "begin_coordinates", text="")
 
-        # 添加max [x, y, z]输入框
+        # 添加end [x, y, z]输入框
         row = box.row()
-        row.label(text="最大坐标")
-        row.prop(context.scene, "max_coordinates", text="")
+        row.label(text="结束坐标")
+        row.prop(context.scene, "end_coordinates", text="")
         col.operator("baigave.import_world", text="导入世界")
 
         row = layout.row()

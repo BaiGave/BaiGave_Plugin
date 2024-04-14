@@ -85,8 +85,8 @@ class Property(bpy.types.PropertyGroup):
     # 定义 color_to_block_list 属性
     color_to_block_list: bpy.props.CollectionProperty(type=BlockInfo) # type: ignore
     color_to_block_list_index: bpy.props.IntProperty() # type: ignore
-    bpy.types.Scene.min_coordinates = bpy.props.IntVectorProperty(name="最小坐标", size=3)
-    bpy.types.Scene.max_coordinates = bpy.props.IntVectorProperty(name="最大坐标", size=3)
+    bpy.types.Scene.begin_coordinates = bpy.props.IntVectorProperty(name="起始坐标", size=3)
+    bpy.types.Scene.end_coordinates = bpy.props.IntVectorProperty(name="结束坐标", size=3)
 
     bpy.types.Scene.schem_size = bpy.props.IntVectorProperty(name="结构大小", size=3)
     bpy.types.Scene.schem_location = bpy.props.IntVectorProperty(name="结构位置", size=3)
