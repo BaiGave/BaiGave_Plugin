@@ -81,7 +81,6 @@ class ImportBlock(bpy.types.Operator):
 
                     # 添加到结果列表
                     id_list.append(namespace+filename)
-        print(id_list)
         register_blocks(id_list)
 
 
@@ -430,8 +429,8 @@ class ImportWorld(bpy.types.Operator):
     def execute(self, context):
         filename="world"
         level = amulet.load_level(self.filepath)
-        begin_coords=context.scene.begin_coordinates
-        end_coords=context.scene.end_coordinates
+        min_coords=context.scene.min_coordinates
+        max_coords=context.scene.max_coordinates
         # 创建一个新的网格对象
         mesh = bpy.data.meshes.new(name=filename)
         mesh.attributes.new(name='blockid', type="INT", domain="POINT")
@@ -463,9 +462,9 @@ class ImportWorld(bpy.types.Operator):
         vertices = []
         ids = []  # 存储顶点id
         # 遍历范围内所有的坐标
-        for x in range(min(begin_coords[0],end_coords[0]), max(begin_coords[0],end_coords[0]) + 1):
-            for y in range(min(begin_coords[1],end_coords[1]), max(begin_coords[1],end_coords[1]) + 1):
-                for z in range(min(begin_coords[2],end_coords[2]), max(begin_coords[2],end_coords[2]) + 1):
+        for x in range(min_coords[0], max_coords[0] + 1):
+            for y in range(min_coords[1], max_coords[1] + 1):
+                for z in range(min_coords[2], max_coords[2] + 1):
                     # 获取坐标处的方块       
                     blc =level.get_version_block(x, y, z, "minecraft:overworld",("java", (1, 20, 4)))
                     id =blc[0]
@@ -474,7 +473,7 @@ class ImportWorld(bpy.types.Operator):
                         result = remove_brackets(id) 
                         if result not in exclude:  
                             # 将字符串id映射到数字，如果id已经有对应的数字id，则使用现有的数字id
-                            vertices.append((x-min(begin_coords[0],end_coords[0]),-(z-min(begin_coords[2],end_coords[2])),y-min(begin_coords[1],end_coords[1])))
+                            vertices.append((x-min_coords[0],-(z-min_coords[2]),y-min_coords[1]))
                             # 将字符串id转换为相应的数字id
                             ids.append(id)
 
@@ -529,3 +528,5 @@ def register():
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
+        
+    

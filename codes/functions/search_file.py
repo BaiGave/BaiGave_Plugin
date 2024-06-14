@@ -4,7 +4,8 @@ import bpy
 import os
 import re
 
-from ..property import unzip_mods_files,unzip_resourcepacks_files,calculate_average_color
+from ..property import unzip_mods_files,unzip_resourcepacks_files
+from ..color_dict import calculate_average_color
 
 class Read_mods_dir(bpy.types.Operator):
     """读取目录"""
@@ -434,7 +435,7 @@ class AddResourcepackOperator(bpy.types.Operator):
     bl_label = "添加模组"
 
     # 定义一个属性来存储文件路径
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore # type: ignore
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH") # type: ignore 
     # 定义一个属性来过滤文件类型，只显示.zip文件
     filter_glob: bpy.props.StringProperty(default="*.zip", options={'HIDDEN'}) # type: ignore
 
@@ -504,6 +505,7 @@ class DeleteResourcepackOperator(bpy.types.Operator):
             
         return {'CANCELLED'}
 
+
 class AddColorToBlockOperator(bpy.types.Operator):
     bl_idname = "baigave.add_color_to_block_operator"
     bl_label = "添加方块"
@@ -521,16 +523,16 @@ class AddColorToBlockOperator(bpy.types.Operator):
         color_to_block_list = my_properties.color_to_block_list
 
         source_file = os.path.dirname(self.filepath) 
-        
+        dir = os.path.dirname(os.path.dirname(self.filepath)).split(os.path.sep)[-1]
         for f in self.files:
             # 从文件路径中提取文件名
-            filename = f.name.replace(".json","")
-
+            filename = str(dir + ":" + f.name.replace(".json", ""))
             # 检查文件名是否已经在列表中
             if not any(item.name == filename for item in color_to_block_list):
                 # 文件名不在列表中，添加到列表
                 item = color_to_block_list.add()
                 item.name = filename
+                item.type = -1
                 item.filepath=source_file+"\\"+f.name
 
         return {'FINISHED'}

@@ -36,7 +36,11 @@ def create_node_material(texture_paths, mat_name,filename):
         mat.node_tree.links.new(shader_node.outputs['BSDF'], output_node.inputs['Surface'])
     elif len(texture_paths) == 2:
         image=bpy.data.images.load(texture_paths[0])
-        image_2=bpy.data.images.load(texture_paths[1])
+        try:
+            image_2=bpy.data.images.load(texture_paths[1])
+        except:
+            print(texture_paths[0])
+
         shader_name = "重叠面着色器"
         # 导入shader
         shader = bpy.data.materials.get(shader_name)
@@ -54,7 +58,10 @@ def create_node_material(texture_paths, mat_name,filename):
             if node.name == "默认图片":
                 node.image = image
             elif node.name == "默认图片2":
-                node.image = image_2
+                try:
+                    node.image = image_2
+                except:
+                    pass
     else:
         if mat_name in Type1:
             shader_name = "树叶/草+灰度图着色器"

@@ -174,7 +174,7 @@ def create_points_from_dictionary(d,name):
 def create_node(color_dict, node_groups, node_type, next_id, id_map,group_name="",blocktype=0):
     node_0 = None
 
-    if id_map ==register_blocks(color_dict.values()):
+    if id_map ==register_blocks(color_dict.keys()):
         for group in node_groups:
             if group.name == group_name:
                 node_collection = group.nodes.get("方块集合")
@@ -185,7 +185,7 @@ def create_node(color_dict, node_groups, node_type, next_id, id_map,group_name="
         return next_id,id_map
     else:
         first_id=next_id
-        for color in color_dict.keys():
+        for color in color_dict.values():
             # 获取名为 node_type 的节点组
             node_group = None
             for group in node_groups:
@@ -211,7 +211,7 @@ def create_node(color_dict, node_groups, node_type, next_id, id_map,group_name="
                 
                 node_0 = node_1
                 next_id +=1
-        id_map=register_blocks(color_dict.values())
+        id_map=register_blocks(color_dict.keys())
     next_id = max(id_map.values()) + 1
     if node_group:
         output_socket_1 = node_1.outputs[0]
@@ -564,9 +564,55 @@ class BlockBlender(bpy.types.Operator):
             next_id,id_map =create_node(dict['stairs_north_bottom_inner_right'], node_groups, "stairs_north_bottom_inner_right", next_id, id_map,blocktype=24)
             next_id,id_map =create_node(dict['stairs_west_bottom_inner_left'], node_groups, "stairs_west_bottom_inner_left", next_id, id_map,blocktype=25)
             next_id,id_map =create_node(dict['stairs_west_bottom_inner_right'], node_groups, "stairs_west_bottom_inner_right", next_id, id_map,blocktype=26)
-        
+
+            for group in node_groups:
+                if group.name == "改变id组":
+                    node_group = group
             
-            
+                    
+            # 尝试从 .blend 文件中获取文本数据
+            text_data = bpy.data.texts.get("Blocks.py")
+            if not text_data:  # 如果文本数据不存在，则创建一个新的文本数据对象
+                text_data = bpy.data.texts.new("Blocks.py")
+
+            # 从文本数据中读取字典 id_map
+            id_map_content = text_data.as_string()
+            try:
+                id_map = eval(id_map_content)  # 尝试解析文件内容为字典
+            except SyntaxError:  # 如果解析失败，即文件内容不是有效的Python字典表示
+                id_map = {}  # 初始化为空字典
+            node_0 = None
+            for index in range(len(id_map)):
+                if node_group:
+                    if node_0 is None:
+                        node_0 = node_group.nodes.get("-1")
+                        print(node_0)
+                    node_1 = node_group.nodes.new(type=node_0.bl_idname)
+                    node_1.location = (node_0.location.x + 200, node_0.location.y)
+                    node_1.node_tree = bpy.data.node_groups.get(node_0.node_tree.name)
+                    node_1.name = str(index)
+                    node_1.inputs[0].default_value = index
+                    node_1.inputs[1].default_value = index
+
+                    input_socket_0 = node_0.outputs[0]
+                    output_socket_1 = node_1.inputs[2]
+                    node_group.links.new(output_socket_1, input_socket_0)
+                    node_0 = node_1
+            if node_group:
+                output_socket_1 = node_1.outputs[0]
+                node_output = node_group.nodes.get("组输出")
+                node_output.location = (node_1.location.x + 200, node_1.location.y)
+                input_socket_output = node_output.inputs[0]
+                node_group.links.new(input_socket_output, output_socket_1)
+
+                node_input =node_group.nodes.get("组输入")
+                node_first =node_group.nodes.get("0")
+                node_0 = node_group.nodes.get("-1")
+                node_group.nodes.remove(node_0)
+                node_group.links.new(node_input.outputs[0], node_first.inputs[2])
+                
+
+
         return {'FINISHED'}
 
 

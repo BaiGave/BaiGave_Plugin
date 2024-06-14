@@ -1,10 +1,18 @@
 import bpy
 import importlib
 
+if "install" in locals():
+	importlib.reload(install)
+else:
+	from . import install
 if "property" in locals():
 	importlib.reload(property)
 else:
 	from .codes import property
+if "color_dict" in locals():
+	importlib.reload(color_dict)
+else:
+	from .codes import color_dict
 if "sway_animation" in locals():
 	importlib.reload(sway_animation)
 else:
@@ -67,6 +75,7 @@ else:
 	
 module_list = (
 	property,
+	color_dict,
 	sway_animation,
 	BaiGave_Rig,
 	surface_optimization,

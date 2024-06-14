@@ -131,15 +131,15 @@ class ImportPanel(bpy.types.Panel):
         col=box.column()
         row.label(text="导入MC地图")
         row.operator("baigave.spawn_map", text="2D预览")
-        # 添加begin [x, y, z]输入框
+        # 添加min [x, y, z]输入框
         row = box.row()
-        row.label(text="起始坐标")
-        row.prop(context.scene, "begin_coordinates", text="")
+        row.label(text="最小坐标")
+        row.prop(context.scene, "min_coordinates", text="")
 
-        # 添加end [x, y, z]输入框
+        # 添加max [x, y, z]输入框
         row = box.row()
-        row.label(text="结束坐标")
-        row.prop(context.scene, "end_coordinates", text="")
+        row.label(text="最大坐标")
+        row.prop(context.scene, "max_coordinates", text="")
         col.operator("baigave.import_world", text="导入世界")
 
         row = layout.row()
@@ -230,7 +230,6 @@ class CreateLevel(bpy.types.Panel):
         
 
 
-
 #创建编辑面板
 class EditPanel(bpy.types.Panel):
     bl_label ="编辑"
@@ -249,6 +248,8 @@ class EditPanel(bpy.types.Panel):
         row.prop(scene, "color_list",text="对照表")
         row = layout.row()
         row.operator("baigave.color_to_block_panel", text="制作颜色-方块字典")
+        row = layout.row()
+        row.operator("baigave.switch_blocks_panel", text="替换方块")
         row = layout.row()
         row.operator("baigave.get_average_color", text="得到图片平均颜色值")
         row = layout.row()
@@ -319,7 +320,7 @@ class Ability(bpy.types.Panel):
         box.prop(scene, "attack_damage", text="攻击伤害")
         box.prop(scene, "attack_speed", text="攻击速度")
 
-#创建存档面板
+#创建游戏规则面板
 class GameRules(bpy.types.Panel):
     bl_label ="游戏规则"
     bl_idname ="GameRules"
@@ -532,7 +533,7 @@ class SkyPanel(bpy.types.Panel):
         row.operator("baigave.sky_import", text="导入WXR的天空")
 
 
-#创建编辑面板
+#创建信息面板
 class InformationPanel(bpy.types.Panel):
     bl_label ="更多信息"
     bl_idname ="InformationPanel"
@@ -577,10 +578,25 @@ class ResourcepackList(bpy.types.UIList):
 
 # 定义 UIList 类 ColorToBlockList
 class ColorToBlockList(bpy.types.UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+    def draw_item(self, _context, layout, _data, item, icon, _active_data, _active_propname):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            layout.label(text=item.name)
-
+            my_properties = bpy.context.scene.my_properties 
+            row = layout.row()
+            split = row.split(factor=0.65)
+             # 字符串映射字典
+            type_mapping = {
+                -1: "自动",
+                0: "方块",
+                1: "台阶",
+                2: "楼梯",
+            }
+            type_string = type_mapping.get(item.type, "Undefined")
+            split.row().prop(item, "name", text="", emboss=False)
+            if my_properties.color_file_path!="":
+                split.row().prop(item, "color", text="")
+            if my_properties.color_file_path=="":
+                split.row().prop(item, "type", text="", emboss=False)
+            split.row().label(text=type_string)
 # 定义 UIList 类 ModList
 class ModList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
@@ -590,6 +606,18 @@ class ModList(bpy.types.UIList):
             row.label(text=item.name)
             row.label(text=item.description)
 
+# 定义 UIList 类 ModList
+class SwitchBlockList(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            # 显示模组名称、图标和描述
+            split = layout.split()
+            row = split.row()
+            row.label(text=str(item.id)+"#"+item.name)
+            row = layout.row(align=True)
+            #row.label(text=item.name)
+            split = row.split(factor=0.65)
+            split.row().prop(item, "target_id", text="", emboss=False)
 class SchemImportPanel(bpy.types.Operator):
     bl_idname = "baigave.schem_import_panel"
     bl_label = "导入Schem文件二级界面"
@@ -626,7 +654,7 @@ class ColorToBlockPanel(bpy.types.Operator):
 
     def invoke(self, context, event):
         # 弹出界面
-        return context.window_manager.invoke_popup(self)
+        return context.window_manager.invoke_props_dialog(self,width=450)
     def draw(self,context):
         layout = self.layout
         scene = context.scene
@@ -634,17 +662,134 @@ class ColorToBlockPanel(bpy.types.Operator):
         
         
         row = layout.row()
+        
         row.label(text="生成方块颜色对照表：")
+        row.emboss="NONE_OR_STATUS"
+        row.operator("baigave.open_color_dict",text="加载已有对照表")
+        row = layout.row()
+        row.operator("baigave.clear_color_dict",text="清除当前对照表")
         row = layout.row()
         row.template_list("ColorToBlockList", "", my_properties, "color_to_block_list", my_properties, "color_to_block_list_index")
         col = row.column()
         col.operator("baigave.add_color_to_block_operator",text="", icon='ADD')
         col.operator("baigave.delete_color_to_block_operator",text="", icon='REMOVE')
         row = layout.row()
-        row.operator("baigave.make_color_dict", text="制作颜色-方块字典")
+        if my_properties.color_file_path=="":
+            row.operator("baigave.make_color_dict", text="新建")
+        else:
+            row.operator("baigave.edit_color_dict", text="编辑")
         row = layout.row()
 
-classes=[SchemImportPanel,ColorToBlockPanel,ResourcepackList,ColorToBlockList,ModList,MainPanel,SkyPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,InformationPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
+
+class SwitchBlocks(bpy.types.Operator):
+    bl_idname = "baigave.switch_blocks_panel"
+    bl_label = "替换方块界面"
+
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        scene = context.scene
+        my_properties = scene.my_properties
+        # 假设你已经选择了包含几何节点组的对象
+        obj = bpy.context.active_object
+        # 获取几何节点树
+        geometry_nodes = obj.modifiers.get("模型转换")
+        node_group = geometry_nodes.node_group
+        for node in node_group.nodes:
+            if node.name == 'SwitchBlock':
+                switch=node
+                switch.inputs[0].default_value = False
+        # 打印选中的物体
+        selected_objects = bpy.context.selected_objects
+        # 尝试从 .blend 文件中获取文本数据
+        text_data = bpy.data.texts.get("Blocks.py")
+        if not text_data:  # 如果文本数据不存在，则创建一个新的文本数据对象
+            return {'CANCELLED'}
+
+        # 读取字典 id_map
+        block_id_name_map = eval(text_data.as_string())
+
+        # 使用集合来存储不重复的 blockid
+        unique_blockids = set()
+
+        for obj in selected_objects:
+            if obj.type == 'MESH':
+                # 检查是否存在名为“模型转换”的修改器
+                has_modifier = False
+                for modifier in obj.modifiers:
+                    if modifier.name == '模型转换':
+                        has_modifier = True
+                        break
+
+                if has_modifier:
+                    depsgraph = bpy.context.evaluated_depsgraph_get()
+                    obj_evaluated = bpy.context.active_object.evaluated_get(depsgraph)
+
+                    # 检查 'blockid' 属性是否存在并且不为空
+                    if 'blockid' in obj_evaluated.data.attributes and obj_evaluated.data.attributes['blockid'].data:
+                        # 获取 'blockid' 属性列表
+                        blockid_attr = obj_evaluated.data.attributes['blockid'].data
+
+                        # 将不重复的 blockid 存入集合
+                        for item in blockid_attr:
+                            try:
+                                blockid = item.value  # 获取blockid属性值
+                            except:
+                                blockid = 0
+                            if blockid != 0:
+                                unique_blockids.add(blockid)
+
+                    continue
+                elif not has_modifier:
+                    mesh = obj.data
+
+                    # 将不重复的 blockid 存入集合
+                    for vertex in mesh.vertices:
+                        try:
+                            blockid = obj.data.attributes['blockid'].data[vertex.index].value
+                        except:
+                            blockid = 0
+                        if blockid != 0:
+                            unique_blockids.add(blockid)
+
+        my_properties.switch_block_list.clear()
+        for blockid in unique_blockids:
+            item = my_properties.switch_block_list.add()
+            item.id = blockid
+            item.target_id = blockid
+
+            # 根据 blockid 找到对应的名称
+            block_name = None
+            for name, id in block_id_name_map.items():
+                if id == blockid:
+                    block_name = name
+                    break
+            
+            if block_name is not None:
+                item.name = block_name
+            else:
+                item.name = "Unknown"
+        switch.inputs[0].default_value = True
+        # 弹出界面
+        return context.window_manager.invoke_props_dialog(self, width=450)
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene
+        my_properties = scene.my_properties 
+        
+        
+        row = layout.row()
+        
+        row.label(text="方块切换界面：")
+        row.emboss="NONE_OR_STATUS"
+        row.operator("baigave.open_color_dict",text="刷新")
+        row = layout.row()
+        row.template_list("SwitchBlockList", "", my_properties, "switch_block_list", my_properties, "switch_block_list_index")
+        row = layout.row()
+        #row.operator("baigave.make_color_dict", text="准备（第一次需要按一下）")
+        #row = layout.row()
+classes=[SchemImportPanel,ColorToBlockPanel,SwitchBlocks,ResourcepackList,ColorToBlockList,SwitchBlockList,ModList,MainPanel,SkyPanel,RigPanel,BlockPanel,ImportPanel,ExportPanel,EditPanel,CreateLevel,ModPanel,InformationPanel,ResourcepacksPanel,MoreLevelSettings,GameRules,
          Ability]
 
 

@@ -3,16 +3,47 @@ import os
 import zipfile
 import threading
 import functools
-import numpy as np
 import shutil
 import toml
 import json
 import random
 import importlib
-from .functions.get_data import get_file_path,get_all_data
+
 from .. import config
-from collections import Counter
-from PIL import Image
+
+
+def switch_block_update(self, context):
+    scene = context.scene
+    my_properties = scene.my_properties
+    switch_block_list = my_properties.switch_block_list
+
+    # 假设你已经选择了包含几何节点组的对象
+    obj = bpy.context.active_object
+    # 获取几何节点树
+    geometry_nodes = obj.modifiers.get("模型转换")
+    node_group = geometry_nodes.node_group
+    
+    id_to_target = {str(blockid.id): blockid.target_id for blockid in switch_block_list}
+
+    for node in node_group.nodes:
+        if node.name == '改变id组':
+            # 查找匹配的节点
+            for sub_node in node.node_tree.nodes:
+                if sub_node.name in id_to_target:
+                    # 获取第一个输入口的值
+                    input_socket = sub_node.inputs[1]
+                    input_value = input_socket.default_value
+                    target_value = id_to_target[sub_node.name]
+                    
+                    # 检查 input_value 是否与 target_value 不同
+                    if input_value != target_value:
+                        # 修改第一个输入口的值为 target_value
+                        input_socket.default_value = target_value
+
+                    
+    return
+
+
 class ModInfo(bpy.types.PropertyGroup):
     icon: bpy.props.StringProperty(name="图标") # type: ignore
     name: bpy.props.StringProperty(name="名称") # type: ignore
@@ -21,9 +52,23 @@ class ModInfo(bpy.types.PropertyGroup):
 class BlockInfo(bpy.types.PropertyGroup):
     name: bpy.props.StringProperty(name="名称") # type: ignore
     filepath: bpy.props.StringProperty(name="文件位置") # type: ignore
+    type: bpy.props.IntProperty(name="种类", min=-1, max=2) # type: ignore
+    color: bpy.props.FloatVectorProperty(
+        name="颜色",
+        subtype='COLOR',
+        min=0.0, max=1.0,
+        size=4,  
+        default=(1.0, 1.0, 1.0, 1.0)  
+    )  # type: ignore
 
+class SwitchBlockInfo(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty(name="名称") # type: ignore
+    id: bpy.props.IntProperty(name="ID") # type: ignore
+    target_id: bpy.props.IntProperty(name="TargetID",update=switch_block_update) # type: ignore
+    
 #属性
 class Property(bpy.types.PropertyGroup):
+    color_file_path: bpy.props.StringProperty(name="Color File Path",default="") # type: ignore
     bpy.types.Scene.mods_dir = bpy.props.StringProperty(
         name="模组路径",
         default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")
@@ -85,8 +130,11 @@ class Property(bpy.types.PropertyGroup):
     # 定义 color_to_block_list 属性
     color_to_block_list: bpy.props.CollectionProperty(type=BlockInfo) # type: ignore
     color_to_block_list_index: bpy.props.IntProperty() # type: ignore
-    bpy.types.Scene.begin_coordinates = bpy.props.IntVectorProperty(name="起始坐标", size=3)
-    bpy.types.Scene.end_coordinates = bpy.props.IntVectorProperty(name="结束坐标", size=3)
+
+    switch_block_list: bpy.props.CollectionProperty(type=SwitchBlockInfo) # type: ignore
+    switch_block_list_index: bpy.props.IntProperty() # type: ignore
+    bpy.types.Scene.min_coordinates = bpy.props.IntVectorProperty(name="最小坐标", size=3)
+    bpy.types.Scene.max_coordinates = bpy.props.IntVectorProperty(name="最大坐标", size=3)
 
     bpy.types.Scene.schem_size = bpy.props.IntVectorProperty(name="结构大小", size=3)
     bpy.types.Scene.schem_location = bpy.props.IntVectorProperty(name="结构位置", size=3)
@@ -606,6 +654,7 @@ def unzip_resourcepacks_files():
                         pass
                 
 
+        
 class UnzipModOperator(bpy.types.Operator):
     bl_idname = "baigave.unzip_mods_operator"
     bl_label = "加载模组包"
@@ -640,520 +689,10 @@ class UnzipResourcepacksOperator(bpy.types.Operator):
             return {'FINISHED'}
         return {'RUNNING_MODAL'}
 
-def write_model_dict(file, model_dict):
-    for key, value in model_dict.items():
-        file.write(f"    {key}: \"{value}\",\n")
-def calculate_average_color(image_path):
-    # 打开图片
-    img = Image.open(image_path)
 
-    # 调整图片大小以便处理
-    img = img.resize((1, 1))
 
-    # 获取像素值
-    pixel = img.getpixel((0, 0))
-
-    # 转换为0-1之间的浮点数
-    normalized_color = (round(pixel[0] / 255, 2), round(pixel[1] / 255, 2), round(pixel[2] / 255, 2) ,round(pixel[3] / 255, 2) if len(pixel) == 4 else 1.0)
-
-    return normalized_color
-
-def get_color(variant_value,processed_models,dic,id):
-    if 'model' in variant_value:
-        model = variant_value['model']
-        filepath = get_file_path(model, 'm')
-        if filepath is None:
-            return
-        dirname, filename = os.path.split(filepath)
-        dirname = dirname + '\\'
-        try:
-            _, _, parent = get_all_data(dirname, filename)
-            t, _, _ = get_all_data(dirname, filename)
-            texture_counter = Counter(t.values())
-            most_common_texture = texture_counter.most_common(1)[0][0]
-
-            all_average_colors = []
-            processed_textures = set()
-
-            for value in t.values():
-                if value != most_common_texture:
-                    continue
-
-                if value in processed_textures:
-                    continue
-                processed_textures.add(value)
-
-                texture = get_file_path(value, 't')
-                average_color = calculate_average_color(texture)
-                all_average_colors.append(average_color)
-
-            if all_average_colors:
-                overall_average_color = np.mean(all_average_colors, axis=0)
-                overall_average_color = np.round(overall_average_color, 2)
-                dic[tuple(overall_average_color)] = id
-                return
-        except Exception as e:
-            pass
-def read_blockstate_files(directory,version):
-    cube_dict = {}
-    slab_dict = {}
-    slab_top_dict = {}
-    stairs_west_top_outer_left = {}
-    stairs_east_top_outer_left = {}
-    stairs_south_top_outer_left = {}
-    stairs_north_top_outer_left = {}
-    stairs_west_bottom_outer_left = {}
-    stairs_east_bottom_outer_left = {}
-    stairs_south_bottom_outer_left = {}
-    stairs_north_bottom_outer_left = {}
-    stairs_west_top_straight = {}
-    stairs_east_top_straight = {}
-    stairs_west_bottom_straight = {}
-    stairs_east_bottom_straight = {}
-    stairs_north_top_straight = {}
-    stairs_south_top_straight = {}
-    stairs_north_bottom_straight = {}
-    stairs_south_bottom_straight = {}
-    stairs_south_top_inner_left = {}
-    stairs_north_top_inner_right = {}
-    stairs_west_top_inner_left = {}
-    stairs_west_top_inner_right = {}
-    stairs_south_bottom_inner_left = {}
-    stairs_north_bottom_inner_right = {}
-    stairs_west_bottom_inner_left = {}
-    stairs_west_bottom_inner_right = {}
-
-    processed_models = set()  
     
-    for root, dirs, files in os.walk(directory):
-        for dir in dirs:
-            if dir == "minecraft":
-                blockstate_dir = os.path.join(root, dir, version, "assets", dir, "blockstates")
-            else:
-                blockstate_dir = os.path.join(root, dir, "assets", dir, "blockstates")
-            if os.path.exists(blockstate_dir):
-                for file in os.listdir(blockstate_dir):
-                    if file.endswith(".json"):
-                        file_path = os.path.join(blockstate_dir, file)
-                        with open(file_path, 'r') as f:
-                            data = json.load(f)
-                            if 'variants' in data:
-                                variants = data['variants']
-                                for variant_key, variant_value in variants.items():
-                                    if variant_key != "":
-                                        id = str(dir + ":" + file.replace(".json", "") + "[" + variant_key + "]")
-                                        if variant_key =="type=bottom":
-                                            get_color(variant_value,processed_models,slab_dict,id)
-                                            continue
-                                        elif variant_key =="type=top":
-                                            get_color(variant_value,processed_models,slab_top_dict,id)
-                                            continue
-                                        elif variant_key =="facing=west,half=top,shape=outer_left":
-                                            get_color(variant_value,processed_models,stairs_west_top_outer_left,id)
-                                            continue
-                                        elif variant_key =="facing=east,half=top,shape=outer_left":
-                                            get_color(variant_value,processed_models,stairs_east_top_outer_left,id)
-                                            continue
-                                        elif variant_key =="facing=south,half=top,shape=outer_left":
-                                            get_color(variant_value,processed_models,stairs_south_top_outer_left,id)
-                                            continue
-                                        elif variant_key =="facing=north,half=top,shape=outer_left":
-                                            get_color(variant_value,processed_models,stairs_north_top_outer_left,id)
-                                            continue
-                                        elif variant_key =="facing=west,half=bottom,shape=outer_left":
-                                            get_color(variant_value,processed_models,stairs_west_bottom_outer_left,id)
-                                            continue
-                                        elif variant_key =="facing=east,half=bottom,shape=outer_left":
-                                            get_color(variant_value,processed_models,stairs_east_bottom_outer_left,id)
-                                            continue
-                                        elif variant_key =="facing=south,half=bottom,shape=outer_left":
-                                            get_color(variant_value,processed_models,stairs_south_bottom_outer_left,id)
-                                            continue
-                                        elif variant_key =="facing=north,half=bottom,shape=outer_left":
-                                            get_color(variant_value,processed_models,stairs_north_bottom_outer_left,id)
-                                            continue
-                                        elif variant_key =="facing=west,half=top,shape=straight":
-                                            get_color(variant_value,processed_models,stairs_west_top_straight,id)
-                                            continue
-                                        elif variant_key =="facing=east,half=top,shape=straight":
-                                            get_color(variant_value,processed_models,stairs_east_top_straight,id)
-                                            continue
-                                        elif variant_key =="facing=west,half=bottom,shape=straight":
-                                            get_color(variant_value,processed_models,stairs_west_bottom_straight,id)
-                                            continue
-                                        elif variant_key =="facing=east,half=bottom,shape=straight":
-                                            get_color(variant_value,processed_models,stairs_east_bottom_straight,id)
-                                            continue
-                                        elif variant_key =="facing=north,half=top,shape=straight":
-                                            get_color(variant_value,processed_models,stairs_north_top_straight,id)
-                                            continue
-                                        elif variant_key =="facing=south,half=top,shape=straight":
-                                            get_color(variant_value,processed_models,stairs_south_top_straight,id)
-                                            continue
-                                        elif variant_key =="facing=north,half=bottom,shape=straight":
-                                            get_color(variant_value,processed_models,stairs_north_bottom_straight,id)
-                                            continue
-                                        elif variant_key =="facing=south,half=bottom,shape=straight":
-                                            get_color(variant_value,processed_models,stairs_south_bottom_straight,id)
-                                            continue
-                                        elif variant_key =="facing=south,half=top,shape=inner_left":
-                                            get_color(variant_value,processed_models,stairs_south_top_inner_left,id)
-                                            continue
-                                        elif variant_key =="facing=north,half=top,shape=inner_right":
-                                            get_color(variant_value,processed_models,stairs_north_top_inner_right,id)
-                                            continue
-                                        elif variant_key =="facing=west,half=top,shape=inner_left":
-                                            get_color(variant_value,processed_models,stairs_west_top_inner_left,id)
-                                            continue
-                                        elif variant_key =="facing=west,half=top,shape=inner_right":
-                                            get_color(variant_value,processed_models,stairs_west_top_inner_right,id)
-                                            continue
-                                        elif variant_key =="facing=south,half=bottom,shape=inner_left":
-                                            get_color(variant_value,processed_models,stairs_south_bottom_inner_left,id)
-                                            continue
-                                        elif variant_key =="facing=north,half=bottom,shape=inner_right":
-                                            get_color(variant_value,processed_models,stairs_north_bottom_inner_right,id)
-                                            continue
-                                        elif variant_key =="facing=west,half=bottom,shape=inner_left":
-                                            get_color(variant_value,processed_models,stairs_west_bottom_inner_left,id)
-                                            continue
-                                        elif variant_key =="facing=west,half=bottom,shape=inner_right":
-                                            get_color(variant_value,processed_models,stairs_west_bottom_inner_right,id)
-                                            continue
-
-                                    else:
-                                        id = str(dir + ":" + file.replace(".json", ""))
-
-                                    if 'model' in variant_value:
-                                        model = variant_value['model']
-
-                                        if model in processed_models:
-                                            continue
-                                        processed_models.add(model)
-                                        filepath = get_file_path(model, 'm')
-                                        if filepath is None:
-                                            continue
-                                        dirname, filename = os.path.split(filepath)
-                                        dirname = dirname + '\\'
-                                        try:
-                                            _, _, parent = get_all_data(dirname, filename)
-                                            
-                                            if parent == "block/cube":
-                                                t, _, _ = get_all_data(dirname, filename)
-                                                texture_counter = Counter(t.values())
-                                                most_common_texture = texture_counter.most_common(1)[0][0]
-
-                                                all_average_colors = []
-                                                processed_textures = set()
-
-                                                for value in t.values():
-                                                    if value != most_common_texture:
-                                                        continue
-
-                                                    if value in processed_textures:
-                                                        continue
-                                                    processed_textures.add(value)
-
-                                                    texture = get_file_path(value, 't')
-                                                    average_color = calculate_average_color(texture)
-                                                    all_average_colors.append(average_color)
-
-                                                if all_average_colors:
-                                                    overall_average_color = np.mean(all_average_colors, axis=0)
-                                                    overall_average_color = np.round(overall_average_color, 2)
-                                                    cube_dict[tuple(overall_average_color)] = id
-
-                                        except Exception as e:
-                                            pass
-    # 将所有字典写入文件
-    with open(os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin","colors","colors.py"), 'w') as models_file:
-        dict_names = [
-            "cube_dict",
-            "slab_dict",
-            "slab_top_dict",
-            "stairs_west_top_outer_left",
-            "stairs_east_top_outer_left",
-            "stairs_south_top_outer_left",
-            "stairs_north_top_outer_left",
-            "stairs_west_bottom_outer_left",
-            "stairs_east_bottom_outer_left",
-            "stairs_south_bottom_outer_left",
-            "stairs_north_bottom_outer_left",
-            "stairs_west_top_straight",
-            "stairs_east_top_straight",
-            "stairs_west_bottom_straight",
-            "stairs_east_bottom_straight",
-            "stairs_north_top_straight",
-            "stairs_south_top_straight",
-            "stairs_north_bottom_straight",
-            "stairs_south_bottom_straight",
-            "stairs_south_top_inner_left",
-            "stairs_north_top_inner_right",
-            "stairs_west_top_inner_left",
-            "stairs_west_top_inner_right",
-            "stairs_south_bottom_inner_left",
-            "stairs_north_bottom_inner_right",
-            "stairs_west_bottom_inner_left",
-            "stairs_west_bottom_inner_right",
-        ]
-
-        for dict_name in dict_names:
-            models_file.write(f"{dict_name} = {{\n")
-            write_model_dict(models_file, locals()[dict_name])
-            models_file.write("}\n")
-
-    print("finish")
-
-def make_color_dict(filepaths,name):
-    cube_dict = {}
-    slab_dict = {}
-    slab_top_dict = {}
-    stairs_west_top_outer_left = {}
-    stairs_east_top_outer_left = {}
-    stairs_south_top_outer_left = {}
-    stairs_north_top_outer_left = {}
-    stairs_west_bottom_outer_left = {}
-    stairs_east_bottom_outer_left = {}
-    stairs_south_bottom_outer_left = {}
-    stairs_north_bottom_outer_left = {}
-    stairs_west_top_straight = {}
-    stairs_east_top_straight = {}
-    stairs_west_bottom_straight = {}
-    stairs_east_bottom_straight = {}
-    stairs_north_top_straight = {}
-    stairs_south_top_straight = {}
-    stairs_north_bottom_straight = {}
-    stairs_south_bottom_straight = {}
-    stairs_south_top_inner_left = {}
-    stairs_north_top_inner_right = {}
-    stairs_west_top_inner_left = {}
-    stairs_west_top_inner_right = {}
-    stairs_south_bottom_inner_left = {}
-    stairs_north_bottom_inner_right = {}
-    stairs_west_bottom_inner_left = {}
-    stairs_west_bottom_inner_right = {}
-
-    processed_models = set()  
-    
-    for file_path in filepaths:
-        if os.path.exists(file_path):
-            dir = os.path.dirname(os.path.dirname(file_path)).split(os.path.sep)[-1]
-            with open(file_path, 'r') as f:
-                file = os.path.basename(file_path)
-                data = json.load(f)
-                if 'variants' in data:
-                    variants = data['variants']
-                    for variant_key, variant_value in variants.items():
-                        if variant_key != "":
-                            # key_parts = variant_key.split(",")  # 将字符串按逗号分隔成列表
-                            # sorted_key_parts = sorted(key_parts)  # 对列表进行排序
-                            # variant_key = ",".join(sorted_key_parts[::-1])  # 将排序后的列表反向组合
-                            id = str(dir + ":" + file.replace(".json", "") + "[" + variant_key + "]")
-                            if variant_key =="type=bottom":
-                                get_color(variant_value,processed_models,slab_dict,id)
-                                continue
-                            elif variant_key =="type=top":
-                                get_color(variant_value,processed_models,slab_top_dict,id)
-                                continue
-                            elif variant_key =="facing=west,half=top,shape=outer_left":
-                                get_color(variant_value,processed_models,stairs_west_top_outer_left,id)
-                                continue
-                            elif variant_key =="facing=east,half=top,shape=outer_left":
-                                get_color(variant_value,processed_models,stairs_east_top_outer_left,id)
-                                continue
-                            elif variant_key =="facing=south,half=top,shape=outer_left":
-                                get_color(variant_value,processed_models,stairs_south_top_outer_left,id)
-                                continue
-                            elif variant_key =="facing=north,half=top,shape=outer_left":
-                                get_color(variant_value,processed_models,stairs_north_top_outer_left,id)
-                                continue
-                            elif variant_key =="facing=west,half=bottom,shape=outer_left":
-                                get_color(variant_value,processed_models,stairs_west_bottom_outer_left,id)
-                                continue
-                            elif variant_key =="facing=east,half=bottom,shape=outer_left":
-                                get_color(variant_value,processed_models,stairs_east_bottom_outer_left,id)
-                                continue
-                            elif variant_key =="facing=south,half=bottom,shape=outer_left":
-                                get_color(variant_value,processed_models,stairs_south_bottom_outer_left,id)
-                                continue
-                            elif variant_key =="facing=north,half=bottom,shape=outer_left":
-                                get_color(variant_value,processed_models,stairs_north_bottom_outer_left,id)
-                                continue
-                            elif variant_key =="facing=west,half=top,shape=straight":
-                                get_color(variant_value,processed_models,stairs_west_top_straight,id)
-                                continue
-                            elif variant_key =="facing=east,half=top,shape=straight":
-                                get_color(variant_value,processed_models,stairs_east_top_straight,id)
-                                continue
-                            elif variant_key =="facing=west,half=bottom,shape=straight":
-                                get_color(variant_value,processed_models,stairs_west_bottom_straight,id)
-                                continue
-                            elif variant_key =="facing=east,half=bottom,shape=straight":
-                                get_color(variant_value,processed_models,stairs_east_bottom_straight,id)
-                                continue
-                            elif variant_key =="facing=north,half=top,shape=straight":
-                                get_color(variant_value,processed_models,stairs_north_top_straight,id)
-                                continue
-                            elif variant_key =="facing=south,half=top,shape=straight":
-                                get_color(variant_value,processed_models,stairs_south_top_straight,id)
-                                continue
-                            elif variant_key =="facing=north,half=bottom,shape=straight":
-                                get_color(variant_value,processed_models,stairs_north_bottom_straight,id)
-                                continue
-                            elif variant_key =="facing=south,half=bottom,shape=straight":
-                                get_color(variant_value,processed_models,stairs_south_bottom_straight,id)
-                                continue
-                            elif variant_key =="facing=south,half=top,shape=inner_left":
-                                get_color(variant_value,processed_models,stairs_south_top_inner_left,id)
-                                continue
-                            elif variant_key =="facing=north,half=top,shape=inner_right":
-                                get_color(variant_value,processed_models,stairs_north_top_inner_right,id)
-                                continue
-                            elif variant_key =="facing=west,half=top,shape=inner_left":
-                                get_color(variant_value,processed_models,stairs_west_top_inner_left,id)
-                                continue
-                            elif variant_key =="facing=west,half=top,shape=inner_right":
-                                get_color(variant_value,processed_models,stairs_west_top_inner_right,id)
-                                continue
-                            elif variant_key =="facing=south,half=bottom,shape=inner_left":
-                                get_color(variant_value,processed_models,stairs_south_bottom_inner_left,id)
-                                continue
-                            elif variant_key =="facing=north,half=bottom,shape=inner_right":
-                                get_color(variant_value,processed_models,stairs_north_bottom_inner_right,id)
-                                continue
-                            elif variant_key =="facing=west,half=bottom,shape=inner_left":
-                                get_color(variant_value,processed_models,stairs_west_bottom_inner_left,id)
-                                continue
-                            elif variant_key =="facing=west,half=bottom,shape=inner_right":
-                                get_color(variant_value,processed_models,stairs_west_bottom_inner_right,id)
-                                continue
-
-                        else:
-                            id = str(dir + ":" + file.replace(".json", ""))
-
-                        print(id)
-                        if 'model' in variant_value:
-                            model = variant_value['model']
-
-                            if model in processed_models:
-                                continue
-                            processed_models.add(model)
-                            filepath = get_file_path(model, 'm')
-                            if filepath is None:
-                                continue
-                            dirname, filename = os.path.split(filepath)
-                            dirname = dirname + '\\'
-                            try:
-                                _, _, parent = get_all_data(dirname, filename)
-                                
-                                if parent == "block/cube":
-                                    t, _, _ = get_all_data(dirname, filename)
-                                    texture_counter = Counter(t.values())
-                                    most_common_texture = texture_counter.most_common(1)[0][0]
-
-                                    all_average_colors = []
-                                    processed_textures = set()
-
-                                    for value in t.values():
-                                        if value != most_common_texture:
-                                            continue
-
-                                        if value in processed_textures:
-                                            continue
-                                        processed_textures.add(value)
-
-                                        texture = get_file_path(value, 't')
-                                        average_color = calculate_average_color(texture)
-                                        all_average_colors.append(average_color)
-
-                                    if all_average_colors:
-                                        overall_average_color = np.mean(all_average_colors, axis=0)
-                                        overall_average_color = np.round(overall_average_color, 2)
-                                        cube_dict[tuple(overall_average_color)] = id
-
-                            except Exception as e:
-                                pass
-    # 获取文件路径
-    file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "colors", name + ".py")
-
-    with open(file_path, 'w') as models_file:
-        dict_names = [
-            "cube_dict",
-            "slab_dict",
-            "slab_top_dict",
-            "stairs_west_top_outer_left",
-            "stairs_east_top_outer_left",
-            "stairs_south_top_outer_left",
-            "stairs_north_top_outer_left",
-            "stairs_west_bottom_outer_left",
-            "stairs_east_bottom_outer_left",
-            "stairs_south_bottom_outer_left",
-            "stairs_north_bottom_outer_left",
-            "stairs_west_top_straight",
-            "stairs_east_top_straight",
-            "stairs_west_bottom_straight",
-            "stairs_east_bottom_straight",
-            "stairs_north_top_straight",
-            "stairs_south_top_straight",
-            "stairs_north_bottom_straight",
-            "stairs_south_bottom_straight",
-            "stairs_south_top_inner_left",
-            "stairs_north_top_inner_right",
-            "stairs_west_top_inner_left",
-            "stairs_west_top_inner_right",
-            "stairs_south_bottom_inner_left",
-            "stairs_north_bottom_inner_right",
-            "stairs_west_bottom_inner_left",
-            "stairs_west_bottom_inner_right",
-        ]
-
-        for dict_name in dict_names:
-            models_file.write(f"{dict_name} = {{\n")
-            write_model_dict(models_file, locals()[dict_name])
-            models_file.write("}\n")
-
-    print("finish")
-
-
-class MakeColorDict(bpy.types.Operator):
-    bl_idname = "baigave.make_color_dict"
-    bl_label = "制作方块-颜色对照表"
-
-    n: bpy.props.StringProperty(name="文件名", default="") # type: ignore
-
-    def execute(self, context):
-        scene = context.scene
-        my_properties = scene.my_properties
-        color_to_block_list = my_properties.color_to_block_list
-        # 创建一个存储文件路径的集合
-        filepaths = []
-        
-        # 收集文件路径
-        for block_info in color_to_block_list:
-            filepath = block_info.filepath
-            # 将文件路径添加到集合中
-            filepaths.append(filepath)
-        thread = threading.Thread(target=make_color_dict, args=(filepaths,self.n,))
-
-        thread.start()
-
-        bpy.app.timers.register(functools.partial(self.check_thread, thread), first_interval=1.0)
-        return {'RUNNING_MODAL'}
-
-    def check_thread(self, thread):
-        # 检查线程是否在运行
-        if not thread.is_alive():
-            return {'FINISHED'}
-        return {'RUNNING_MODAL'}
-    def invoke(self, context, event):
-        wm = context.window_manager
-        wm.invoke_props_dialog(self, width=400)
-        return {'RUNNING_MODAL'}
-
-    def draw(self, context):
-        layout = self.layout
-        layout.prop(self, "n")
-classes=[ModInfo,BlockInfo,Property,UnzipModOperator,UnzipResourcepacksOperator,MakeColorDict]
+classes=[ModInfo,BlockInfo,SwitchBlockInfo,Property,UnzipModOperator,UnzipResourcepacksOperator]
 
 
 
@@ -1164,10 +703,8 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.Scene.my_properties = bpy.props.PointerProperty(type=Property)
-    temp_dir = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")
     importlib.reload(config)
     
-    #threading.Thread(target=read_blockstate_files, args=(temp_dir,config.config["version"])).start()
     
 def unregister():
     for cls in classes:

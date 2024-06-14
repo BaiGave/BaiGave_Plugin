@@ -263,7 +263,7 @@ class ExportToSave(bpy.types.Operator):
         self.foldername = context.scene.save_list
         worldpath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves",self.foldername)
         level = amulet.load_level(worldpath)
-         # 创建空字典来存储顶点数据
+        # 创建空字典来存储顶点数据
         selected_objects = bpy.context.selected_objects
         self.vertex_dict = {} 
 
