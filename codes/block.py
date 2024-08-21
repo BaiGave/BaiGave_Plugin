@@ -42,7 +42,7 @@ def search_ctm_properties(folder_path,id):
 
 def get_ctm_value(modid):
     importlib.reload(config)
-    filepath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")+"\\"
+    filepath = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"temp")+"\\"
     Pos = modid.find(":")
     mod = ""
     id = ""

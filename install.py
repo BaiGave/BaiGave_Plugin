@@ -1,46 +1,39 @@
 import os
-import sys
 import bpy
+import sys
+import threading
 import zipfile
-import importlib
+import subprocess
+from .codes.functions.tip import ShowMessageBox
 
-def reload_all_modules():
-    # 定义需要保留的核心模块
-    core_modules = {'bpy', 'bpy_types', 'mathutils'}
 
-    # 获取当前已加载的模块列表
-    registered_modules = list(sys.modules.keys())
+def restart_blender_after_delay(blender_exe):
+    # 使用 subprocess 启动新的 Blender 实例并恢复上次会话
+    si = subprocess.STARTUPINFO()
+    si.dwFlags = subprocess.DETACHED_PROCESS
+    subprocess.Popen(
+        [blender_exe, "-con", "--python-expr", "import bpy; bpy.ops.wm.recover_last_session()"],
+        startupinfo=si
+    )
+    # 关闭当前的 Blender 实例
+    bpy.ops.wm.quit_blender()
 
-    # 卸载非核心模块
-    for module_name in registered_modules:
-        if module_name not in core_modules and not module_name.startswith("bl_") and not module_name.startswith("_"):
-            print(f"卸载模块: {module_name}")
-            del sys.modules[module_name]
-
-    # 重新加载核心模块
-    for module_name in core_modules:
-        if module_name in sys.modules:
-            importlib.reload(sys.modules[module_name])
-        else:
-            importlib.import_module(module_name)
-
-    # 重新加载非核心模块
-    for module_name in registered_modules:
-        if module_name not in core_modules and module_name not in sys.modules:
-            try:
-                importlib.import_module(module_name)
-                print(f"重新加载模块: {module_name}")
-            except ImportError:
-                print(f"模块 {module_name} 未找到，无法重新加载。")
-
-path = os.path.join(sys.prefix, 'lib', 'site-packages', 'amulet')
+path = os.path.join(sys.prefix, 'lib', 'site-packages', 'win32')
 if not os.path.exists(path):
+    ShowMessageBox("请重启blender!", "咕咕正在关闭ing", 'INFO')
     # 指定.zip文件和目标文件夹
-    zip_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "site-packages.zip")
+    zip_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"BaiGave_Plugin","site-packages.zip")
     target_folder = os.path.join(sys.prefix, 'lib')
 
     # 使用zipfile模块解压.zip文件
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         # 解压.zip文件到目标文件夹，覆盖已存在的文件
         zip_ref.extractall(target_folder)
-    #reload_all_modules()
+    
+
+    # 获取 Blender 可执行文件路径
+    blender_exe = bpy.app.binary_path
+    
+    # 创建并启动一个新线程，用于延迟重启 Blender
+    restart_thread = threading.Thread(target=restart_blender_after_delay, args=(blender_exe,))
+    restart_thread.start()

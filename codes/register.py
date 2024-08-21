@@ -1,4 +1,5 @@
 import bpy
+import re
 from .block import block
 from .blockstates import get_model
 
@@ -32,8 +33,9 @@ def register_blocks(ids):
     id_map_content = text_data.as_string()
     try:
         id_map = eval(id_map_content)  # 尝试解析文件内容为字典
+        
     except SyntaxError:  # 如果解析失败，即文件内容不是有效的Python字典表示
-        id_map = {}  # 初始化为空字典
+       id_map = {}  # 初始化为空字典
 
     # 更新 id_map
     if id_map and collection.objects: # 如果id_map不为空
@@ -63,6 +65,7 @@ def register_blocks(ids):
             obj=block(textures, elements, position, rotation, filename, has_air, collection, uvlock)
             obj["文本数据"] = text_data
             obj["id"] = id
+            id = re.escape(id)
             id_map[id] = next_id
             next_id += 1  # 修改这里，确保每次迭代都递增 next_id
 
@@ -70,7 +73,7 @@ def register_blocks(ids):
     text_data.clear()  # 清除原始文本数据内容
     text_data.write("{\n")  # 开始写入字典
     for key, value in id_map.items():  # 将每对 id 都写入新的一行
-        text_data.write(f"    '{key}': {value},\n")
+        text_data.write(f"    \"{key}\": {value},\n")
     text_data.write("}\n")  # 结束写入字典
 
     collection.hide_render = True

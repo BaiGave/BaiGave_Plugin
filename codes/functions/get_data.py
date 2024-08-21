@@ -1,12 +1,10 @@
 import json
-import bpy
 import os
 from importlib import reload
-from .merge_images import merger
 from ... import config
 #file_data_cache = {}
-global_filepath = bpy.utils.script_path_user()
-json_file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "icons", "modid.json")
+global_filepath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+json_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"icons", "modid.json")
 
 def load_modid_list():
     if os.path.exists(json_file_path):
@@ -87,7 +85,7 @@ def get_all_data(filepath, filename,rot=0):
     return textures, elements ,parent
 def get_file_path(modid,type):
     reload(config)
-    filepath = global_filepath + "\\addons\\BaiGave_Plugin\\temp\\"
+    filepath = global_filepath + "\\temp\\"
     Pos = modid.find(":")
     mod = ""
     id = ""
@@ -150,7 +148,6 @@ def get_file_path(modid,type):
                         result =search_ctm_properties(ctm_path,id)
                         if result:
                             pngs_path, ctm_value = result
-                            merger(pngs_path+"\\")
                             
                             temp_path=pngs_path +"\\"+  id.split("\\")[-1] + ".png"
                             if os.path.exists(temp_path):

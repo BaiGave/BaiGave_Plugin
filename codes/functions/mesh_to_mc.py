@@ -2,6 +2,7 @@ import os
 import bpy
 import bmesh
 import numpy as np
+import re
 from .tip import ShowMessageBox
 from ..register import register_blocks,create_or_clear_collection
 from collections import defaultdict
@@ -64,7 +65,7 @@ def export_schem(dict,filename="file"):
     schem['Length'] = ShortTag(Length)
     schem['BlockData'] = ByteArrayTag(block_data)
     # 将NBT数据写入.schem文件
-    file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "schem",filename+".schem") # 设置你想要保存的文件路径
+    file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"schem",filename+".schem") # 设置你想要保存的文件路径
     #创建一个新的选中区域
     with open(file_path, "wb") as f:
         schem.save_to(f)
@@ -104,6 +105,7 @@ def create_mesh_from_dictionary(d,name):
     id_map=register_blocks(list(set(d.values())))
     for coord, id_str in d.items():
         vertices.append((coord[0],-coord[1],coord[2]))
+        id_str =re.escape(id_str)
         # 将字符串id转换为相应的数字id
         ids.append(id_map[id_str])
     # 将顶点和顶点索引添加到网格中
@@ -369,7 +371,7 @@ class ObjToBlocks(bpy.types.Operator):
         except:
             # 如果 context_node_tree 不存在，则检查 nodetree_target 是否存在，不存在则添加，存在则复制
             if nodetree_target not in node_groups:
-                file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","BlockBlender++.blend")
+                file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"codes","blend_files","BlockBlender++.blend")
                 inner_path = 'NodeTree'
                 object_name = nodetree_target
                 bpy.ops.wm.append(
@@ -486,7 +488,7 @@ class BlockBlender(bpy.types.Operator):
             except:
                 # 如果 context_node_tree 不存在，则检查 nodetree_target 是否存在，不存在则添加，存在则复制
                 if nodetree_target not in node_groups:
-                    file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","BlockBlender++.blend")
+                    file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"codes","blend_files","BlockBlender++.blend")
                     inner_path = 'NodeTree'
                     object_name = nodetree_target
                     bpy.ops.wm.append(
@@ -586,7 +588,8 @@ class BlockBlender(bpy.types.Operator):
                 if node_group:
                     if node_0 is None:
                         node_0 = node_group.nodes.get("-1")
-                        print(node_0)
+                        if node_0 == None:
+                            return {'FINISHED'}
                     node_1 = node_group.nodes.new(type=node_0.bl_idname)
                     node_1.location = (node_0.location.x + 200, node_0.location.y)
                     node_1.node_tree = bpy.data.node_groups.get(node_0.node_tree.name)

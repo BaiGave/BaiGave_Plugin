@@ -13,7 +13,7 @@ class OpenSaves_FileManagerOperator(bpy.types.Operator):
 
     def execute(self, context):
         # 构建路径
-        folderpath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves")
+        folderpath = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"saves")
 
         # 打开文件管理器并导航到指定路径
         bpy.ops.wm.path_open(filepath=folderpath)
@@ -26,7 +26,7 @@ class OpenFileManagerOperator(bpy.types.Operator):
 
     def execute(self, context):
         # 构建路径
-        folderpath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "schem")
+        folderpath = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"schem")
 
         # 打开文件管理器并导航到指定路径
         bpy.ops.wm.path_open(filepath=folderpath)
@@ -171,7 +171,7 @@ class ExportSchem(bpy.types.Operator):
         schem['Length'] = ShortTag(Length)
         schem['BlockData'] = ByteArrayTag(block_data)
         # 将NBT数据写入.schem文件
-        file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "schem",self.filename+".schem") # 设置你想要保存的文件路径
+        file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"schem",self.filename+".schem") # 设置你想要保存的文件路径
         #创建一个新的选中区域
         with open(file_path, "wb") as f:
             schem.save_to(f)
@@ -261,7 +261,7 @@ class ExportToSave(bpy.types.Operator):
 
     def execute(self, context):
         self.foldername = context.scene.save_list
-        worldpath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves",self.foldername)
+        worldpath = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"saves",self.foldername)
         level = amulet.load_level(worldpath)
         # 创建空字典来存储顶点数据
         selected_objects = bpy.context.selected_objects

@@ -1,10 +1,9 @@
 import bpy
-from .codes.functions.translate import translate
 
 
 #主面板
 class MainPanel(bpy.types.Panel):
-    bl_label = translate("mainpanel.bl_label")
+    bl_label = "白给的工具"
     bl_idname ="MainPanel"
     bl_space_type ='VIEW_3D'
     bl_region_type = 'UI'
@@ -102,21 +101,6 @@ class ImportPanel(bpy.types.Panel):
         box = layout.box()
         box.label(text="导入.schem文件")
         box.operator("baigave.schem_import_panel", text="导入.schem文件")
-
-        split_8D70F = box.split(factor=0.15, align=True)
-        split_8D70F.enabled = True
-        split_8D70F.active = True
-        split_8D70F.alignment = 'Expand'.upper()
-        if not True: split_8D70F.operator_context = "EXEC_DEFAULT"
-        op = split_8D70F.operator('sna.my_generic_operator_a38b8', text='', icon_value=692, emboss=True, depress=False)
-        split_8D70F.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_minsize', text='方块数分界线', icon_value=0, emboss=True)
-        split_3E557 = box.split(factor=1, align=True)
-        split_3E557.enabled = True
-        split_3E557.active = True
-        split_3E557.alignment = 'Expand'.upper()
-        if not True: split_3E557.operator_context = "EXEC_DEFAULT"
-        split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_processnumber', text='进程数', icon_value=0, emboss=True)
-        # split_3E557.prop(bpy.context.preferences.addons['BaiGave_Plugin'].preferences, 'sna_intervaltime', text='间隔(秒)', icon_value=0, emboss=True)
         layout.split()
         box = layout.box()
         box.label(text="导入方块")
@@ -130,7 +114,6 @@ class ImportPanel(bpy.types.Panel):
         row=box.row()
         col=box.column()
         row.label(text="导入MC地图")
-        row.operator("baigave.spawn_map", text="2D预览")
         # 添加min [x, y, z]输入框
         row = box.row()
         row.label(text="最小坐标")
@@ -152,18 +135,10 @@ class ImportPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, "is_weld", text="合并重叠顶点")
         
-
-        row = layout.row()
-        row.operator("baigave.image_merger", text="合并图片")
         
         box = layout.box()
         row=box.row()
         row.operator("baigave.merge_overlapping_faces", text="合并重叠面")
-        
-        # row = layout.row()
-        # row.operator("baigave.select", text="选择区域")
-        # row = layout.row()
-        # row.operator("baigave.import_world", text="导入世界")
 
 #导出面板     
 class ExportPanel(bpy.types.Panel):
@@ -693,8 +668,14 @@ class SwitchBlocks(bpy.types.Operator):
         my_properties = scene.my_properties
         # 假设你已经选择了包含几何节点组的对象
         obj = bpy.context.active_object
+        if obj is None:
+            self.report({'WARNING'}, "物体未选中")
+            return {'CANCELLED'}
         # 获取几何节点树
         geometry_nodes = obj.modifiers.get("模型转换")
+        if geometry_nodes is None:
+            self.report({'WARNING'}, "仅有 '模型转换' 几何节点激活时可行")
+            return {'CANCELLED'}
         node_group = geometry_nodes.node_group
         for node in node_group.nodes:
             if node.name == 'SwitchBlock':
@@ -706,7 +687,7 @@ class SwitchBlocks(bpy.types.Operator):
         text_data = bpy.data.texts.get("Blocks.py")
         if not text_data:  # 如果文本数据不存在，则创建一个新的文本数据对象
             return {'CANCELLED'}
-
+        
         # 读取字典 id_map
         block_id_name_map = eval(text_data.as_string())
 
@@ -721,6 +702,7 @@ class SwitchBlocks(bpy.types.Operator):
                     if modifier.name == '模型转换':
                         has_modifier = True
                         break
+                    
 
                 if has_modifier:
                     depsgraph = bpy.context.evaluated_depsgraph_get()

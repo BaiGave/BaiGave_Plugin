@@ -188,7 +188,7 @@ def get_parent(id):
 
     except Exception as e:
         
-        print(f"An error occurred: {e}")
+        print(f"An error occurred1: {e}")
         return None
 
 

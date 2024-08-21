@@ -2,8 +2,7 @@ import bpy
 import os
 import time
 import pickle
-import subprocess
-
+import re
 
 from .block import block
 from .functions.get_data import get_all_data
@@ -170,7 +169,7 @@ class ImportSchem(bpy.types.Operator):
             # 从文件路径中提取文件名            
             self.filepath=str(str(os.path.dirname(self.filepath))+"\\"+str(f.name))
             name=os.path.basename(self.filepath)
-            folder_path = bpy.utils.script_path_user() + "/addons/BaiGave_Plugin/schemcache"
+            folder_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))+ "/schemcache"
             file_names = os.listdir(folder_path)
             for file_name in file_names:
                 file_path = os.path.join(folder_path, file_name)
@@ -481,7 +480,8 @@ class ImportWorld(bpy.types.Operator):
         # 将顶点和顶点索引添加到网格中
         mesh.from_pydata(vertices, [], [])
         for i, item in enumerate(obj.data.attributes['blockid'].data):
-            item.value=id_map[ids[i]]
+            id =re.escape(ids[i])
+            item.value=id_map[id]
         #群系上色
         for i, item in enumerate(obj.data.attributes['biome'].data):
             item.color[:]=(0.149,0.660,0.10,0.00)

@@ -1,0 +1,33 @@
+schema_version = "1.0.0"
+
+id = "BaiGave_Plugin"
+version = "1.0.0"
+name = "BaiGave_Plugin"
+tagline = "BaiGave_Plugin"
+maintainer = "白给 <1402452699@qq.com>"
+type = "add-on"
+
+
+tags = ["Add Mesh"]
+
+blender_version_min = "4.2.0"
+
+
+license = [
+  "SPDX:GPL-2.0-or-later",
+]
+
+
+
+wheels = [
+   "./wheels/pywin32-306-cp311-cp311-win_arm64.whl",
+   "./wheels/amulet_core-1.9.25-py3-none-any.whl",
+   "./wheels/amulet_nbt-2.1.3-cp311-cp311-win_amd64.whl",
+   "./wheels/pillow-10.4.0-pp310-pypy310_pp73-win_amd64.whl",
+   "./wheels/PyMCTranslate-1.2.27-py3-none-any.whl",
+   "./wheels/platformdirs-4.2.2-py3-none-any.whl",
+   "./wheels/portalocker-2.10.1-py3-none-any.whl",
+   "./wheels/mutf8-1.0.6-cp39-cp39-win_amd64.whl",
+   "./wheels/lz4-4.3.3-cp311-cp311-win_amd64.whl",
+   "./wheels/amulet_leveldb-1.0.2-cp311-cp311-win_amd64.whl",
+]

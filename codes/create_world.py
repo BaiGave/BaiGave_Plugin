@@ -12,7 +12,7 @@ class OpenFileManagerOperator(bpy.types.Operator):
 
     def execute(self, context):
         # 构建路径
-        folderpath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves")
+        folderpath = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"saves")
 
         # 打开文件管理器并导航到指定路径
         bpy.ops.wm.path_open(filepath=folderpath)
@@ -111,7 +111,7 @@ class CreateWorld(bpy.types.Operator):
         attack_speed = bpy.context.scene.attack_speed
 
 
-        folderpath =os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves",World_Name)
+        folderpath =os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"saves",World_Name)
 
         # 创建存档文件夹
         if not os.path.exists(folderpath):
@@ -129,11 +129,11 @@ class CreateWorld(bpy.types.Operator):
 
 )
         # 将NBT数据写入文件
-        filepath =os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves",World_Name,"level.dat")
+        filepath =os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"saves",World_Name,"level.dat")
         level_dat.save_to(filepath)
         if HeightLimit == "1":
-            source_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "datapacks", "datapacks.zip")
-            destination_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves", World_Name, "datapacks")
+            source_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"datapacks", "datapacks.zip")
+            destination_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"saves", World_Name, "datapacks")
             # 创建目标文件夹（如果不存在）
             if not os.path.exists(destination_path):
                 os.makedirs(destination_path)

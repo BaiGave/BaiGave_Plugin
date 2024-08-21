@@ -65,57 +65,57 @@ class SwitchBlockInfo(bpy.types.PropertyGroup):
     name: bpy.props.StringProperty(name="名称") # type: ignore
     id: bpy.props.IntProperty(name="ID") # type: ignore
     target_id: bpy.props.IntProperty(name="TargetID",update=switch_block_update) # type: ignore
-    
+
 #属性
 class Property(bpy.types.PropertyGroup):
     color_file_path: bpy.props.StringProperty(name="Color File Path",default="") # type: ignore
     bpy.types.Scene.mods_dir = bpy.props.StringProperty(
         name="模组路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"temp")
     )
     bpy.types.Scene.jars_dir = bpy.props.StringProperty(
         name="jar文件路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "mods")
+        default=os.path.join("mods")
     )
     bpy.types.Scene.versions_dir = bpy.props.StringProperty(
         name="版本路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp","minecraft")
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"temp","minecraft")
     )
     bpy.types.Scene.saves_dir = bpy.props.StringProperty(
         name="存档路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "saves")
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"saves")
     )
     bpy.types.Scene.colors_dir = bpy.props.StringProperty(
         name="颜色路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "colors")
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"colors")
     )
     bpy.types.Scene.schems_dir = bpy.props.StringProperty(
         name=".schem文件路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "schem")
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"schem")
     )
     bpy.types.Scene.zips_dir = bpy.props.StringProperty(
         name="zip文件路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "resourcepacks")
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"resourcepacks")
     )
     bpy.types.Scene.resourcepacks_dir = bpy.props.StringProperty(
         name="资源包路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp", "资源包")
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"temp", "资源包")
     )
     bpy.types.Scene.rig_blend_path = bpy.props.StringProperty(
         name="人物绑定路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","BaiGave_Rig.blend")
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"codes","blend_files","BaiGave_Rig.blend")
     )
     bpy.types.Scene.material_blend_path = bpy.props.StringProperty(
         name="材质节点路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","Material.blend")
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"codes","blend_files","Material.blend")
     )
     bpy.types.Scene.wxr_sky_blend_path = bpy.props.StringProperty(
         name="WXR的天空路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","SkyV0.12.blend")
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"codes","blend_files","SkyV0.12.blend")
     )
     bpy.types.Scene.geometrynodes_blend_path = bpy.props.StringProperty(
         name="几何节点路径",
-        default=os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "codes","blend_files","GeometryNodes.blend")
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"codes","blend_files","GeometryNodes.blend")
     )
     bpy.types.Scene.is_weld = bpy.props.BoolProperty(name="合并重叠顶点", default=True)
 
@@ -475,10 +475,10 @@ class Property(bpy.types.PropertyGroup):
     
 def unzip_mods_files():
     # 指定的文件夹路径
-    folder_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "mods")
+    folder_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"mods")
 
     # 临时文件夹路径
-    temp_dir = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp")
+    temp_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"temp")
 
     # 遍历文件夹中的所有文件
     for file_name in os.listdir(folder_path):
@@ -587,7 +587,7 @@ def unzip_mods_files():
                                     with zip_ref.open(member) as file_in_zip, open(extract_path, 'wb') as output_file:
                                         shutil.copyfileobj(file_in_zip, output_file)
                         except Exception as e:
-                            print(f"An error occurred: {e}")
+                            print(f"An error occurred3: {e}")
                             pass
                     try:
                         if mod_id!="minecraft":
@@ -604,10 +604,10 @@ def unzip_mods_files():
 
 def unzip_resourcepacks_files():
     # 指定的文件夹路径
-    folder_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "resourcepacks")
+    folder_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"resourcepacks")
 
     # 临时文件夹路径
-    temp_dir = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "temp","资源包")
+    temp_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"temp","资源包")
 
     # 遍历文件夹中的所有文件
     for file_name in os.listdir(folder_path):
@@ -650,7 +650,7 @@ def unzip_resourcepacks_files():
                                 with zip_ref.open(member) as file_in_zip, open(extract_path, 'wb') as output_file:
                                     shutil.copyfileobj(file_in_zip, output_file)
                     except Exception as e:
-                        print(f"An error occurred: {e}")
+                        print(f"An error occurred4: {e}")
                         pass
                 
 

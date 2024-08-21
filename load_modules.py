@@ -38,11 +38,6 @@ if "search_file" in locals():
 else:
 	from .codes.functions import search_file
 
-if "merge_images" in locals():
-	importlib.reload(merge_images)
-else:
-	from .codes.functions import merge_images
-
 if "mesh_to_mc" in locals():
 	importlib.reload(mesh_to_mc)
 else:
@@ -57,11 +52,6 @@ if "surface_optimization" in locals():
 	importlib.reload(surface_optimization)
 else:
 	from .codes.functions import surface_optimization
-
-if "map" in locals():
-	importlib.reload(map)
-else:
-	from .codes.unuse import map
 
 if "WXR_Sky" in locals():
 	importlib.reload(WXR_Sky)
@@ -79,10 +69,8 @@ module_list = (
 	sway_animation,
 	BaiGave_Rig,
 	surface_optimization,
-	map,
 	WXR_Sky,
 	search_file,
-	merge_images,
 	importfile,
 	exportfile,
 	create_world,

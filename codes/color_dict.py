@@ -1,8 +1,6 @@
 from .functions.get_data import get_file_path,get_all_data
 from .functions.tip import ShowMessageBox
 from collections import Counter
-from PIL import Image
-
 import bpy
 import os
 import json
@@ -12,7 +10,7 @@ def write_model_dict(file, dictionary):
         
 def calculate_average_color(image_path):
     # 打开图片
-    img = Image.open(image_path)
+    #img = Image.open(image_path)
 
     # 调整图片大小以便处理
     img = img.resize((1, 1))
@@ -282,7 +280,7 @@ def make_color_dict(filepaths,name,blocktype):
                                 get_color(variant_value,stairs_west_bottom_inner_right,id)
                                 continue
     # 获取文件路径
-    file_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "colors", name + ".py")
+    file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"colors", name + ".py")
 
     with open(file_path, 'w') as models_file:
         dict_names = [
@@ -433,7 +431,7 @@ class OpenColorDict(bpy.types.Operator):
 
     def invoke(self, context, event):
         # 设置文件选择对话框的默认路径
-        self.filepath = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "colors","")
+        self.filepath = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"colors","")
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
     

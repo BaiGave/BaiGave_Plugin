@@ -42,7 +42,7 @@ class Read_mods_dir(bpy.types.Operator):
         for index in items_to_remove:
             my_properties.mod_list.remove(index)
         # 读取并更新 config.py 文件中的 config 字典
-        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py")
+        config_path = os.path.join(os.path.dirname(os.path.dirname((os.path.dirname(os.path.realpath(__file__))))),"config.py")
         with open(config_path, 'r') as file:
             lines = file.readlines()
 
@@ -106,7 +106,7 @@ class Read_resourcepacks_dir(bpy.types.Operator):
         for index in items_to_remove:
             my_properties.resourcepack_list.remove(index)
         # 读取并更新 config.py 文件中的 config 字典
-        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py")
+        config_path = os.path.join(os.path.dirname(os.path.dirname((os.path.dirname(os.path.realpath(__file__))))),"config.py")
         with open(config_path, 'r') as file:
             lines = file.readlines()
 
@@ -163,7 +163,7 @@ class Read_versions_dir(bpy.types.Operator):
         selected_version = bpy.context.scene.version_list
 
         # 读取config.py文件
-        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py") 
+        config_path = os.path.join(os.path.dirname(os.path.dirname((os.path.dirname(os.path.realpath(__file__))))),"config.py")
         with open(config_path, 'r') as file:
             content = file.read()
 
@@ -207,7 +207,7 @@ class Read_saves_dir(bpy.types.Operator):
 
 
         # 读取config.py文件
-        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py") 
+        config_path = os.path.join(os.path.dirname(os.path.dirname((os.path.dirname(os.path.realpath(__file__))))),"config.py")
         with open(config_path, 'r') as file:
             content = file.read()
 
@@ -250,7 +250,7 @@ class Read_colors_dir(bpy.types.Operator):
         selected_version = bpy.context.scene.color_list
 
         # 读取config.py文件
-        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py") 
+        config_path = os.path.join(os.path.dirname(os.path.dirname((os.path.dirname(os.path.realpath(__file__))))),"config.py")
         with open(config_path, 'r') as file:
             content = file.read()
 
@@ -295,7 +295,7 @@ class Read_schems_dir(bpy.types.Operator):
 
 
         # 读取config.py文件
-        config_path = os.path.join(bpy.utils.script_path_user(), "addons", "BaiGave_Plugin", "config.py") 
+        config_path = os.path.join(os.path.dirname(os.path.dirname((os.path.dirname(os.path.realpath(__file__))))),"config.py")
         with open(config_path, 'r') as file:
             content = file.read()
 

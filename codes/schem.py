@@ -2,7 +2,7 @@ import bpy
 import math
 import bmesh
 from .model import create_mesh,add_mesh_to_collection,get_or_create_material,set_uv
-from .blockstates import blockstates
+import re
 import amulet
 from .classification_files.block_type import liquid,exclude
 import numpy as np
@@ -100,7 +100,8 @@ def schem(level,chunks,cached,filename="schem",position=(0,0,0)):
     mesh.from_pydata(vertices, [], [])
     #给予顶点id
     for i, item in enumerate(obj.data.attributes['blockid'].data):
-        item.value=id_map[ids[i]]
+        id =re.escape(ids[i])
+        item.value=id_map[id]
         #print(item.value)
     #给予水属性
     for i, item in enumerate(obj.data.attributes['waterlogged'].data):
