@@ -371,7 +371,7 @@ class ObjToBlocks(bpy.types.Operator):
         except:
             # 如果 context_node_tree 不存在，则检查 nodetree_target 是否存在，不存在则添加，存在则复制
             if nodetree_target not in node_groups:
-                file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"codes","blend_files","BlockBlender++.blend")
+                file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"blend_files","BlockBlender++.blend")
                 inner_path = 'NodeTree'
                 object_name = nodetree_target
                 bpy.ops.wm.append(
@@ -488,7 +488,7 @@ class BlockBlender(bpy.types.Operator):
             except:
                 # 如果 context_node_tree 不存在，则检查 nodetree_target 是否存在，不存在则添加，存在则复制
                 if nodetree_target not in node_groups:
-                    file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"codes","blend_files","BlockBlender++.blend")
+                    file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"blend_files","BlockBlender++.blend")
                     inner_path = 'NodeTree'
                     object_name = nodetree_target
                     bpy.ops.wm.append(
